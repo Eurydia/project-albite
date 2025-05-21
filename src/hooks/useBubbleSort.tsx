@@ -1,92 +1,41 @@
-import { shuffle } from "lodash";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-
-const bubbleSort = (
-  dataset: number[],
-  frames: number[][]
-) => {
-  const items = structuredClone(dataset);
-  const size = items.length;
-  let swapCount: number = 0;
-  let comparisonCount: number = 0;
-
-  for (let offset = 0; offset < size - 1; offset++) {
-    for (let i = 0; i < size - offset - 1; i++) {
-      comparisonCount++;
-
-      const a = items[i];
-      const b = items[i + 1];
-
-      if (b >= a) {
-        continue;
-      }
-
-      items[i] = b;
-      items[i + 1] = a;
-      swapCount++;
-      frames.push(structuredClone(items));
-    }
-  }
-  return {
-    comparisonCount,
-    swapCount,
-  };
-};
+import { bubbleSort } from "@/services/bubblesort";
+import type { BubbleSortFrameData } from "@/types/bubblesort";
+import { useCallback, useState } from "react";
 
 export const useBubbleSort = (dataset: number[]) => {
-  const framesRef = useRef<number[][]>([]);
-
-  const [frameIndex, setFrameIndex] = useState<number>();
+  const [frameIndex, setFrameIndex] = useState(0);
+  const [frames, setFrames] = useState(() => {
+    const init: BubbleSortFrameData[] = [];
+    bubbleSort(dataset, init);
+    return init;
+  });
 
   const shuffleDataset = useCallback(() => {
-    const nextDataSet = structuredClone(dataset);
-    shuffle(nextDataSet);
-    const tmp: typeof framesRef.current = [];
-    bubbleSort(nextDataSet, tmp);
-    framesRef.current = tmp;
+    const nextFrames: BubbleSortFrameData[] = [];
+    bubbleSort(dataset, nextFrames);
+    setFrames(nextFrames);
     setFrameIndex(0);
   }, [dataset]);
 
   const getFrame = useCallback(() => {
-    if (
-      frameIndex === undefined ||
-      frameIndex < 0 ||
-      frameIndex >= framesRef.current.length
-    ) {
-      return [];
+    const frame = frames.at(frameIndex);
+    if (frame === undefined) {
+      return null;
     }
-    return structuredClone(framesRef.current[frameIndex]);
-  }, [frameIndex]);
+    return structuredClone(frame);
+  }, [frameIndex, frames]);
 
   const nextFrame = useCallback(() => {
     setFrameIndex((prev) => {
-      if (prev === undefined) {
-        return prev;
-      }
-      return Math.min(
-        framesRef.current.length - 1,
-        prev + 1
-      );
+      return Math.min(frames.length - 1, prev + 1);
     });
-  }, []);
+  }, [frames.length]);
 
   const prevFrame = useCallback(() => {
     setFrameIndex((prev) => {
-      if (prev === undefined) {
-        return prev;
-      }
       return Math.max(0, prev - 1);
     });
   }, []);
-
-  useEffect(() => {
-    console.debug(frameIndex);
-  }, [frameIndex]);
 
   return { shuffleDataset, prevFrame, nextFrame, getFrame };
 };

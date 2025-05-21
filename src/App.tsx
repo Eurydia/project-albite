@@ -1,6 +1,9 @@
-import { Fragment } from "react";
-
-import { Container, CssBaseline } from "@mui/material";
+import {
+  createTheme,
+  CssBaseline,
+  ThemeProvider,
+} from "@mui/material";
+import { grey } from "@mui/material/colors";
 import { BubbleSortView } from "./views/BubbleSortView";
 // import { RendererBubbleSort } from "@renderers/RendererBubbleSort";
 // import { generateDataset } from "@renderers/helper/shuffle";
@@ -12,13 +15,27 @@ import { BubbleSortView } from "./views/BubbleSortView";
 // import { RendererRadixSort } from "renderers/RendererRadixSort/RendererRadixSort";
 // import { RendererSelectionSort } from "renderers/RendererSelectionSort";
 
+const theme = createTheme({
+  palette: { mode: "dark", primary: grey },
+  typography: {
+    fontFamily: "monospace",
+  },
+  components: {
+    MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+        disableRipple: true,
+        color: "primary",
+      },
+    },
+  },
+});
+
 export const App = () => {
   return (
-    <Fragment>
+    <ThemeProvider theme={theme}>
       <CssBaseline enableColorScheme />
-      <Container maxWidth="md">
-        <BubbleSortView />
-      </Container>
-    </Fragment>
+      <BubbleSortView />
+    </ThemeProvider>
   );
 };
