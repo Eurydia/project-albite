@@ -8,10 +8,10 @@ import {
 import {
   Box,
   Button,
-  Collapse,
   Grid,
   Stack,
   Toolbar,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import {
@@ -21,9 +21,10 @@ import {
   orange,
 } from "@mui/material/colors";
 import { isEqual } from "lodash";
-import { memo, useMemo, useState, type FC } from "react";
+import { memo, useMemo, type FC } from "react";
 
 const ITEM_SIZE = 15;
+
 type ItemProps = {
   value: number;
   compared: boolean;
@@ -57,7 +58,6 @@ const Item: FC<ItemProps> = memo(
 export const BubbleSortView: FC = () => {
   const { getFrame, nextFrame, prevFrame, shuffleDataset } =
     useBubbleSort(generateDataset(ITEM_SIZE));
-  const [descOpen, setDescOpen] = useState(true);
   const {
     compared,
     swapped,
@@ -71,96 +71,96 @@ export const BubbleSortView: FC = () => {
   }, [getFrame]);
 
   return (
-    <Box sx={{ backgroundColor: "black" }}>
+    <Box
+      sx={{
+        backgroundColor: "black",
+        display: "flex",
+        flexDirection: "column",
+      }}
+      height="100vh"
+    >
+      <Stack
+        spacing={1}
+        component="div"
+      >
+        <Stack spacing={1}>
+          <Typography
+            fontWeight={900}
+            sx={{ userSelect: "none" }}
+          >
+            {`Bubble sort (Swaps: ${swapCount}, Comparisons: ${comparisonCount})`}
+          </Typography>
+          <Tooltip
+            title={<Typography>{description}</Typography>}
+          >
+            <Typography
+              fontWeight={700}
+              textOverflow="ellipsis"
+              whiteSpace="nowrap"
+              overflow="hidden"
+            >
+              {description}
+            </Typography>
+          </Tooltip>
+        </Stack>
+        <Toolbar
+          variant="dense"
+          disableGutters
+          sx={{ gap: { xs: 1, md: 2 }, flexWrap: "wrap" }}
+        >
+          <Button
+            startIcon={<FastRewindRounded />}
+            variant="contained"
+            onClick={prevFrame}
+          >
+            Previous Frame
+          </Button>
+          <Button
+            startIcon={<AutorenewRounded />}
+            variant="contained"
+            onClick={shuffleDataset}
+          >
+            Shuffle
+          </Button>
+          <Button
+            variant="contained"
+            endIcon={<FastForwardRounded />}
+            onClick={nextFrame}
+          >
+            Next Frame
+          </Button>
+        </Toolbar>
+      </Stack>
       <Grid
         container
-        spacing={2}
+        columns={ITEM_SIZE}
+        spacing={0}
+        alignItems="baseline"
+        sx={{ flexBasis: 0, flexGrow: 1 }}
       >
-        <Grid
-          size={12}
-          position="absolute"
-        >
-          <Stack spacing={1}>
-            <Typography
-              fontWeight={900}
-              onClick={() => setDescOpen((prev) => !prev)}
-              sx={{ cursor: "pointer", userSelect: "none" }}
-            >
-              {`Bubble sort (Swaps: ${swapCount}, Comparisons: ${comparisonCount})`}
-            </Typography>
-            <Collapse in={descOpen}>
-              <Typography
-                fontWeight={700}
-                textOverflow="ellipsis"
-                whiteSpace="nowrap"
-              >
-                {description}
-              </Typography>
-            </Collapse>
-          </Stack>
-        </Grid>
-        <Grid size={12}>
-          <Grid
-            container
-            spacing={0}
-            alignItems="baseline"
-            columns={ITEM_SIZE}
-            height={ITEM_SIZE * 20}
-          >
-            {items.map((value, index) => {
-              return (
-                <Item
-                  key={`sort-item-${index}`}
-                  value={value}
-                  compared={
-                    compared !== null &&
-                    (index === compared.left ||
-                      index === compared.right)
-                  }
-                  swapping={
-                    swapping !== null &&
-                    (index === swapping.left ||
-                      index === swapping.right)
-                  }
-                  swapped={
-                    swapped !== null &&
-                    (index === swapped.left ||
-                      index === swapped.right)
-                  }
-                />
-              );
-            })}
-          </Grid>
-        </Grid>
-        <Grid size={12}>
-          <Toolbar
-            variant="dense"
-            disableGutters
-            sx={{ gap: { xs: 1, md: 2 }, flexWrap: "wrap" }}
-          >
-            <Button
-              startIcon={<FastRewindRounded />}
-              variant="contained"
-              onClick={prevFrame}
-            >
-              Previous Frame
-            </Button>
-            <Button
-              startIcon={<AutorenewRounded />}
-              variant="contained"
-              onClick={shuffleDataset}
-            >
-              Shuffle
-            </Button>
-            <Button
-              variant="contained"
-              endIcon={<FastForwardRounded />}
-              onClick={nextFrame}
-            >
-              Next Frame
-            </Button>
-          </Toolbar>
-        </Grid>
+        {items.map((value, index) => {
+          return (
+            <Item
+              key={`sort-item-${index}`}
+              value={value}
+              compared={
+                compared !== null &&
+                (index === compared.left ||
+                  index === compared.right)
+              }
+              swapping={
+                swapping !== null &&
+                (index === swapping.left ||
+                  index === swapping.right)
+              }
+              swapped={
+                swapped !== null &&
+                (index === swapped.left ||
+                  index === swapped.right)
+              }
+            />
+          );
+        })}
       </Grid>
     </Box>
   );

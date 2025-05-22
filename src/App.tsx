@@ -4,16 +4,16 @@ import {
   ThemeProvider,
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router";
+import {
+  getSorterRoutes,
+  registerSorterView,
+} from "./routes";
 import { BubbleSortView } from "./views/BubbleSortView";
-// import { RendererBubbleSort } from "@renderers/RendererBubbleSort";
-// import { generateDataset } from "@renderers/helper/shuffle";
-// import { RendererCountingSort } from "renderers/RendererCountingSort";
-// import { RendererHeapSort } from "renderers/RendererHeapSort";
-// import { RendererInsertionSort } from "renderers/RendererInsertionSort";
-// import { RendererMergeSort } from "renderers/RendererMergeSort";
-// import { RendererQuickSort } from "renderers/RendererQuickSort";
-// import { RendererRadixSort } from "renderers/RendererRadixSort/RendererRadixSort";
-// import { RendererSelectionSort } from "renderers/RendererSelectionSort";
+import { HomeView } from "./views/HomeView";
 
 const theme = createTheme({
   palette: { mode: "dark", primary: grey },
@@ -31,11 +31,26 @@ const theme = createTheme({
   },
 });
 
+registerSorterView("/bubble-sort", {
+  display: { name: "Bubble Sort" },
+  view: <BubbleSortView />,
+});
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    children: [
+      { index: true, element: <HomeView /> },
+      ...getSorterRoutes(),
+    ],
+  },
+]);
+
 export const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline enableColorScheme />
-      <BubbleSortView />
+      <RouterProvider router={router} />
     </ThemeProvider>
   );
 };
