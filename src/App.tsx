@@ -13,6 +13,7 @@ import {
   registerSorterView,
 } from "./routes";
 import { BubbleSortView } from "./views/BubbleSortView";
+import { CountingSortView } from "./views/CountingSortView";
 import { HomeView } from "./views/HomeView";
 
 const theme = createTheme({
@@ -35,16 +36,23 @@ registerSorterView("/bubble-sort", {
   display: { name: "Bubble Sort" },
   view: <BubbleSortView />,
 });
+registerSorterView("/counting-sort", {
+  display: { name: "Counting Sort" },
+  view: <CountingSortView />, // Replace with actual CountingSortView when implemented
+});
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    children: [
-      { index: true, element: <HomeView /> },
-      ...getSorterRoutes(),
-    ],
-  },
-]);
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      children: [
+        { index: true, element: <HomeView /> },
+        ...getSorterRoutes(),
+      ],
+    },
+  ],
+  { basename: import.meta.env.BASE_URL }
+);
 
 export const App = () => {
   return (

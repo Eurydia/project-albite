@@ -1,6 +1,6 @@
 import type { BubbleSortFrameData } from "@/types/bubblesort";
 
-export const bubbleSort = (
+export const performBubbleSort = (
   dataset: number[],
   frames: BubbleSortFrameData[]
 ) => {
@@ -11,9 +11,9 @@ export const bubbleSort = (
 
   const generateFrameData = (
     description: string,
-    compared: BubbleSortFrameData["compared"] | null = null,
-    swapping: BubbleSortFrameData["swapping"] | null = null,
-    swapped: BubbleSortFrameData["swapped"] | null = null
+    compared: BubbleSortFrameData["compared"] = [],
+    swapping: BubbleSortFrameData["swapping"] = [],
+    swapped: BubbleSortFrameData["swapped"] = []
   ) => {
     const frameData: BubbleSortFrameData = {
       items: structuredClone(items),
@@ -39,21 +39,21 @@ export const bubbleSort = (
 
       const shouldSwap = b <= a;
       comparisonCount++;
-      frames.push(
-        generateFrameData(
-          `Compared item at position ${i} and position 
-          ${i + 1}.`,
-          { left: i, right: i + 1 }
-        )
-      );
+      // frames.push(
+      //   generateFrameData(
+      //     `Compared item at position ${i} and position
+      //     ${i + 1}.`,
+      //     { left: i, right: i + 1 }
+      //   )
+      // );
 
       if (shouldSwap) {
-        frames.push(
-          generateFrameData(`Swap needed.`, null, {
-            left: i,
-            right: i + 1,
-          })
-        );
+        // frames.push(
+        //   generateFrameData(`Swap needed.`, null, {
+        //     left: i,
+        //     right: i + 1,
+        //   })
+        // );
         items[i] = b;
         items[i + 1] = a;
         swapCount++;
@@ -61,18 +61,22 @@ export const bubbleSort = (
           generateFrameData(
             `Swapped item at position ${i} and position 
             ${i + 1}.`,
-            null,
-            null,
-            {
-              left: i,
-              right: i + 1,
-            }
+            [],
+            [],
+            [i, i + 1]
           )
         );
       } else {
-        frames.push(generateFrameData("Swap not needed."));
+        // frames.push(generateFrameData("Swap not needed."));
       }
     }
+  }
+  for (let i = 0; i < size; i++) {
+    frames.push(
+      generateFrameData(`Verified item at position ${i}.`, [
+        i,
+      ])
+    );
   }
 
   frames.push(generateFrameData("Done."));

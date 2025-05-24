@@ -1,4 +1,6 @@
-import { useBubbleSort } from "@/hooks/useBubbleSort";
+import { useSortAnimator } from "@/hooks/useBubbleSort";
+import { useMusicalScale } from "@/hooks/useMusicalNotes";
+import { performBubbleSort } from "@/services/bubblesort";
 import { generateDataset } from "@/services/generate-dataset";
 import {
   AutorenewRounded,
@@ -21,9 +23,9 @@ import {
   orange,
 } from "@mui/material/colors";
 import { isEqual } from "lodash";
-import { memo, useMemo, type FC } from "react";
+import { memo, useEffect, type FC } from "react";
 
-const ITEM_SIZE = 15;
+const ITEM_SIZE = 40;
 
 type ItemProps = {
   value: number;
@@ -31,7 +33,7 @@ type ItemProps = {
   swapping: boolean;
   swapped: boolean;
 };
-const Item: FC<ItemProps> = memo(
+const ItemElement: FC<ItemProps> = memo(
   ({ value, compared, swapped, swapping }) => {
     let backgroundColor: string = grey["300"];
     if (compared) {
@@ -56,19 +58,53 @@ const Item: FC<ItemProps> = memo(
 );
 
 export const BubbleSortView: FC = () => {
-  const { getFrame, nextFrame, prevFrame, shuffleDataset } =
-    useBubbleSort(generateDataset(ITEM_SIZE));
+  const { frame, nextFrame, prevFrame, shuffleDataset } =
+    useSortAnimator(
+      generateDataset(ITEM_SIZE),
+      performBubbleSort
+    );
+
+  const { playNote } = useMusicalScale({
+    scalePattern: [0, 2, 4, 6, 7, 9, 11], // Lydian
+    baseMidiNote: 60, // still C4
+    gain: 0.3, // a bit louder
+    duration: 0.6,
+    fadeDuration: 0.2,
+    waveform: "sine",
+  });
+
+  useEffect(() => {
+    if (
+      frame === null ||
+      frame.swapped.at(0) === undefined
+    ) {
+      return;
+    }
+    playNote(frame.swapped.at(0)! + 1);
+  }, [frame, playNote]);
+
+  useEffect(() => {
+    if (
+      frame === null ||
+      frame.compared.at(0) === undefined
+    ) {
+      return;
+    }
+    playNote(frame.compared.at(0)! + 1);
+  }, [frame, playNote]);
+
+  if (frame === null) {
+    return <Typography>Loading...</Typography>;
+  }
   const {
-    compared,
-    swapped,
-    comparisonCount,
-    swapCount,
     items,
+    compared,
     swapping,
+    swapped,
     description,
-  } = useMemo(() => {
-    return getFrame()!;
-  }, [getFrame]);
+    swapCount,
+    comparisonCount,
+  } = frame;
 
   return (
     <Box
@@ -140,24 +176,12 @@ export const BubbleSortView: FC = () => {
       >
         {items.map((value, index) => {
           return (
-            <Item
+            <ItemElement
               key={`sort-item-${index}`}
               value={value}
-              compared={
-                compared !== null &&
-                (index === compared.left ||
-                  index === compared.right)
-              }
-              swapping={
-                swapping !== null &&
-                (index === swapping.left ||
-                  index === swapping.right)
-              }
-              swapped={
-                swapped !== null &&
-                (index === swapped.left ||
-                  index === swapped.right)
-              }
+              compared={compared.includes(index)}
+              swapping={swapping.includes(index)}
+              swapped={swapped.includes(index)}
             />
           );
         })}
