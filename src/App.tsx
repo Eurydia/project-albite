@@ -16,6 +16,7 @@ import {
 import { BubbleSortView } from "./views/BubbleSortView";
 import { CountingSortView } from "./views/CountingSortView";
 import { HomeView } from "./views/HomeView";
+import { InsertionSortView } from "./views/InsertionSortView";
 import { SelectionSortView } from "./views/SelectionSortView";
 
 const theme = createTheme({
@@ -46,6 +47,10 @@ registerSorterView("/bubble-sort", {
 registerSorterView("/selection-sort", {
   display: { name: "Selection Sort" },
   view: <SelectionSortView />,
+});
+registerSorterView("/insertion-sort", {
+  display: { name: "Insertion Sort" },
+  view: <InsertionSortView />,
 });
 registerSorterView("/counting-sort", {
   display: { name: "Counting Sort" },

@@ -1,5 +1,8 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import { useMusicalScale } from "@/hooks/useMusicalNotes";
+import {
+  SCALES,
+  useMusicalScale,
+} from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { generateDataset } from "@/services/generate-dataset";
 import { performSelectionSort } from "@/services/sorters/selection-sort";
@@ -76,7 +79,9 @@ const SelectionSortView_: FC = () => {
       performSelectionSort
     );
 
-  const { playNote } = useMusicalScale();
+  const { playNote } = useMusicalScale({
+    scalePattern: SCALES.MajorPentatonic,
+  });
 
   useEffect(() => {
     if (frame === null || frame.compared === undefined) {
@@ -113,8 +118,6 @@ const SelectionSortView_: FC = () => {
     key,
     leftBound,
   } = frame;
-
-  console.log(frame.swapped, frame.compared);
 
   return (
     <Box

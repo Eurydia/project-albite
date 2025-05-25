@@ -2,14 +2,16 @@ import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performBubbleSort } from "@/services/sorters/bubblesort";
+import { performInsertionSort } from "@/services/sorters/insertion-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
+import type { InsertionSortFrameState } from "@/types/sorters/insertion-sort";
+import { KeyRounded } from "@mui/icons-material";
 import {
-  alpha,
   Box,
   Grid,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
 import {
   blue,
@@ -17,72 +19,87 @@ import {
   grey,
   orange,
 } from "@mui/material/colors";
-import { isEqual } from "lodash";
 import { memo, useEffect, type FC } from "react";
 import { useLoaderData } from "react-router";
 
-type ItemProps = {
-  height: number;
-  compare: boolean;
-  swapped: boolean;
-  verify: boolean;
-  locked: boolean;
+type SortItemProps = {
+  index: number;
+  value: number;
+  data: InsertionSortFrameState;
 };
-const ItemElement: FC<ItemProps> = memo(
-  ({ height, compare, swapped, verify, locked }) => {
-    let backgroundColor: string = grey["50"];
-    if (compare) {
-      backgroundColor = blue["A200"];
-    } else if (swapped) {
-      backgroundColor = green["A200"];
-    } else if (verify) {
-      backgroundColor = orange["A200"];
-    } else if (locked) {
-      backgroundColor = grey["A400"];
-    }
+const SortItem: FC<SortItemProps> = ({
+  value,
+  data,
+  index,
+}) => {
+  const { palette } = useTheme();
 
-    return (
-      <Grid
-        size={1}
-        sx={{
-          backgroundColor: alpha(backgroundColor, 0.8),
-          height: `${height}%`,
-        }}
-      ></Grid>
-    );
-  },
-  isEqual
-);
+  const { leftBound, verify, compared, swapped, key } =
+    data;
 
-const BubbleSortView_: FC = () => {
+  let backgroundColor: string = grey["300"];
+  if (leftBound !== undefined && index > leftBound) {
+    backgroundColor = grey["900"];
+  } else if (verify === index) {
+    backgroundColor = orange["A200"];
+  } else if (
+    compared !== undefined &&
+    compared.includes(index)
+  ) {
+    backgroundColor = blue["A200"];
+  } else if (
+    swapped !== undefined &&
+    swapped.includes(index)
+  ) {
+    backgroundColor = green["A200"];
+  }
+
+  return (
+    <Grid
+      size={1}
+      sx={{
+        backgroundColor,
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
+        height: `${
+          (value / Math.max(...data.items)) * 100
+        }%`,
+      }}
+    >
+      {key !== undefined && key === index && (
+        <KeyRounded
+          sx={{
+            color: palette.getContrastText(backgroundColor),
+          }}
+        />
+      )}
+    </Grid>
+  );
+};
+
+const InsertionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, shuffleDataset } =
     useSortAnimator(
       generateDataset(size),
-      performBubbleSort
+      performInsertionSort
     );
 
-  const { playNote } = useMusicalScale({
-    scalePattern: [0, 2, 4, 6, 7, 9, 11],
-    baseMidiNote: 60,
-    gain: 0.3,
-    duration: 0.6,
-    fadeDuration: 0.2,
-    waveform: "sine",
-  });
+  const { playNote } = useMusicalScale();
+
+  useEffect(() => {
+    if (frame === null || frame.compared === undefined) {
+      return;
+    }
+    playNote(frame.items.at(frame.compared.at(0)!)!);
+  }, [frame, playNote]);
 
   useEffect(() => {
     if (frame === null || frame.swapped === undefined) {
       return;
     }
-    playNote(frame.items.at(Math.max(...frame.swapped))!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.compare == undefined) {
-      return;
-    }
-    playNote(frame.items.at(Math.max(...frame.compare))!);
+    playNote(frame.items.at(frame.swapped.at(0)!)!);
   }, [frame, playNote]);
 
   useEffect(() => {
@@ -96,15 +113,7 @@ const BubbleSortView_: FC = () => {
     return <Typography>Loading...</Typography>;
   }
 
-  const {
-    items,
-    compare,
-    swapped,
-    swapCount,
-    compareCount,
-    verify,
-    rightBound,
-  } = frame;
+  const { compareCount, items, swapCount } = frame;
 
   return (
     <Box
@@ -112,18 +121,15 @@ const BubbleSortView_: FC = () => {
         backgroundColor: "black",
         display: "flex",
         flexDirection: "column",
+        height: "100vh",
       }}
-      height="100vh"
     >
-      <Stack
-        spacing={1}
-        component="div"
-      >
+      <Stack spacing={1}>
         <Typography
           fontWeight={900}
           sx={{ userSelect: "none" }}
         >
-          {`Bubble sort`}
+          {`Insertion sort`}
         </Typography>
         <Stack
           spacing={1}
@@ -163,22 +169,11 @@ const BubbleSortView_: FC = () => {
         sx={{ flexBasis: 0, flexGrow: 1 }}
       >
         {items.map((value, index) => (
-          <ItemElement
+          <SortItem
             key={`sort-item-${index}`}
-            height={(value / items.length) * 100}
-            compare={
-              compare !== undefined &&
-              compare.includes(index)
-            }
-            swapped={
-              swapped !== undefined &&
-              swapped.includes(index)
-            }
-            verify={verify === index}
-            locked={
-              rightBound !== undefined &&
-              index >= rightBound
-            }
+            index={index}
+            value={value}
+            data={frame}
           />
         ))}
       </Grid>
@@ -186,4 +181,6 @@ const BubbleSortView_: FC = () => {
   );
 };
 
-export const BubbleSortView: FC = memo(BubbleSortView_);
+export const InsertionSortView: FC = memo(
+  InsertionSortView_
+);

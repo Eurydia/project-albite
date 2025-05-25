@@ -26,29 +26,31 @@ export const performBubbleSort = (
   };
 
   const generateSwapFrameData = (
-    posA: number,
-    posB: number
+    bound: number,
+    a: number,
+    b: number
   ) => {
-    const frameData: BubbleSortFrameData = {
+    frames.push({
       items: structuredClone(dataset),
-      swapped: [posA, posB],
       swapCount,
       compareCount,
-    };
-    return frameData;
+      swapped: [a, b],
+      rightBound: bound,
+    });
   };
 
   const generateCompareFrameData = (
-    posA: number,
-    posB: number
+    bound: number,
+    a: number,
+    b: number
   ) => {
-    const frameData: BubbleSortFrameData = {
+    frames.push({
       items: structuredClone(dataset),
-      compare: [posA, posB],
       swapCount,
       compareCount,
-    };
-    frames.push(frameData);
+      compare: [a, b],
+      rightBound: bound,
+    });
   };
 
   generateFrameData();
@@ -59,13 +61,13 @@ export const performBubbleSort = (
 
       const shouldSwap = b <= a;
       compareCount++;
-      generateCompareFrameData(i, i + 1);
+      generateCompareFrameData(size - offset, i, i + 1);
 
       if (shouldSwap) {
         dataset[i] = b;
         dataset[i + 1] = a;
         swapCount++;
-        generateSwapFrameData(i, i + 1);
+        generateSwapFrameData(size - offset, i, i + 1);
       }
     }
   }
