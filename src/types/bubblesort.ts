@@ -1,9 +1,8 @@
 export type BubbleSortFrameData = {
   items: number[];
-  compared: number[];
-  swapping: number[];
-  swapped: number[];
-  description: string;
+  compare?: number[];
+  swapped?: number[];
+  verify?: number;
   swapCount: number;
-  comparisonCount: number;
+  compareCount: number;
 };

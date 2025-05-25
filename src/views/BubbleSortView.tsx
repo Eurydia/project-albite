@@ -1,19 +1,14 @@
+import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { performBubbleSort } from "@/services/bubblesort";
 import { generateDataset } from "@/services/generate-dataset";
+import type { SorterRouterLoaderData } from "@/types/loader-data";
 import {
-  AutorenewRounded,
-  FastForwardRounded,
-  FastRewindRounded,
-} from "@mui/icons-material";
-import {
+  alpha,
   Box,
-  Button,
   Grid,
   Stack,
-  Toolbar,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import {
@@ -24,32 +19,31 @@ import {
 } from "@mui/material/colors";
 import { isEqual } from "lodash";
 import { memo, useEffect, type FC } from "react";
-
-const ITEM_SIZE = 40;
+import { useLoaderData } from "react-router";
 
 type ItemProps = {
-  value: number;
-  compared: boolean;
-  swapping: boolean;
+  height: number;
+  compare: boolean;
   swapped: boolean;
+  verify: boolean;
 };
 const ItemElement: FC<ItemProps> = memo(
-  ({ value, compared, swapped, swapping }) => {
+  ({ height, compare, swapped, verify }) => {
     let backgroundColor: string = grey["300"];
-    if (compared) {
-      backgroundColor = blue["300"];
-    } else if (swapping) {
-      backgroundColor = orange["200"];
+    if (compare) {
+      backgroundColor = blue["A200"];
     } else if (swapped) {
-      backgroundColor = green["400"];
+      backgroundColor = green["A200"];
+    } else if (verify) {
+      backgroundColor = orange["A200"];
     }
 
     return (
       <Grid
         size={1}
         sx={{
-          backgroundColor,
-          height: `${(value / ITEM_SIZE) * 100}%`,
+          backgroundColor: alpha(backgroundColor, 0.8),
+          height: `${height}%`,
         }}
       ></Grid>
     );
@@ -57,53 +51,55 @@ const ItemElement: FC<ItemProps> = memo(
   isEqual
 );
 
-export const BubbleSortView: FC = () => {
+const BubbleSortView_: FC = () => {
+  const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, shuffleDataset } =
     useSortAnimator(
-      generateDataset(ITEM_SIZE),
+      generateDataset(size),
       performBubbleSort
     );
 
   const { playNote } = useMusicalScale({
-    scalePattern: [0, 2, 4, 6, 7, 9, 11], // Lydian
-    baseMidiNote: 60, // still C4
-    gain: 0.3, // a bit louder
+    scalePattern: [0, 2, 4, 6, 7, 9, 11],
+    baseMidiNote: 60,
+    gain: 0.3,
     duration: 0.6,
     fadeDuration: 0.2,
     waveform: "sine",
   });
 
   useEffect(() => {
-    if (
-      frame === null ||
-      frame.swapped.at(0) === undefined
-    ) {
+    if (frame === null || frame.swapped === undefined) {
       return;
     }
-    playNote(frame.swapped.at(0)! + 1);
+    playNote(frame.items.at(Math.max(...frame.swapped))!);
   }, [frame, playNote]);
 
   useEffect(() => {
-    if (
-      frame === null ||
-      frame.compared.at(0) === undefined
-    ) {
+    if (frame === null || frame.compare == undefined) {
       return;
     }
-    playNote(frame.compared.at(0)! + 1);
+    playNote(frame.items.at(Math.max(...frame.compare))!);
+  }, [frame, playNote]);
+
+  useEffect(() => {
+    if (frame === null || frame.verify === undefined) {
+      return;
+    }
+    playNote(frame.items.at(frame.verify)!);
   }, [frame, playNote]);
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
   }
+
   const {
     items,
-    compared,
-    swapping,
+    compare,
     swapped,
-    description,
     swapCount,
-    comparisonCount,
+    compareCount,
+    verify,
   } = frame;
 
   return (
@@ -119,73 +115,67 @@ export const BubbleSortView: FC = () => {
         spacing={1}
         component="div"
       >
-        <Stack spacing={1}>
-          <Typography
-            fontWeight={900}
-            sx={{ userSelect: "none" }}
-          >
-            {`Bubble sort (Swaps: ${swapCount}, Comparisons: ${comparisonCount})`}
-          </Typography>
-          <Tooltip
-            title={<Typography>{description}</Typography>}
-          >
-            <Typography
-              fontWeight={700}
-              textOverflow="ellipsis"
-              whiteSpace="nowrap"
-              overflow="hidden"
-            >
-              {description}
-            </Typography>
-          </Tooltip>
-        </Stack>
-        <Toolbar
-          variant="dense"
-          disableGutters
-          sx={{ gap: { xs: 1, md: 2 }, flexWrap: "wrap" }}
+        <Typography
+          fontWeight={900}
+          sx={{ userSelect: "none" }}
         >
-          <Button
-            startIcon={<FastRewindRounded />}
-            variant="contained"
-            onClick={prevFrame}
+          {`Bubble sort`}
+        </Typography>
+        <Stack
+          spacing={1}
+          flexDirection="row"
+          alignItems="center"
+          flexWrap="wrap"
+          useFlexGap
+        >
+          <Typography
+            sx={{
+              userSelect: "none",
+              color: green["A200"],
+            }}
           >
-            Previous Frame
-          </Button>
-          <Button
-            startIcon={<AutorenewRounded />}
-            variant="contained"
-            onClick={shuffleDataset}
+            {`Swaps: ${swapCount}`}
+          </Typography>
+          <Typography
+            sx={{
+              userSelect: "none",
+              color: blue["A200"],
+            }}
           >
-            Shuffle
-          </Button>
-          <Button
-            variant="contained"
-            endIcon={<FastForwardRounded />}
-            onClick={nextFrame}
-          >
-            Next Frame
-          </Button>
-        </Toolbar>
+            {`Comparisons: ${compareCount}`}
+          </Typography>
+        </Stack>
+        <SorterAnimationToolbar
+          onNextFrame={nextFrame}
+          onPrevFrame={prevFrame}
+          onShuffle={shuffleDataset}
+        />
       </Stack>
       <Grid
         container
-        columns={ITEM_SIZE}
+        columns={size}
         spacing={0}
-        alignItems="baseline"
+        alignItems="flex-end"
         sx={{ flexBasis: 0, flexGrow: 1 }}
       >
-        {items.map((value, index) => {
-          return (
-            <ItemElement
-              key={`sort-item-${index}`}
-              value={value}
-              compared={compared.includes(index)}
-              swapping={swapping.includes(index)}
-              swapped={swapped.includes(index)}
-            />
-          );
-        })}
+        {items.map((value, index) => (
+          <ItemElement
+            key={`sort-item-${index}`}
+            height={(value / items.length) * 100}
+            compare={
+              compare !== undefined &&
+              compare.includes(index)
+            }
+            swapped={
+              swapped !== undefined &&
+              swapped.includes(index)
+            }
+            verify={verify === index}
+          />
+        ))}
       </Grid>
     </Box>
   );
 };
+
+export const BubbleSortView: FC = memo(BubbleSortView_);

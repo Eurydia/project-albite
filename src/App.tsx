@@ -1,4 +1,5 @@
 import {
+  alpha,
   createTheme,
   CssBaseline,
   ThemeProvider,
@@ -29,6 +30,11 @@ const theme = createTheme({
         color: "primary",
       },
     },
+    MuiTypography: {
+      defaultProps: {
+        color: alpha("#fff", 0.8),
+      },
+    },
   },
 });
 
@@ -38,7 +44,7 @@ registerSorterView("/bubble-sort", {
 });
 registerSorterView("/counting-sort", {
   display: { name: "Counting Sort" },
-  view: <CountingSortView />, // Replace with actual CountingSortView when implemented
+  view: <CountingSortView />,
 });
 
 const router = createBrowserRouter(

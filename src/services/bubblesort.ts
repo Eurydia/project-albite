@@ -4,80 +4,73 @@ export const performBubbleSort = (
   dataset: number[],
   frames: BubbleSortFrameData[]
 ) => {
-  const items = structuredClone(dataset);
-  const size = items.length;
-  let swapCount: number = 0;
-  let comparisonCount: number = 0;
+  const size = dataset.length;
+  let swapCount = 0;
+  let compareCount = 0;
 
-  const generateFrameData = (
-    description: string,
-    compared: BubbleSortFrameData["compared"] = [],
-    swapping: BubbleSortFrameData["swapping"] = [],
-    swapped: BubbleSortFrameData["swapped"] = []
+  const generateFrameData = () => {
+    frames.push({
+      items: structuredClone(dataset),
+      swapCount,
+      compareCount,
+    });
+  };
+
+  const generateVerifyFrameData = (pos: number) => {
+    frames.push({
+      items: structuredClone(dataset),
+      verify: pos,
+      swapCount,
+      compareCount,
+    });
+  };
+
+  const generateSwapFrameData = (
+    posA: number,
+    posB: number
   ) => {
     const frameData: BubbleSortFrameData = {
-      items: structuredClone(items),
+      items: structuredClone(dataset),
+      swapped: [posA, posB],
       swapCount,
-      comparisonCount,
-      description,
-      compared,
-      swapped,
-      swapping,
+      compareCount,
     };
     return frameData;
   };
 
-  frames.push(
-    generateFrameData(
-      `Sorting array with size ${items.length}.`
-    )
-  );
+  const generateCompareFrameData = (
+    posA: number,
+    posB: number
+  ) => {
+    const frameData: BubbleSortFrameData = {
+      items: structuredClone(dataset),
+      compare: [posA, posB],
+      swapCount,
+      compareCount,
+    };
+    frames.push(frameData);
+  };
+
+  generateFrameData();
   for (let offset = 0; offset < size - 1; offset++) {
     for (let i = 0; i < size - offset - 1; i++) {
-      const a = items[i];
-      const b = items[i + 1];
+      const a = dataset[i];
+      const b = dataset[i + 1];
 
       const shouldSwap = b <= a;
-      comparisonCount++;
-      // frames.push(
-      //   generateFrameData(
-      //     `Compared item at position ${i} and position
-      //     ${i + 1}.`,
-      //     { left: i, right: i + 1 }
-      //   )
-      // );
+      compareCount++;
+      generateCompareFrameData(i, i + 1);
 
       if (shouldSwap) {
-        // frames.push(
-        //   generateFrameData(`Swap needed.`, null, {
-        //     left: i,
-        //     right: i + 1,
-        //   })
-        // );
-        items[i] = b;
-        items[i + 1] = a;
+        dataset[i] = b;
+        dataset[i + 1] = a;
         swapCount++;
-        frames.push(
-          generateFrameData(
-            `Swapped item at position ${i} and position 
-            ${i + 1}.`,
-            [],
-            [],
-            [i, i + 1]
-          )
-        );
-      } else {
-        // frames.push(generateFrameData("Swap not needed."));
+        generateSwapFrameData(i, i + 1);
       }
     }
   }
   for (let i = 0; i < size; i++) {
-    frames.push(
-      generateFrameData(`Verified item at position ${i}.`, [
-        i,
-      ])
-    );
+    generateVerifyFrameData(i);
   }
-
-  frames.push(generateFrameData("Done."));
+  generateFrameData();
 };

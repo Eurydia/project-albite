@@ -15,69 +15,51 @@ export const performCountingSort = (
   );
   const sortMemory: number[] = new Array(size).fill(0);
 
-  const generateFrameState = (
-    description: string,
-    {
-      mainMemRead,
-      mainMemWritten,
-      auxiMemRead,
-      auxiMemWritten,
-      sortMemRead,
-      sortMemWritten,
-    }: {
-      mainMemRead: number;
-      mainMemWritten: number;
-      auxiMemRead: number;
-      auxiMemWritten: number;
-      sortMemRead: number;
-      sortMemWritten: number;
-    }
-  ): void => {
+  const generateFrameState = ({
+    mainMemRead = undefined,
+    mainMemWritten = undefined,
+    auxiMemRead = undefined,
+    auxiMemWritten = undefined,
+    sortMemRead = undefined,
+    sortMemWritten = undefined,
+  }: {
+    mainMemRead?: number;
+    mainMemWritten?: number;
+    auxiMemRead?: number;
+    auxiMemWritten?: number;
+    sortMemRead?: number;
+    sortMemWritten?: number;
+  }) => {
     frames.push({
-      description,
       mainMem: {
         items: structuredClone(dataset),
-        readAt: mainMemRead ?? -1,
-        writtenAt: mainMemWritten ?? -1,
+        readAt: mainMemRead,
+        writtenAt: mainMemWritten,
       },
       auxiMem: {
         items: structuredClone(auxiMemory),
-        readAt: auxiMemRead ?? -1,
-        writtenAt: auxiMemWritten ?? -1,
+        readAt: auxiMemRead,
+        writtenAt: auxiMemWritten,
       },
       sortMem: {
         items: structuredClone(sortMemory),
-        readAt: sortMemRead ?? -1,
-        writtenAt: sortMemWritten ?? -1,
+        readAt: sortMemRead,
+        writtenAt: sortMemWritten,
       },
       memReadCount,
       memWriteCount,
     });
   };
 
-  generateFrameState(
-    `Sorting array with ${size} elements.`,
-    {
-      mainMemRead: -1,
-      mainMemWritten: -1,
-      auxiMemRead: -1,
-      auxiMemWritten: -1,
-      sortMemRead: -1,
-      sortMemWritten: -1,
-    }
-  );
+  generateFrameState({});
 
   for (let i = 0; i < size; i++) {
     auxiMemory[dataset[i]]++;
     memReadCount++;
     memWriteCount++;
-    generateFrameState(``, {
+    generateFrameState({
       mainMemRead: i,
-      mainMemWritten: -1,
-      auxiMemRead: -1,
       auxiMemWritten: dataset[i],
-      sortMemRead: -1,
-      sortMemWritten: -1,
     });
   }
 
@@ -85,13 +67,9 @@ export const performCountingSort = (
     auxiMemory[i] += auxiMemory[i - 1];
     memReadCount++;
     memWriteCount++;
-    generateFrameState(``, {
-      mainMemRead: -1,
-      mainMemWritten: -1,
+    generateFrameState({
       auxiMemRead: i,
       auxiMemWritten: i + 1,
-      sortMemRead: -1,
-      sortMemWritten: -1,
     });
   }
 
@@ -103,12 +81,9 @@ export const performCountingSort = (
     memReadCount++;
     memReadCount++;
     memWriteCount++;
-    generateFrameState("", {
+    generateFrameState({
       mainMemRead: i,
-      mainMemWritten: -1,
       auxiMemRead: dataset[i],
-      auxiMemWritten: -1,
-      sortMemRead: -1,
       sortMemWritten: auxiMemory[dataset[i]] - 1,
     });
 
@@ -116,13 +91,9 @@ export const performCountingSort = (
 
     memReadCount++;
     memWriteCount++;
-    generateFrameState("", {
+    generateFrameState({
       mainMemRead: i,
-      mainMemWritten: -1,
-      auxiMemRead: -1,
       auxiMemWritten: dataset[i],
-      sortMemRead: -1,
-      sortMemWritten: -1,
     });
   }
 
@@ -131,22 +102,11 @@ export const performCountingSort = (
 
     memReadCount++;
     memWriteCount++;
-    generateFrameState("", {
-      mainMemRead: -1,
+    generateFrameState({
       mainMemWritten: i,
-      auxiMemRead: -1,
-      auxiMemWritten: -1,
       sortMemRead: i,
-      sortMemWritten: -1,
     });
   }
 
-  generateFrameState("", {
-    mainMemRead: -1,
-    mainMemWritten: -1,
-    auxiMemRead: -1,
-    auxiMemWritten: -1,
-    sortMemRead: -1,
-    sortMemWritten: -1,
-  });
+  generateFrameState({});
 };

@@ -1,3 +1,4 @@
+import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import {
   SCALES,
   useMusicalScale,
@@ -7,17 +8,10 @@ import { performCountingSort } from "@/services/counting-sort";
 import { generateDataset } from "@/services/generate-dataset";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import {
-  AutorenewRounded,
-  FastForwardRounded,
-  FastRewindRounded,
-} from "@mui/icons-material";
-import {
   alpha,
   Box,
-  Button,
   Grid,
   Stack,
-  Toolbar,
   Typography,
 } from "@mui/material";
 import { grey, orange, teal } from "@mui/material/colors";
@@ -29,31 +23,31 @@ type ItemElementProps = {
   isRead: boolean;
   isWritten: boolean;
 };
-const ItemElement: FC<ItemElementProps> = (props) => {
-  const { height, isRead, isWritten } = props;
+const ItemElement: FC<ItemElementProps> = memo(
+  ({ height, isRead, isWritten }) => {
+    let bgColor: string;
+    if (isRead) {
+      bgColor = teal.A200;
+    } else if (isWritten) {
+      bgColor = orange.A200;
+    } else {
+      bgColor = grey[200];
+    }
 
-  let bgColor: string;
-  if (isRead) {
-    bgColor = teal.A200;
-  } else if (isWritten) {
-    bgColor = orange.A200;
-  } else {
-    bgColor = grey[200];
+    return (
+      <Grid
+        size={1}
+        height={`${height}%`}
+        bgcolor={alpha(bgColor, 0.8)}
+      />
+    );
   }
-
-  return (
-    <Grid
-      size={1}
-      height={`${height}%`}
-      bgcolor={alpha(bgColor, 0.8)}
-    />
-  );
-};
+);
 
 type MemoryDisplayProps = {
   items: number[];
-  readAt: number;
-  writtenAt: number;
+  readAt?: number;
+  writtenAt?: number;
   pattern: readonly number[];
 };
 const MemoryDisplay: FC<MemoryDisplayProps> = memo(
@@ -68,19 +62,20 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
     });
 
     useEffect(() => {
-      if (readAt !== -1) {
+      if (readAt !== undefined) {
         const item = items.at(readAt);
         if (item !== undefined && item >= 0) {
           playNote(item + 1);
         }
       }
-      if (writtenAt !== -1) {
+      if (writtenAt !== undefined) {
         const item = items.at(writtenAt);
         if (item !== undefined && item >= 0) {
           playNote(item + 1);
         }
       }
     }, [items, playNote, readAt, writtenAt]);
+
     return (
       <Grid
         container
@@ -108,7 +103,7 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
   }
 );
 
-export const CountingSortView: FC = () => {
+const CountingSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, shuffleDataset } =
     useSortAnimator(
@@ -119,6 +114,7 @@ export const CountingSortView: FC = () => {
   if (frame === null) {
     return <Typography>Loading...</Typography>;
   }
+
   const { memReadCount, memWriteCount } = frame;
 
   return (
@@ -134,72 +130,45 @@ export const CountingSortView: FC = () => {
         spacing={1}
         component="div"
       >
-        <Stack spacing={1}>
-          <Stack
-            flexDirection="row"
-            flexWrap="wrap"
-            spacing={1}
-            useFlexGap
-          >
-            <Typography
-              fontWeight={900}
-              sx={{
-                userSelect: "none",
-              }}
-            >
-              {`Counting sort`}
-            </Typography>
-            <Typography
-              fontWeight={700}
-              sx={{
-                userSelect: "none",
-                color: teal["A200"],
-              }}
-            >
-              {`Writes: ${memWriteCount}`}
-            </Typography>
-            <Typography
-              fontWeight={700}
-              sx={{
-                userSelect: "none",
-                color: orange["A200"],
-              }}
-            >
-              {`Reads: ${memReadCount}`}
-            </Typography>
-          </Stack>
-        </Stack>
-        <Toolbar
-          variant="dense"
-          disableGutters
-          sx={{ gap: { xs: 1, md: 2 }, flexWrap: "wrap" }}
+        <Typography
+          fontWeight={900}
+          sx={{
+            userSelect: "none",
+          }}
         >
-          <Button
-            startIcon={<FastRewindRounded />}
-            variant="contained"
-            onClick={prevFrame}
+          {`Counting sort`}
+        </Typography>
+        <Stack
+          flexDirection="row"
+          flexWrap="wrap"
+          spacing={1}
+          useFlexGap
+        >
+          <Typography
+            sx={{
+              userSelect: "none",
+              color: teal["A200"],
+            }}
           >
-            Previous Frame
-          </Button>
-          <Button
-            startIcon={<AutorenewRounded />}
-            variant="contained"
-            onClick={shuffleDataset}
+            {`Writes: ${memWriteCount}`}
+          </Typography>
+          <Typography
+            sx={{
+              userSelect: "none",
+              color: orange["A200"],
+            }}
           >
-            Shuffle
-          </Button>
-          <Button
-            variant="contained"
-            endIcon={<FastForwardRounded />}
-            onClick={nextFrame}
-          >
-            Next Frame
-          </Button>
-        </Toolbar>
+            {`Reads: ${memReadCount}`}
+          </Typography>
+        </Stack>
+        <SorterAnimationToolbar
+          onNextFrame={nextFrame}
+          onPrevFrame={prevFrame}
+          onShuffle={shuffleDataset}
+        />
       </Stack>
       <Grid
         container
-        padding={2}
         spacing={2}
         columns={1}
         sx={{
@@ -238,3 +207,5 @@ export const CountingSortView: FC = () => {
     </Box>
   );
 };
+
+export const CountingSortView = memo(CountingSortView_);
