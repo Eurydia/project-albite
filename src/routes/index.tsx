@@ -1,5 +1,6 @@
 import type { SorterRouteData } from "@/types/routes";
 import { type RouteObject } from "react-router";
+import { sorterRouterLoader as sorterRouteLoader } from "./sorter-route-loader";
 
 const SORTER_VIEW__REGISTRY: Map<string, SorterRouteData> =
   new Map();
@@ -25,6 +26,7 @@ export const getSorterRoutes = () => {
       return {
         path,
         element: view,
+        loader: sorterRouteLoader,
       } as RouteObject;
     }
   );

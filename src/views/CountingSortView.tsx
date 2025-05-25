@@ -1,7 +1,11 @@
-import { useSortAnimator } from "@/hooks/useBubbleSort";
-import { useMusicalScale } from "@/hooks/useMusicalNotes";
+import {
+  SCALES,
+  useMusicalScale,
+} from "@/hooks/useMusicalNotes";
+import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { performCountingSort } from "@/services/counting-sort";
 import { generateDataset } from "@/services/generate-dataset";
+import type { SorterRouterLoaderData } from "@/types/loader-data";
 import {
   AutorenewRounded,
   FastForwardRounded,
@@ -14,128 +18,108 @@ import {
   Grid,
   Stack,
   Toolbar,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import { grey, orange, teal } from "@mui/material/colors";
-import { useEffect, type FC } from "react";
+import { memo, useEffect, type FC } from "react";
+import { useLoaderData } from "react-router";
 
-type RendererElemenetProps = {
-  size: number;
-  value: number;
-  maxValue: number;
-  stateRead: boolean;
-  stateWrite: boolean;
+type ItemElementProps = {
+  height: number;
+  isRead: boolean;
+  isWritten: boolean;
 };
-const ItemElement: FC<RendererElemenetProps> = (props) => {
-  const { value, maxValue, stateRead, stateWrite } = props;
+const ItemElement: FC<ItemElementProps> = (props) => {
+  const { height, isRead, isWritten } = props;
 
-  const clampedValue: number = Math.max(value, 0);
-
-  const height: number = (clampedValue / maxValue) * 100;
-
-  let bgColor: string = grey[200];
-  if (stateRead) {
+  let bgColor: string;
+  if (isRead) {
     bgColor = teal.A200;
-  }
-  if (stateWrite) {
+  } else if (isWritten) {
     bgColor = orange.A200;
+  } else {
+    bgColor = grey[200];
   }
 
   return (
     <Grid
       size={1}
       height={`${height}%`}
-      bgcolor={alpha(bgColor, 0.6)}
+      bgcolor={alpha(bgColor, 0.8)}
     />
   );
 };
 
-const ITEM_SIZE: number = 40;
+type MemoryDisplayProps = {
+  items: number[];
+  readAt: number;
+  writtenAt: number;
+  pattern: readonly number[];
+};
+const MemoryDisplay: FC<MemoryDisplayProps> = memo(
+  ({ items, readAt, writtenAt, pattern }) => {
+    const { playNote } = useMusicalScale({
+      scalePattern: pattern,
+      baseMidiNote: 60,
+      gain: 0.3,
+      duration: 0.6,
+      fadeDuration: 0.2,
+      waveform: "sine",
+    });
+
+    useEffect(() => {
+      if (readAt !== -1) {
+        const item = items.at(readAt);
+        if (item !== undefined && item >= 0) {
+          playNote(item + 1);
+        }
+      }
+      if (writtenAt !== -1) {
+        const item = items.at(writtenAt);
+        if (item !== undefined && item >= 0) {
+          playNote(item + 1);
+        }
+      }
+    }, [items, playNote, readAt, writtenAt]);
+    return (
+      <Grid
+        container
+        columns={items.length}
+        spacing={0}
+        sx={{
+          height: "100%",
+          alignItems: "flex-end",
+          flexGrow: 1,
+          flexBasis: 0,
+        }}
+      >
+        {items.map((value, index) => {
+          return (
+            <ItemElement
+              key={`sort-item-${index}`}
+              height={(value / items.length) * 100}
+              isRead={readAt === index}
+              isWritten={writtenAt === index}
+            />
+          );
+        })}
+      </Grid>
+    );
+  }
+);
+
 export const CountingSortView: FC = () => {
+  const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, shuffleDataset } =
     useSortAnimator(
-      generateDataset(ITEM_SIZE),
+      generateDataset(size),
       performCountingSort
     );
-
-  const { playNote } = useMusicalScale({
-    scalePattern: [0, 2, 4, 6, 7, 9, 11], // Lydian
-    baseMidiNote: 60, // still C4
-    gain: 0.3, // a bit louder
-    duration: 0.6,
-    fadeDuration: 0.2,
-    waveform: "sine",
-  });
-
-  useEffect(() => {
-    if (frame === null) {
-      return;
-    }
-    const { readAt, writtenAt, items } = frame.mainMem;
-    if (readAt !== -1) {
-      const item = items.at(readAt);
-      if (item !== undefined && item >= 0) {
-        playNote(item + 1);
-      }
-    }
-    if (writtenAt !== -1) {
-      const item = items.at(writtenAt);
-      if (item !== undefined && item >= 0) {
-        playNote(item + 1);
-      }
-    }
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null) {
-      return;
-    }
-    const { readAt, writtenAt, items } = frame.sortMem;
-    if (readAt !== -1) {
-      const item = items.at(readAt);
-      if (item !== undefined && item >= 0) {
-        playNote(item + 1);
-      }
-    }
-    if (writtenAt !== -1) {
-      const item = items.at(writtenAt);
-      if (item !== undefined && item >= 0) {
-        playNote(item + 1);
-      }
-    }
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null) {
-      return;
-    }
-    const { readAt, writtenAt, items } = frame.auxiMem;
-    if (readAt !== -1) {
-      const item = items.at(readAt);
-      if (item !== undefined && item >= 0) {
-        playNote(item + 1);
-      }
-    }
-    if (writtenAt !== -1) {
-      const item = items.at(writtenAt);
-      if (item !== undefined && item >= 0) {
-        playNote(item + 1);
-      }
-    }
-  }, [frame, playNote]);
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
   }
-  const {
-    description,
-    memReadCount,
-    memWriteCount,
-    auxiMem,
-    mainMem,
-    sortMem,
-  } = frame;
+  const { memReadCount, memWriteCount } = frame;
 
   return (
     <Box
@@ -151,24 +135,39 @@ export const CountingSortView: FC = () => {
         component="div"
       >
         <Stack spacing={1}>
-          <Typography
-            fontWeight={900}
-            sx={{ userSelect: "none" }}
-          >
-            {`Counting sort (Writes: ${memWriteCount}, Reads: ${memReadCount})`}
-          </Typography>
-          <Tooltip
-            title={<Typography>{description}</Typography>}
+          <Stack
+            flexDirection="row"
+            flexWrap="wrap"
+            spacing={1}
+            useFlexGap
           >
             <Typography
-              fontWeight={700}
-              textOverflow="ellipsis"
-              whiteSpace="nowrap"
-              overflow="hidden"
+              fontWeight={900}
+              sx={{
+                userSelect: "none",
+              }}
             >
-              {description}
+              {`Counting sort`}
             </Typography>
-          </Tooltip>
+            <Typography
+              fontWeight={700}
+              sx={{
+                userSelect: "none",
+                color: teal["A200"],
+              }}
+            >
+              {`Writes: ${memWriteCount}`}
+            </Typography>
+            <Typography
+              fontWeight={700}
+              sx={{
+                userSelect: "none",
+                color: orange["A200"],
+              }}
+            >
+              {`Reads: ${memReadCount}`}
+            </Typography>
+          </Stack>
         </Stack>
         <Toolbar
           variant="dense"
@@ -200,7 +199,7 @@ export const CountingSortView: FC = () => {
       </Stack>
       <Grid
         container
-        marginBottom={2}
+        padding={2}
         spacing={2}
         columns={1}
         sx={{
@@ -212,88 +211,28 @@ export const CountingSortView: FC = () => {
           size={1}
           sx={{ flexGrow: 1 }}
         >
-          <Grid
-            container
-            columns={ITEM_SIZE}
-            spacing={0}
-            sx={{
-              height: "100%",
-              alignItems: "flex-end",
-              flexGrow: 1,
-              flexBasis: 0,
-            }}
-          >
-            {mainMem.items.map((value, index) => {
-              return (
-                <ItemElement
-                  key={`sort-item-${index}`}
-                  value={value}
-                  size={ITEM_SIZE}
-                  maxValue={ITEM_SIZE}
-                  stateRead={mainMem.readAt === index}
-                  stateWrite={mainMem.writtenAt === index}
-                />
-              );
-            })}
-          </Grid>
+          <MemoryDisplay
+            {...frame.mainMem}
+            pattern={SCALES.Phrygian}
+          />
         </Grid>
         <Grid
           size={1}
           sx={{ flexGrow: 1 }}
         >
-          <Grid
-            container
-            columns={ITEM_SIZE + 1}
-            spacing={0}
-            sx={{
-              height: "100%",
-              alignItems: "flex-end",
-              flexGrow: 1,
-              flexBasis: 0,
-            }}
-          >
-            {auxiMem.items.map((value, index) => {
-              return (
-                <ItemElement
-                  key={`sort-item-${index}`}
-                  value={value}
-                  size={ITEM_SIZE}
-                  maxValue={ITEM_SIZE}
-                  stateRead={auxiMem.readAt === index}
-                  stateWrite={auxiMem.writtenAt === index}
-                />
-              );
-            })}
-          </Grid>
+          <MemoryDisplay
+            {...frame.auxiMem}
+            pattern={SCALES.Dorian}
+          />
         </Grid>
         <Grid
           size={1}
           sx={{ flexGrow: 1 }}
         >
-          <Grid
-            container
-            columns={ITEM_SIZE}
-            spacing={0}
-            sx={{
-              height: "100%",
-              alignItems: "flex-end",
-              flexGrow: 1,
-              flexBasis: 0,
-            }}
-          >
-            {sortMem.items.map((value, index) => {
-              return (
-                <ItemElement
-                  key={`sort-item-${index}`}
-                  value={value}
-                  size={ITEM_SIZE}
-                  maxValue={ITEM_SIZE}
-                  stateRead={sortMem.readAt === index}
-                  stateWrite={sortMem.writtenAt === index}
-                />
-              );
-            })}
-          </Grid>
+          <MemoryDisplay
+            {...frame.sortMem}
+            pattern={SCALES.Major}
+          />
         </Grid>
       </Grid>
     </Box>

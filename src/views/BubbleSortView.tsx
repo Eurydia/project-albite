@@ -1,5 +1,5 @@
-import { useSortAnimator } from "@/hooks/useBubbleSort";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
+import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { performBubbleSort } from "@/services/bubblesort";
 import { generateDataset } from "@/services/generate-dataset";
 import {

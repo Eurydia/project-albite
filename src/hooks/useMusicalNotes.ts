@@ -3,22 +3,33 @@ import { useCallback, useRef } from "react";
 interface UseMusicalScaleOptions {
   duration?: number; // seconds
   fadeDuration?: number; // seconds
-  scalePattern?: number[]; // semitone intervals
+  scalePattern?: readonly number[]; // semitone intervals
   baseMidiNote?: number; // MIDI note for root (default C4 = 60)
   totalValues?: number; // total mapped items
   waveform?: OscillatorType; // 'sine' | 'square' | ...
   gain?: number; // 0–1
 }
 
-const defaultScalePattern = [0, 2, 4, 5, 7, 9, 11]; // C Major
+export const SCALES = {
+  Major: [0, 2, 4, 5, 7, 9, 11],
+  NaturalMinor: [0, 2, 3, 5, 7, 8, 10],
+  Dorian: [0, 2, 3, 5, 7, 9, 10],
+  Phrygian: [0, 1, 3, 5, 7, 8, 10],
+  Lydian: [0, 2, 4, 6, 7, 9, 11],
+  Mixolydian: [0, 2, 4, 5, 7, 9, 10],
+  Locrian: [0, 1, 3, 5, 6, 8, 10],
+  MajorPentatonic: [0, 2, 4, 7, 9],
+  MinorPentatonic: [0, 3, 5, 7, 10],
+  BluesMinor: [0, 3, 5, 6, 7, 10],
+} as const;
 
-export function useMusicalScale(
+export const useMusicalScale = (
   options: UseMusicalScaleOptions = {}
-) {
+) => {
   const {
     duration = 0.5,
     fadeDuration = 0.1,
-    scalePattern = defaultScalePattern,
+    scalePattern = SCALES.Major,
     baseMidiNote = 60,
     waveform = "sine",
     gain = 0.2,
@@ -83,4 +94,4 @@ export function useMusicalScale(
   );
 
   return { playNote };
-}
+};
