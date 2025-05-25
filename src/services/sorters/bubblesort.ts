@@ -1,4 +1,4 @@
-import type { BubbleSortFrameData } from "@/types/bubblesort";
+import type { BubbleSortFrameData } from "@/types/sorters/bubble-sort";
 
 export const performBubbleSort = (
   dataset: number[],

@@ -2,10 +2,10 @@ import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performBubbleSort } from "@/services/sorters/bubblesort";
+import { performSelectionSort } from "@/services/sorters/selection-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
+import { KeyRounded } from "@mui/icons-material";
 import {
-  alpha,
   Box,
   Grid,
   Stack,
@@ -17,69 +17,79 @@ import {
   grey,
   orange,
 } from "@mui/material/colors";
-import { isEqual } from "lodash";
 import { memo, useEffect, type FC } from "react";
 import { useLoaderData } from "react-router";
 
-type ItemProps = {
+type SortItemProps = {
   height: number;
-  compare: boolean;
+  compared: boolean;
   swapped: boolean;
+  locked: boolean;
+  keyElement: boolean;
   verify: boolean;
 };
-const ItemElement: FC<ItemProps> = memo(
-  ({ height, compare, swapped, verify }) => {
-    let backgroundColor: string = grey["300"];
-    if (compare) {
+const SortItem: FC<SortItemProps> = memo(
+  ({
+    compared,
+    height,
+    swapped,
+    locked,
+    keyElement,
+    verify,
+  }) => {
+    let backgroundColor: string = grey[200];
+    if (verify) {
+      backgroundColor = orange["A200"];
+    } else if (locked) {
+      backgroundColor = grey["A400"];
+    } else if (compared) {
       backgroundColor = blue["A200"];
     } else if (swapped) {
       backgroundColor = green["A200"];
-    } else if (verify) {
-      backgroundColor = orange["A200"];
     }
 
     return (
       <Grid
         size={1}
         sx={{
-          backgroundColor: alpha(backgroundColor, 0.8),
           height: `${height}%`,
+          backgroundColor,
+          alignItems: "center",
+          display: "flex",
+          justifyContent: "center",
         }}
-      ></Grid>
+      >
+        {keyElement && (
+          <KeyRounded sx={{ color: "black" }} />
+        )}
+      </Grid>
     );
-  },
-  isEqual
+  }
 );
 
-const BubbleSortView_: FC = () => {
+const SelectionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
+
   const { frame, nextFrame, prevFrame, shuffleDataset } =
     useSortAnimator(
       generateDataset(size),
-      performBubbleSort
+      performSelectionSort
     );
 
-  const { playNote } = useMusicalScale({
-    scalePattern: [0, 2, 4, 6, 7, 9, 11],
-    baseMidiNote: 60,
-    gain: 0.3,
-    duration: 0.6,
-    fadeDuration: 0.2,
-    waveform: "sine",
-  });
+  const { playNote } = useMusicalScale();
+
+  useEffect(() => {
+    if (frame === null || frame.compared === undefined) {
+      return;
+    }
+    playNote(frame.items.at(frame.compared.at(0)!)!);
+  }, [frame, playNote]);
 
   useEffect(() => {
     if (frame === null || frame.swapped === undefined) {
       return;
     }
-    playNote(frame.items.at(Math.max(...frame.swapped))!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.compare == undefined) {
-      return;
-    }
-    playNote(frame.items.at(Math.max(...frame.compare))!);
+    playNote(frame.items.at(frame.swapped.at(0)!)!);
   }, [frame, playNote]);
 
   useEffect(() => {
@@ -94,13 +104,17 @@ const BubbleSortView_: FC = () => {
   }
 
   const {
-    items,
-    compare,
-    swapped,
-    swapCount,
     compareCount,
+    swapCount,
+    items,
+    compared,
+    swapped,
     verify,
+    key,
+    leftBound,
   } = frame;
+
+  console.log(frame.swapped, frame.compared);
 
   return (
     <Box
@@ -111,15 +125,12 @@ const BubbleSortView_: FC = () => {
       }}
       height="100vh"
     >
-      <Stack
-        spacing={1}
-        component="div"
-      >
+      <Stack spacing={1}>
         <Typography
           fontWeight={900}
           sx={{ userSelect: "none" }}
         >
-          {`Bubble sort`}
+          {`Selection sort`}
         </Typography>
         <Stack
           spacing={1}
@@ -159,18 +170,22 @@ const BubbleSortView_: FC = () => {
         sx={{ flexBasis: 0, flexGrow: 1 }}
       >
         {items.map((value, index) => (
-          <ItemElement
+          <SortItem
             key={`sort-item-${index}`}
             height={(value / items.length) * 100}
-            compare={
-              compare !== undefined &&
-              compare.includes(index)
+            compared={
+              compared !== undefined &&
+              compared.includes(index)
             }
             swapped={
               swapped !== undefined &&
               swapped.includes(index)
             }
             verify={verify === index}
+            locked={
+              leftBound !== undefined && index < leftBound
+            }
+            keyElement={key === index}
           />
         ))}
       </Grid>
@@ -178,4 +193,6 @@ const BubbleSortView_: FC = () => {
   );
 };
 
-export const BubbleSortView: FC = memo(BubbleSortView_);
+export const SelectionSortView: FC = memo(
+  SelectionSortView_
+);

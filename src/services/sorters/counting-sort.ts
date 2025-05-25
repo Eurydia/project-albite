@@ -1,4 +1,4 @@
-import type { CountingSortFrameState } from "@/types/counting-sort";
+import type { CountingSortFrameState } from "@/types/sorters/counting-sort";
 
 export const performCountingSort = (
   dataset: number[],
