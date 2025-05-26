@@ -1,12 +1,13 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
-import { useSortAnimator } from "@/hooks/useSortAnimator";
+import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performInsertionSort } from "@/services/sorting-animators/insertion-sort";
+import { insertionSortAnimation } from "@/services/sorting-animators/insertion-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import type { InsertionSortFrameState } from "@/types/sorters/insertion-sort";
 import { CircleRounded } from "@mui/icons-material";
 import {
+  alpha,
   Box,
   Grid,
   Stack,
@@ -35,8 +36,13 @@ const SortItem: FC<SortItemProps> = ({
 }) => {
   const { palette } = useTheme();
 
-  const { leftBound, verify, compared, swapped, key } =
-    data;
+  const {
+    leftBound,
+    verifyAt: verify,
+    compared,
+    swapped,
+    key,
+  } = data;
 
   let backgroundColor: string = grey["300"];
   if (leftBound !== undefined && index > leftBound) {
@@ -54,7 +60,7 @@ const SortItem: FC<SortItemProps> = ({
   ) {
     backgroundColor = deepPurple["A200"];
   }
-
+  backgroundColor = alpha(backgroundColor, 0.7);
   const height = (value / Math.max(...data.items)) * 100;
 
   return (
@@ -85,15 +91,10 @@ const SortItem: FC<SortItemProps> = ({
 
 const InsertionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const {
-    frame,
-    nextFrame,
-    prevFrame,
-    reset: shuffleDataset,
-  } = useSortAnimator(
-    generateDataset(size),
-    performInsertionSort
-  );
+  const { frame, nextFrame, prevFrame, reset } =
+    useSortAnimatorGenerator(() =>
+      insertionSortAnimation(generateDataset(size))
+    );
 
   const { playNote } = useMusicalScale();
 
@@ -112,10 +113,10 @@ const InsertionSortView_: FC = () => {
   }, [frame, playNote]);
 
   useEffect(() => {
-    if (frame === null || frame.verify === undefined) {
+    if (frame === null || frame.verifyAt === undefined) {
       return;
     }
-    playNote(frame.items.at(frame.verify)!);
+    playNote(frame.items.at(frame.verifyAt)!);
   }, [frame, playNote]);
 
   if (frame === null) {
@@ -167,7 +168,7 @@ const InsertionSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={shuffleDataset}
+          onShuffle={reset}
         />
       </Stack>
       <Grid

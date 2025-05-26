@@ -17,9 +17,9 @@ const unwrappedNext = <T>(
 };
 
 export const useSortAnimatorGenerator = <T extends object>(
-  animator: Generator<T, void, unknown>
+  animator: () => Generator<T, void, unknown>
 ) => {
-  const animatorRef = useRef(animator);
+  const animatorRef = useRef(animator());
   const framesRef = useRef<(T | null)[]>([
     unwrappedNext(animatorRef.current),
   ]);
@@ -32,17 +32,14 @@ export const useSortAnimatorGenerator = <T extends object>(
     }
   }, []);
 
-  const reset = useCallback(
-    (animator: Generator<T, void, unknown>) => {
-      animatorRef.current = animator;
-      const frame = animatorRef.current.next();
-      if (frame.done === undefined || !frame.done) {
-        framesRef.current = [frame.value];
-        setFrameIndex(0);
-      }
-    },
-    []
-  );
+  const reset = useCallback(() => {
+    animatorRef.current = animator();
+    const frame = animatorRef.current.next();
+    if (frame.done === undefined || !frame.done) {
+      framesRef.current = [frame.value];
+      setFrameIndex(0);
+    }
+  }, [animator]);
 
   const nextFrame = useCallback(() => {
     const frame = animatorRef.current.next();

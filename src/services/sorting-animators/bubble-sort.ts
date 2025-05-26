@@ -1,8 +1,4 @@
-import {
-  BubbleSortFrameDataVariants,
-  type BubbleSortFrameData,
-  type BubbleSortFrameDataCommon,
-} from "@/types/sorters/bubble-sort";
+import type { BubbleSortFrameData } from "@/types/sorters/bubble-sort";
 
 export function* bubbleSortAnimator(
   dataset: number[]
@@ -11,25 +7,21 @@ export function* bubbleSortAnimator(
   let swapCount = 0;
   let compareCount = 0;
 
-  const generateFrameData = <
-    T extends Omit<
+  function* generateFrame(
+    data: Omit<
       BubbleSortFrameData,
-      keyof BubbleSortFrameDataCommon
-    >
-  >(
-    frameData: T
-  ): T & BubbleSortFrameDataCommon => {
-    return {
+      "items" | "swapCount" | "compareCount"
+    > = {}
+  ): Generator<BubbleSortFrameData> {
+    yield {
       items: structuredClone(dataset),
       swapCount,
       compareCount,
-      ...frameData,
+      ...data,
     };
-  };
+  }
 
-  yield generateFrameData({
-    variant: BubbleSortFrameDataVariants.NORMAL,
-  });
+  yield* generateFrame();
 
   for (let offset = 0; offset < size - 1; offset++) {
     for (let i = 0; i < size - offset - 1; i++) {
@@ -38,8 +30,7 @@ export function* bubbleSortAnimator(
 
       const shouldSwap = b <= a;
       compareCount++;
-      yield generateFrameData({
-        variant: BubbleSortFrameDataVariants.COMPARE,
+      yield* generateFrame({
         rightBound: size - offset,
         compared: [i, i + 1],
       });
@@ -48,8 +39,7 @@ export function* bubbleSortAnimator(
         dataset[i] = b;
         dataset[i + 1] = a;
         swapCount++;
-        yield generateFrameData({
-          variant: BubbleSortFrameDataVariants.SWAP,
+        yield* generateFrame({
           rightBound: size - offset,
           swapped: [i, i + 1],
         });
@@ -57,13 +47,10 @@ export function* bubbleSortAnimator(
     }
   }
   for (let i = 0; i < size; i++) {
-    yield generateFrameData({
-      variant: BubbleSortFrameDataVariants.VERIFY,
+    yield* generateFrame({
       verifyAt: i,
     });
   }
 
-  yield generateFrameData({
-    variant: BubbleSortFrameDataVariants.NORMAL,
-  });
+  yield* generateFrame();
 }

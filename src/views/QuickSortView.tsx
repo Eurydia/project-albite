@@ -1,8 +1,8 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
-import { useSortAnimator } from "@/hooks/useSortAnimator";
+import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performQuickSort } from "@/services/sorting-animators/quick-sort";
+import { quickSortAnimator } from "@/services/sorting-animators/quick-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import type { QuicksortFrameState } from "@/types/sorters/quick-sort";
 import {
@@ -57,9 +57,12 @@ const SortElement: FC<SortElementProps> = memo(
       backgroundColor = green["A200"];
     }
 
-    if (frame.verify === index) {
+    if (frame.verifyAt === index) {
       backgroundColor = orange["A200"];
     }
+
+    backgroundColor = alpha(backgroundColor, 0.7);
+
     let icon = <Fragment />;
     if (frame.partition === index) {
       icon = (
@@ -85,7 +88,7 @@ const SortElement: FC<SortElementProps> = memo(
       <Grid
         size={1}
         sx={{
-          backgroundColor: alpha(backgroundColor, 0.6),
+          backgroundColor,
           height: `${height}%`,
           display: "flex",
           alignItems: "center",
@@ -103,38 +106,32 @@ const SortElement: FC<SortElementProps> = memo(
 const QuickSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
 
-  const {
-    frame,
-    nextFrame,
-    prevFrame,
-    reset: shuffleDataset,
-  } = useSortAnimator(
-    generateDataset(size),
-    performQuickSort
-  );
+  const { frame, nextFrame, prevFrame, reset } =
+    useSortAnimatorGenerator(() =>
+      quickSortAnimator(generateDataset(size))
+    );
 
-  const { playNote } = useMusicalScale({
-    maxOctave: 3,
-  });
+  const { playNote } = useMusicalScale();
+
   useEffect(() => {
     if (frame === null || frame.compared === undefined) {
       return;
     }
-    playNote(frame.items.at(frame.compared.at(0)!)!);
+    playNote(frame.items.at(Math.max(...frame.compared))!);
   }, [frame, playNote]);
 
   useEffect(() => {
     if (frame === null || frame.swapped === undefined) {
       return;
     }
-    playNote(frame.items.at(frame.swapped.at(0)!)!);
+    playNote(frame.items.at(Math.max(...frame.swapped))!);
   }, [frame, playNote]);
 
   useEffect(() => {
-    if (frame === null || frame.verify === undefined) {
+    if (frame === null || frame.verifyAt === undefined) {
       return;
     }
-    playNote(frame.items.at(frame.verify)!);
+    playNote(frame.items.at(frame.verifyAt)!);
   }, [frame, playNote]);
 
   if (frame === null) {
@@ -181,7 +178,7 @@ const QuickSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={shuffleDataset}
+          onShuffle={reset}
         />
       </Stack>
       <Grid

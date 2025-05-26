@@ -1,10 +1,11 @@
-export type SelectionSortFrameState = {
+export type HeapSortFrameState = {
   items: number[];
   swapCount: number;
   compareCount: number;
   compared?: number[];
   swapped?: number[];
-  key?: number;
-  leftBound?: number;
+  parent?: number;
+  children?: number[];
+  rightBound?: number;
   verifyAt?: number;
 };

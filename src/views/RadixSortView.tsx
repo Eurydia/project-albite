@@ -3,12 +3,13 @@ import {
   MusicalScales,
   useMusicalScale,
 } from "@/hooks/useMusicalNotes";
-import { useSortAnimator } from "@/hooks/useSortAnimator";
+import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performRadixSort } from "@/services/sorting-animators/radix-sort";
+import { radixSortAnimator } from "@/services/sorting-animators/radix-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import type { RadixSortFrameState } from "@/types/sorters/radix-sort";
 import {
+  alpha,
   Box,
   Grid,
   Stack,
@@ -37,6 +38,7 @@ const SortItem: FC<SortItemProps> = memo(
     } else if (mem.written === index) {
       backgroundColor = deepPurple["A400"];
     }
+    backgroundColor = alpha(backgroundColor, 0.7);
 
     return (
       <Grid
@@ -51,10 +53,7 @@ const SortItem: FC<SortItemProps> = memo(
 );
 
 type MemoryDisplayProps = {
-  mem:
-    | RadixSortFrameState["mainMem"]
-    | RadixSortFrameState["auxiMem"]
-    | RadixSortFrameState["sortMem"];
+  mem: RadixSortFrameState["mainMem"];
   pattern: readonly number[];
 };
 const MemoryDisplay: FC<MemoryDisplayProps> = memo(
@@ -107,15 +106,10 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
 
 const RadixSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const {
-    frame,
-    nextFrame,
-    prevFrame,
-    reset: shuffleDataset,
-  } = useSortAnimator(
-    generateDataset(size),
-    performRadixSort
-  );
+  const { frame, nextFrame, prevFrame, reset } =
+    useSortAnimatorGenerator(() =>
+      radixSortAnimator(generateDataset(size))
+    );
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
@@ -170,7 +164,7 @@ const RadixSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={shuffleDataset}
+          onShuffle={reset}
         />
       </Stack>
       <Grid

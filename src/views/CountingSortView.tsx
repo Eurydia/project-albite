@@ -3,9 +3,9 @@ import {
   MusicalScales,
   useMusicalScale,
 } from "@/hooks/useMusicalNotes";
-import { useSortAnimator } from "@/hooks/useSortAnimator";
+import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performCountingSort } from "@/services/sorting-animators/counting-sort";
+import { countingSortAnimator } from "@/services/sorting-animators/counting-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import {
   alpha,
@@ -14,31 +14,29 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { grey, orange, teal } from "@mui/material/colors";
+import { blue, grey, orange } from "@mui/material/colors";
 import { memo, useEffect, type FC } from "react";
 import { useLoaderData } from "react-router";
 
-type ItemElementProps = {
+type SortItemProps = {
   height: number;
   isRead: boolean;
   isWritten: boolean;
 };
-const ItemElement: FC<ItemElementProps> = memo(
+const SortItem: FC<SortItemProps> = memo(
   ({ height, isRead, isWritten }) => {
-    let bgColor: string;
+    let backgroundColor: string = grey[200];
     if (isRead) {
-      bgColor = teal.A200;
+      backgroundColor = blue["A200"];
     } else if (isWritten) {
-      bgColor = orange.A200;
-    } else {
-      bgColor = grey[200];
+      backgroundColor = orange["A200"];
     }
 
     return (
       <Grid
         size={1}
         height={`${height}%`}
-        bgcolor={alpha(bgColor, 0.8)}
+        bgcolor={alpha(backgroundColor, 0.8)}
       />
     );
   }
@@ -85,7 +83,7 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
       >
         {items.map((value, index) => {
           return (
-            <ItemElement
+            <SortItem
               key={`sort-item-${index}`}
               height={(value / items.length) * 100}
               isRead={readAt === index}
@@ -100,21 +98,16 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
 
 const CountingSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const {
-    frame,
-    nextFrame,
-    prevFrame,
-    reset: shuffleDataset,
-  } = useSortAnimator(
-    generateDataset(size),
-    performCountingSort
-  );
+  const { frame, nextFrame, prevFrame, reset } =
+    useSortAnimatorGenerator(() =>
+      countingSortAnimator(generateDataset(size))
+    );
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
   }
 
-  const { memReadCount, memWriteCount } = frame;
+  const { readCount, writeCount } = frame;
 
   return (
     <Box
@@ -129,12 +122,7 @@ const CountingSortView_: FC = () => {
         spacing={1}
         component="div"
       >
-        <Typography
-          fontWeight={900}
-          sx={{
-            userSelect: "none",
-          }}
-        >
+        <Typography fontWeight={900}>
           {`Counting sort`}
         </Typography>
         <Stack
@@ -145,25 +133,23 @@ const CountingSortView_: FC = () => {
         >
           <Typography
             sx={{
-              userSelect: "none",
-              color: teal["A200"],
+              color: blue["A200"],
             }}
           >
-            {`Writes: ${memWriteCount}`}
+            {`Writes: ${writeCount}`}
           </Typography>
           <Typography
             sx={{
-              userSelect: "none",
-              color: orange["A200"],
+              color: orange["A100"],
             }}
           >
-            {`Reads: ${memReadCount}`}
+            {`Reads: ${readCount}`}
           </Typography>
         </Stack>
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={shuffleDataset}
+          onShuffle={reset}
         />
       </Stack>
       <Grid

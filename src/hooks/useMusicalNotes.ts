@@ -28,7 +28,7 @@ interface options {
   gain?: number;
 }
 
-export const useMusicalScale = (options: options) => {
+export const useMusicalScale = (options: options = {}) => {
   const {
     scalePattern = MusicalScales.Lydian,
     baseMidi = 60,

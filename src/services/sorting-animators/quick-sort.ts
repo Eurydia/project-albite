@@ -1,44 +1,35 @@
 import type { QuicksortFrameState } from "@/types/sorters/quick-sort";
 
-export const performQuickSort = (
-  dataset: number[],
-  frameStates: QuicksortFrameState[]
-) => {
+export function* quickSortAnimator(
+  dataset: number[]
+): Generator<QuicksortFrameState> {
   const size = dataset.length;
   let swapCount = 0;
   let compareCount = 0;
 
-  const generateFrameState = (
+  function* generateFrameState(
     data: Omit<
       QuicksortFrameState,
       "items" | "swapCount" | "compareCount"
-    >
-  ) => {
-    frameStates.push({
+    > = {}
+  ): Generator<QuicksortFrameState> {
+    yield {
       compareCount,
       swapCount,
       items: structuredClone(dataset),
       ...data,
-    });
-  };
-  const generateVerfiyFrameState = (pos: number) => {
-    frameStates.push({
-      compareCount,
-      swapCount,
-      items: structuredClone(dataset),
-      verify: pos,
-    });
-  };
+    };
+  }
 
-  const __partition = (
+  function* __partition(
     lowIndex: number,
     highIndex: number
-  ): number => {
-    generateFrameState({
+  ) {
+    yield* generateFrameState({
       terminals: [lowIndex, highIndex],
     });
 
-    generateFrameState({
+    yield* generateFrameState({
       terminals: [lowIndex, highIndex],
       key: highIndex,
       partition: lowIndex,
@@ -49,7 +40,7 @@ export const performQuickSort = (
       const shouldSkip = dataset[i] > dataset[highIndex];
 
       compareCount++;
-      generateFrameState({
+      yield* generateFrameState({
         compared: [i, highIndex],
         terminals: [lowIndex, highIndex],
         key: highIndex,
@@ -66,7 +57,7 @@ export const performQuickSort = (
       dataset[i] = b;
 
       swapCount++;
-      generateFrameState({
+      yield* generateFrameState({
         swapped: [i, pivotIndex],
         terminals: [lowIndex, highIndex],
         key: highIndex,
@@ -81,7 +72,7 @@ export const performQuickSort = (
     dataset[highIndex] = a;
 
     swapCount++;
-    generateFrameState({
+    yield* generateFrameState({
       swapped: [pivotIndex, highIndex],
       terminals: [lowIndex, highIndex],
       key: highIndex,
@@ -89,27 +80,32 @@ export const performQuickSort = (
     });
 
     return pivotIndex;
-  };
+  }
 
-  const __quickSort = (
+  function* __quickSort(
     lowIndex: number,
     highIndex: number
-  ): void => {
+  ): Generator<QuicksortFrameState> {
     if (lowIndex >= highIndex || lowIndex < 0) {
       return;
     }
-    const p = __partition(lowIndex, highIndex);
-    __quickSort(lowIndex, p - 1);
-    __quickSort(p + 1, highIndex);
-  };
+    const p = yield* __partition(lowIndex, highIndex);
+    yield* __quickSort(lowIndex, p - 1);
+    yield* __quickSort(p + 1, highIndex);
+  }
 
-  generateFrameState({});
+  yield* generateFrameState();
 
   __quickSort(0, size - 1);
 
   for (let i = 0; i < size; i++) {
-    generateVerfiyFrameState(i);
+    yield {
+      compareCount,
+      swapCount,
+      items: structuredClone(dataset),
+      verifyAt: i,
+    };
   }
 
-  generateFrameState({});
-};
+  yield* generateFrameState();
+}

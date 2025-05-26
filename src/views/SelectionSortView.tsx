@@ -1,18 +1,18 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import {
-  MusicalScales,
-  useMusicalScale,
-} from "@/hooks/useMusicalNotes";
-import { useSortAnimator } from "@/hooks/useSortAnimator";
+import { useMusicalScale } from "@/hooks/useMusicalNotes";
+import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performSelectionSort } from "@/services/sorting-animators/selection-sort";
+import { selectionSortAnimator } from "@/services/sorting-animators/selection-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
+import type { SelectionSortFrameState } from "@/types/sorters/selection-sort";
 import { KeyRounded } from "@mui/icons-material";
 import {
+  alpha,
   Box,
   Grid,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
 import {
   blue,
@@ -24,32 +24,37 @@ import { memo, useEffect, type FC } from "react";
 import { useLoaderData } from "react-router";
 
 type SortItemProps = {
-  height: number;
-  compared: boolean;
-  swapped: boolean;
-  locked: boolean;
-  keyElement: boolean;
-  verify: boolean;
+  value: number;
+  index: number;
+  frame: SelectionSortFrameState;
 };
 const SortItem: FC<SortItemProps> = memo(
-  ({
-    compared,
-    height,
-    swapped,
-    locked,
-    keyElement,
-    verify,
-  }) => {
+  ({ frame, index, value }) => {
+    const { palette } = useTheme();
+
+    const height = (value / Math.max(...frame.items)) * 100;
+
     let backgroundColor: string = grey[200];
-    if (verify) {
+    if (frame.verifyAt === index) {
       backgroundColor = orange["A200"];
-    } else if (locked) {
+    } else if (
+      frame.leftBound !== undefined &&
+      index < frame.leftBound
+    ) {
       backgroundColor = grey["A400"];
-    } else if (compared) {
+    } else if (
+      frame.compared !== undefined &&
+      frame.compared.includes(index)
+    ) {
       backgroundColor = blue["A200"];
-    } else if (swapped) {
+    } else if (
+      frame.swapped !== undefined &&
+      frame.swapped.includes(index)
+    ) {
       backgroundColor = green["A200"];
     }
+
+    backgroundColor = alpha(backgroundColor, 0.7);
 
     return (
       <Grid
@@ -57,13 +62,19 @@ const SortItem: FC<SortItemProps> = memo(
         sx={{
           height: `${height}%`,
           backgroundColor,
-          alignItems: "center",
           display: "flex",
+          alignItems: "center",
           justifyContent: "center",
+          overflow: "clip",
         }}
       >
-        {keyElement && (
-          <KeyRounded sx={{ color: "black" }} />
+        {frame.key === index && (
+          <KeyRounded
+            sx={{
+              color:
+                palette.getContrastText(backgroundColor),
+            }}
+          />
         )}
       </Grid>
     );
@@ -73,55 +84,39 @@ const SortItem: FC<SortItemProps> = memo(
 const SelectionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
 
-  const {
-    frame,
-    nextFrame,
-    prevFrame,
-    reset: shuffleDataset,
-  } = useSortAnimator(
-    generateDataset(size),
-    performSelectionSort
-  );
+  const { frame, nextFrame, prevFrame, reset } =
+    useSortAnimatorGenerator(() =>
+      selectionSortAnimator(generateDataset(size))
+    );
 
-  const { playNote } = useMusicalScale({
-    scalePattern: MusicalScales.MajorPentatonic,
-  });
+  const { playNote } = useMusicalScale();
 
   useEffect(() => {
     if (frame === null || frame.compared === undefined) {
       return;
     }
-    playNote(frame.items.at(frame.compared.at(0)!)!);
+    playNote(frame.items.at(Math.max(...frame.compared))!);
   }, [frame, playNote]);
 
   useEffect(() => {
     if (frame === null || frame.swapped === undefined) {
       return;
     }
-    playNote(frame.items.at(frame.swapped.at(0)!)!);
+    playNote(frame.items.at(Math.max(...frame.swapped))!);
   }, [frame, playNote]);
 
   useEffect(() => {
-    if (frame === null || frame.verify === undefined) {
+    if (frame === null || frame.verifyAt === undefined) {
       return;
     }
-    playNote(frame.items.at(frame.verify)!);
+    playNote(frame.items.at(frame.verifyAt)!);
   }, [frame, playNote]);
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
   }
 
-  const {
-    compareCount,
-    swapCount,
-    items,
-    compared,
-    swapped,
-    verify,
-    key,
-    leftBound,
-  } = frame;
+  const { compareCount, swapCount, items } = frame;
 
   return (
     <Box
@@ -166,7 +161,7 @@ const SelectionSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={shuffleDataset}
+          onShuffle={reset}
         />
       </Stack>
       <Grid
@@ -179,20 +174,9 @@ const SelectionSortView_: FC = () => {
         {items.map((value, index) => (
           <SortItem
             key={`sort-item-${index}`}
-            height={(value / items.length) * 100}
-            compared={
-              compared !== undefined &&
-              compared.includes(index)
-            }
-            swapped={
-              swapped !== undefined &&
-              swapped.includes(index)
-            }
-            verify={verify === index}
-            locked={
-              leftBound !== undefined && index < leftBound
-            }
-            keyElement={key === index}
+            value={value}
+            index={index}
+            frame={frame}
           />
         ))}
       </Grid>

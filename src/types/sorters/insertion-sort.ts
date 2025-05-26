@@ -2,8 +2,7 @@ export type InsertionSortFrameState = {
   items: number[];
   swapCount: number;
   compareCount: number;
-
-  verify?: number;
+  verifyAt?: number;
   compared?: number[];
   swapped?: number[];
   leftBound?: number;

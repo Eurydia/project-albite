@@ -1,9 +1,8 @@
 import type { RadixSortFrameState } from "@/types/sorters/radix-sort";
 
-export const performRadixSort = (
-  dataset: number[],
-  frameStates: RadixSortFrameState[]
-): void => {
+export function* radixSortAnimator(
+  dataset: number[]
+): Generator<RadixSortFrameState> {
   const size = dataset.length;
   const maxValue = Math.max(...dataset);
 
@@ -13,7 +12,7 @@ export const performRadixSort = (
   const auxiMemory: number[] = new Array(size).fill(0);
   const sortMemory: number[] = new Array(size).fill(0);
 
-  const generateFrameState = ({
+  function* generateFrame({
     mainMemRead,
     mainMemWritten,
     auxiMemRead,
@@ -27,8 +26,8 @@ export const performRadixSort = (
     auxiMemWritten?: number;
     sortMemRead?: number;
     sortMemWritten?: number;
-  }) => {
-    frameStates.push({
+  } = {}): Generator<RadixSortFrameState> {
+    yield {
       memReadCount,
       memWriteCount,
       mainMem: {
@@ -46,17 +45,19 @@ export const performRadixSort = (
         read: sortMemRead,
         written: sortMemWritten,
       },
-    });
-  };
+    };
+  }
 
-  const countSort = (digit: number): void => {
+  function* __countSort(
+    digit: number
+  ): Generator<RadixSortFrameState> {
     for (let i = 0; i < size; i++) {
       const tIndex = Math.floor(dataset[i] / digit) % 10;
       auxiMemory[tIndex]++;
 
       memReadCount++;
       memWriteCount++;
-      generateFrameState({
+      yield* generateFrame({
         mainMemRead: i,
         auxiMemWritten: tIndex,
       });
@@ -67,7 +68,7 @@ export const performRadixSort = (
 
       memReadCount++;
       memWriteCount++;
-      generateFrameState({
+      yield* generateFrame({
         auxiMemRead: i - 1,
         auxiMemWritten: i,
       });
@@ -80,7 +81,7 @@ export const performRadixSort = (
       memReadCount++;
       memReadCount++;
       memWriteCount++;
-      generateFrameState({
+      yield* generateFrame({
         mainMemRead: i,
         auxiMemRead: tIndex,
         auxiMemWritten: i,
@@ -91,7 +92,7 @@ export const performRadixSort = (
 
       memReadCount++;
       memWriteCount++;
-      generateFrameState({
+      yield* generateFrame({
         mainMemRead: i,
         auxiMemWritten: tIndex,
       });
@@ -102,15 +103,14 @@ export const performRadixSort = (
 
       memReadCount++;
       memWriteCount++;
-      generateFrameState({
+      yield* generateFrame({
         mainMemWritten: i,
         sortMemRead: i,
       });
     }
-  };
+  }
 
-  generateFrameState({});
-
+  yield* generateFrame();
   for (
     let digit = 1;
     Math.floor(maxValue / digit) > 0;
@@ -118,11 +118,11 @@ export const performRadixSort = (
   ) {
     auxiMemory.fill(0);
     sortMemory.fill(0);
-    countSort(digit);
+    yield* __countSort(digit);
   }
 
   for (let i = 0; i < size; i++) {
-    frameStates.push({
+    yield {
       memReadCount,
       memWriteCount,
       verify: i,
@@ -135,8 +135,8 @@ export const performRadixSort = (
       sortMem: {
         items: structuredClone(sortMemory),
       },
-    });
+    };
   }
 
-  generateFrameState({});
-};
+  yield* generateFrame();
+}

@@ -1,18 +1,16 @@
-export type CountingSortFrameState = {
+export type MergeSortFrameData = {
   writeCount: number;
   readCount: number;
-  verifyAt?: number;
+  compareCount: number;
   mainMem: {
     items: number[];
     readAt?: number;
     writtenAt?: number;
+    terminals?: number[];
+    compared?: number[];
+    verifyAt?: number;
   };
   auxiMem: {
-    items: number[];
-    readAt?: number;
-    writtenAt?: number;
-  };
-  sortMem: {
     items: number[];
     readAt?: number;
     writtenAt?: number;

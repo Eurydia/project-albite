@@ -1,39 +1,54 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import { useMusicalScale } from "@/hooks/useMusicalNotes";
+import {
+  MusicalScales,
+  useMusicalScale,
+} from "@/hooks/useMusicalNotes";
 import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
-import { bubbleSortAnimator } from "@/services/sorting-animators/bubble-sort";
+import { heapSortAnimator } from "@/services/sorting-animators/heap-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { BubbleSortFrameData } from "@/types/sorters/bubble-sort";
+import type { HeapSortFrameState } from "@/types/sorters/heap-sort";
+import {
+  ChangeHistoryRounded,
+  CircleOutlined,
+} from "@mui/icons-material";
 import {
   alpha,
   Box,
   Grid,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
 import {
   blue,
+  deepOrange,
+  deepPurple,
   green,
   grey,
-  orange,
 } from "@mui/material/colors";
-import { isEqual } from "lodash";
-import { memo, useEffect, type FC } from "react";
+import { Fragment, memo, useEffect, type FC } from "react";
 import { useLoaderData } from "react-router";
 
 type SortElementProps = {
-  index: number;
   value: number;
-  frame: BubbleSortFrameData;
+  index: number;
+  frame: HeapSortFrameState;
 };
 const SortElement: FC<SortElementProps> = memo(
-  ({ index, value, frame }) => {
-    const height = (value / frame.items.length) * 100;
+  ({ value, index, frame }) => {
+    const { palette } = useTheme();
+    const height = (value / Math.max(...frame.items)) * 100;
 
-    let backgroundColor: string = grey["200"];
+    let backgroundColor: string = grey["A200"];
     if (frame.verifyAt === index) {
-      backgroundColor = orange["A200"];
+      backgroundColor = deepOrange["A200"];
+    }
+    if (
+      frame.rightBound !== undefined &&
+      index > frame.rightBound
+    ) {
+      backgroundColor = grey["A700"];
     } else if (
       frame.compared !== undefined &&
       frame.compared.includes(index)
@@ -43,35 +58,63 @@ const SortElement: FC<SortElementProps> = memo(
       frame.swapped !== undefined &&
       frame.swapped.includes(index)
     ) {
-      backgroundColor = green["A200"];
-    } else if (
-      frame.rightBound !== undefined &&
-      index > frame.rightBound
-    ) {
-      backgroundColor = grey["A700"];
+      backgroundColor = deepPurple["A400"];
     }
-    backgroundColor = alpha(backgroundColor, 0.7);
 
+    backgroundColor = alpha(backgroundColor, 0.7);
+    const labelColor =
+      palette.getContrastText(backgroundColor);
+    let label = <Fragment />;
+    if (frame.parent === index) {
+      label = (
+        <CircleOutlined
+          sx={{
+            color: labelColor,
+            width: "100%",
+          }}
+        />
+      );
+    } else if (
+      frame.children !== undefined &&
+      frame.children.includes(index)
+    ) {
+      label = (
+        <ChangeHistoryRounded
+          sx={{
+            color: labelColor,
+            width: "100%",
+          }}
+        />
+      );
+    }
     return (
       <Grid
         size={1}
         sx={{
-          backgroundColor,
           height: `${height}%`,
+          backgroundColor,
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "center",
+          overflow: "clip",
         }}
-      />
+      >
+        {label}
+      </Grid>
     );
-  },
-  isEqual
+  }
 );
 
-const BubbleSortView_: FC = () => {
+const HeapSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, reset } =
     useSortAnimatorGenerator(() =>
-      bubbleSortAnimator(generateDataset(size))
+      heapSortAnimator(generateDataset(size))
     );
-  const { playNote } = useMusicalScale();
+
+  const { playNote } = useMusicalScale({
+    scalePattern: MusicalScales.MajorPentatonic,
+  });
 
   useEffect(() => {
     if (frame === null || frame.compared === undefined) {
@@ -109,15 +152,9 @@ const BubbleSortView_: FC = () => {
       }}
       height="100vh"
     >
-      <Stack
-        spacing={1}
-        component="div"
-      >
-        <Typography
-          fontWeight={900}
-          sx={{ userSelect: "none" }}
-        >
-          {`Bubble sort`}
+      <Stack spacing={1}>
+        <Typography fontWeight={900}>
+          {`Heap sort`}
         </Typography>
         <Stack
           spacing={1}
@@ -128,7 +165,6 @@ const BubbleSortView_: FC = () => {
         >
           <Typography
             sx={{
-              userSelect: "none",
               color: green["A200"],
             }}
           >
@@ -136,7 +172,6 @@ const BubbleSortView_: FC = () => {
           </Typography>
           <Typography
             sx={{
-              userSelect: "none",
               color: blue["A200"],
             }}
           >
@@ -159,8 +194,8 @@ const BubbleSortView_: FC = () => {
         {items.map((value, index) => (
           <SortElement
             key={`sort-item-${index}`}
-            index={index}
             value={value}
+            index={index}
             frame={frame}
           />
         ))}
@@ -169,4 +204,4 @@ const BubbleSortView_: FC = () => {
   );
 };
 
-export const BubbleSortView: FC = memo(BubbleSortView_);
+export const HeapSortView = memo(HeapSortView_);

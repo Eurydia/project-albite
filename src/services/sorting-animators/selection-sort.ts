@@ -1,49 +1,39 @@
 import type { SelectionSortFrameState } from "@/types/sorters/selection-sort";
 
-export const performSelectionSort = (
-  dataset: number[],
-  frameStates: SelectionSortFrameState[]
-) => {
-  const SIZE = dataset.length;
+export function* selectionSortAnimator(
+  dataset: number[]
+): Generator<SelectionSortFrameState> {
+  const size = dataset.length;
   let swapCount = 0;
-  let comparisonCount = 0;
+  let compareCount = 0;
 
-  const generateFrameState = (data: {
-    compared?: number[];
-    swapped?: number[];
-    key?: number;
-    leftBound?: number;
-  }) => {
-    frameStates.push({
+  function* generateFrame(
+    data: Omit<
+      SelectionSortFrameState,
+      "items" | "swapCount" | "compareCount"
+    > = {}
+  ): Generator<SelectionSortFrameState> {
+    yield {
       items: structuredClone(dataset),
       swapCount,
-      compareCount: comparisonCount,
+      compareCount,
       ...data,
-    });
-  };
+    };
+  }
 
-  const generateVerifyFrameState = (pos: number) => {
-    frameStates.push({
-      items: structuredClone(dataset),
-      verify: pos,
-      swapCount,
-      compareCount: comparisonCount,
-    });
-  };
+  yield* generateFrame();
 
-  generateFrameState({});
-
-  for (let offset = 0; offset < SIZE; offset++) {
-    let pivotIndex: number = offset;
-    generateFrameState({
+  for (let offset = 0; offset < size; offset++) {
+    let pivotIndex = offset;
+    yield* generateFrame({
       key: offset,
       leftBound: offset,
     });
 
-    for (let i = offset + 1; i < SIZE; i++) {
+    for (let i = offset + 1; i < size; i++) {
       const shouldSwap = dataset[pivotIndex] > dataset[i];
-      comparisonCount++;
-      generateFrameState({
+      compareCount++;
+      yield* generateFrame({
         compared: [i, pivotIndex],
         key: pivotIndex,
         leftBound: offset,
@@ -51,7 +41,7 @@ export const performSelectionSort = (
 
       if (shouldSwap) {
         pivotIndex = i;
-        generateFrameState({
+        yield* generateFrame({
           key: pivotIndex,
           leftBound: offset,
         });
@@ -64,16 +54,18 @@ export const performSelectionSort = (
     dataset[pivotIndex] = a;
 
     swapCount++;
-    generateFrameState({
+    yield* generateFrame({
       swapped: [offset, pivotIndex],
       key: offset,
       leftBound: offset,
     });
   }
 
-  for (let i = 0; i < SIZE; i++) {
-    generateVerifyFrameState(i);
+  for (let i = 0; i < size; i++) {
+    yield* generateFrame({
+      key: i,
+    });
   }
 
-  generateFrameState({});
-};
+  yield* generateFrame();
+}

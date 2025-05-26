@@ -12,7 +12,8 @@ export function* countingSortAnimator(
   const auxiMemory = new Array(maxValue + 1).fill(0);
   const sortMemory = new Array(size).fill(0);
 
-  const generateFrameState = ({
+  const generateFrame = ({
+    verifyAt = undefined,
     mainMemRead = undefined,
     mainMemWritten = undefined,
     auxiMemRead = undefined,
@@ -20,13 +21,14 @@ export function* countingSortAnimator(
     sortMemRead = undefined,
     sortMemWritten = undefined,
   }: {
+    verifyAt?: number;
     mainMemRead?: number;
     mainMemWritten?: number;
     auxiMemRead?: number;
     auxiMemWritten?: number;
     sortMemRead?: number;
     sortMemWritten?: number;
-  }) => {
+  } = {}): CountingSortFrameState => {
     return {
       mainMem: {
         items: structuredClone(dataset),
@@ -45,16 +47,17 @@ export function* countingSortAnimator(
       },
       readCount: memReadCount,
       writeCount: memWriteCount,
-    } as CountingSortFrameState;
+      verifyAt,
+    };
   };
 
-  yield generateFrameState({});
+  yield generateFrame();
 
   for (let i = 0; i < size; i++) {
     auxiMemory[dataset[i]]++;
     memReadCount++;
     memWriteCount++;
-    yield generateFrameState({
+    yield generateFrame({
       mainMemRead: i,
       auxiMemWritten: dataset[i],
     });
@@ -64,7 +67,7 @@ export function* countingSortAnimator(
     auxiMemory[i] += auxiMemory[i - 1];
     memReadCount++;
     memWriteCount++;
-    yield generateFrameState({
+    yield generateFrame({
       auxiMemRead: i,
       auxiMemWritten: i + 1,
     });
@@ -78,7 +81,7 @@ export function* countingSortAnimator(
     memReadCount++;
     memReadCount++;
     memWriteCount++;
-    yield generateFrameState({
+    yield generateFrame({
       mainMemRead: i,
       auxiMemRead: dataset[i],
       sortMemWritten: auxiMemory[dataset[i]] - 1,
@@ -88,7 +91,7 @@ export function* countingSortAnimator(
 
     memReadCount++;
     memWriteCount++;
-    yield generateFrameState({
+    yield generateFrame({
       mainMemRead: i,
       auxiMemWritten: dataset[i],
     });
@@ -99,21 +102,16 @@ export function* countingSortAnimator(
 
     memReadCount++;
     memWriteCount++;
-    yield generateFrameState({
+    yield generateFrame({
       mainMemWritten: i,
       sortMemRead: i,
     });
   }
 
   for (let i = 0; i < size; i++) {
-    yield {
+    yield generateFrame({
       verifyAt: i,
-      mainMem: structuredClone(dataset),
-      auxiMem: structuredClone(auxiMemory),
-      sortMem: structuredClone(sortMemory),
-      writeCount: memWriteCount,
-      readCount: memReadCount,
-    } as CountingSortFrameState;
+    });
   }
-  yield generateFrameState({});
+  yield generateFrame();
 }

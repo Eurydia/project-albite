@@ -1,51 +1,34 @@
 import type { InsertionSortFrameState } from "@/types/sorters/insertion-sort";
 
-export const performInsertionSort = (
-  dataset: number[],
-  frameStates: InsertionSortFrameState[]
-): void => {
+export function* insertionSortAnimation(
+  dataset: number[]
+): Generator<InsertionSortFrameState> {
   const size = dataset.length;
   let swapCount = 0;
   let compareCount = 0;
 
-  const generateFrameState = ({
-    compared,
-    swapped,
-    leftBound,
-    key,
-  }: {
-    compared?: number[];
-    swapped?: number[];
-    leftBound?: number;
-    key?: number;
-  }) => {
-    frameStates.push({
+  function* generateFrame(
+    data: Omit<
+      InsertionSortFrameState,
+      "items" | "swapCount" | "compareCount"
+    > = {}
+  ): Generator<InsertionSortFrameState> {
+    yield {
       items: structuredClone(dataset),
       swapCount,
       compareCount,
-      compared,
-      swapped,
-      leftBound,
-      key,
-    });
-  };
-  const generateVerifyFrameState = (pos: number) => {
-    frameStates.push({
-      items: structuredClone(dataset),
-      swapCount,
-      compareCount,
-      verify: pos,
-    });
-  };
+      ...data,
+    };
+  }
 
-  generateFrameState({});
+  yield* generateFrame();
 
   for (
     let pivotIndex = 0;
     pivotIndex < size;
     pivotIndex++
   ) {
-    generateFrameState({
+    yield* generateFrame({
       leftBound: pivotIndex,
       key: pivotIndex,
     });
@@ -55,7 +38,7 @@ export const performInsertionSort = (
       const shouldSwap =
         dataset[mover] < dataset[mover - 1];
       compareCount++;
-      generateFrameState({
+      yield* generateFrame({
         compared: [mover, mover - 1],
         leftBound: pivotIndex + 1,
         key: mover,
@@ -67,7 +50,7 @@ export const performInsertionSort = (
         dataset[mover] = b;
         dataset[mover - 1] = a;
         swapCount++;
-        generateFrameState({
+        yield* generateFrame({
           swapped: [mover, mover - 1],
           leftBound: pivotIndex + 1,
           key: mover - 1,
@@ -78,8 +61,10 @@ export const performInsertionSort = (
   }
 
   for (let i = 0; i < size; i++) {
-    generateVerifyFrameState(i);
+    yield* generateFrame({
+      verifyAt: i,
+    });
   }
 
-  generateFrameState({});
-};
+  yield* generateFrame();
+}

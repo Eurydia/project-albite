@@ -15,8 +15,10 @@ import {
 } from "./routes";
 import { BubbleSortView } from "./views/BubbleSortView";
 import { CountingSortView } from "./views/CountingSortView";
+import { HeapSortView } from "./views/HeapSortView";
 import { HomeView } from "./views/HomeView";
 import { InsertionSortView } from "./views/InsertionSortView";
+import { MergeSortView } from "./views/MergeSortView";
 import { QuickSortView } from "./views/QuickSortView";
 import { RadixSortView } from "./views/RadixSortView";
 import { SelectionSortView } from "./views/SelectionSortView";
@@ -38,6 +40,11 @@ const theme = createTheme({
       defaultProps: {
         color: alpha("#fff", 0.8),
       },
+      styleOverrides: {
+        root: {
+          userSelect: "none",
+        },
+      },
     },
   },
 });
@@ -58,9 +65,21 @@ registerSorterView("/quick-sort", {
   display: { name: "Quick Sort" },
   view: <QuickSortView />,
 });
+registerSorterView("/heap-sort", {
+  display: { name: "Heap Sort" },
+  view: <HeapSortView />,
+});
+registerSorterView("/merge-sort", {
+  display: { name: "Merge Sort" },
+  view: <MergeSortView />,
+});
+registerSorterView("/heap-sort", {
+  display: { name: "Heap Sort" },
+  view: <HeapSortView />,
+});
 registerSorterView("/radix-sort", {
   display: { name: "Radix Sort" },
-  view: <RadixSortView />, // Assuming Radix Sort uses the same view as Quick Sort
+  view: <RadixSortView />,
 });
 registerSorterView("/counting-sort", {
   display: { name: "Counting Sort" },
