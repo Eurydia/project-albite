@@ -2,8 +2,9 @@ import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performBubbleSortGenerator } from "@/services/sorters/bubblesort";
+import { bubbleSortAnimator } from "@/services/sorting-animators/bubble-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
+import type { BubbleSortFrameData } from "@/types/sorters/bubble-sort";
 import {
   alpha,
   Box,
@@ -26,21 +27,25 @@ import {
 } from "react";
 import { useLoaderData } from "react-router";
 
-type ItemProps = {
-  height: number;
-  compare: boolean;
-  swapped: boolean;
-  verify: boolean;
-  locked: boolean;
+type SortElementProps = {
+  index: number;
+  value: number;
+  frame: BubbleSortFrameData;
 };
-const ItemElement: FC<ItemProps> = memo(
-  ({ height, compare, swapped, verify, locked }) => {
-    let backgroundColor: string = grey["50"];
-    if (compare) {
+const SortElement: FC<SortElementProps> = memo(
+  ({ index, value, frame }) => {
+    const height = (value / frame.items.length) * 100;
+
+    let backgroundColor: string = grey["200"];
+    if (frame === "number") {
+      if (frame. === index) {
+        backgroundColor = orange["A200"];
+      }
+    } else if (frame.compare) {
       backgroundColor = blue["A200"];
-    } else if (swapped) {
+    } else if (frame.swapped) {
       backgroundColor = green["A200"];
-    } else if (verify) {
+    } else if (frame.verifyAt === index) {
       backgroundColor = orange["A200"];
     } else if (locked) {
       backgroundColor = grey["A700"];
@@ -63,7 +68,7 @@ const BubbleSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, reset } =
     useSortAnimatorGenerator(
-      performBubbleSortGenerator(generateDataset(size))
+      bubbleSortAnimator(generateDataset(size))
     );
   const { playNote } = useMusicalScale({});
 
@@ -90,7 +95,7 @@ const BubbleSortView_: FC = () => {
 
   const handleReset = useCallback(() => {
     reset(
-      performBubbleSortGenerator(generateDataset(size))
+      bubbleSortAnimator(generateDataset(size))
     );
   }, [reset, size]);
 
@@ -165,7 +170,7 @@ const BubbleSortView_: FC = () => {
         sx={{ flexBasis: 0, flexGrow: 1 }}
       >
         {items.map((value, index) => (
-          <ItemElement
+          <SortElement
             key={`sort-item-${index}`}
             height={(value / items.length) * 100}
             compare={

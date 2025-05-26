@@ -5,7 +5,7 @@ import {
 } from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performSelectionSort } from "@/services/sorters/selection-sort";
+import { performSelectionSort } from "@/services/sorting-animators/selection-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import { KeyRounded } from "@mui/icons-material";
 import {

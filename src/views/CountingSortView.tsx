@@ -5,7 +5,7 @@ import {
 } from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performCountingSort } from "@/services/sorters/counting-sort";
+import { performCountingSort } from "@/services/sorting-animators/counting-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import {
   alpha,

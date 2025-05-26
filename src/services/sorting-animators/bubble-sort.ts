@@ -1,26 +1,34 @@
-import type { BubbleSortFrameData } from "@/types/sorters/bubble-sort";
+import type {
+  BubbleSortFrameData,
+  BubbleSortFrameDataCommon,
+} from "@/types/sorters/bubble-sort";
 
-export function* performBubbleSortGenerator(
+export function* bubbleSortAnimator(
   dataset: number[]
 ): Generator<BubbleSortFrameData> {
   const size = dataset.length;
   let swapCount = 0;
   let compareCount = 0;
-  const generateFrameData = (
-    data: Pick<
+
+  const generateFrameData = <
+    T extends Omit<
       BubbleSortFrameData,
-      "compare" | "rightBound" | "swapped"
+      keyof BubbleSortFrameDataCommon
     >
-  ) => {
+  >(
+    frameData: T
+  ): T & BubbleSortFrameDataCommon => {
     return {
       items: structuredClone(dataset),
       swapCount,
       compareCount,
-      ...data,
+      ...frameData,
     };
   };
 
-  yield generateFrameData({});
+  yield generateFrameData({
+    variant: "normal",
+  });
 
   for (let offset = 0; offset < size - 1; offset++) {
     for (let i = 0; i < size - offset - 1; i++) {
@@ -31,7 +39,7 @@ export function* performBubbleSortGenerator(
       compareCount++;
       yield generateFrameData({
         rightBound: size - offset,
-        compare: [i, i + 1],
+        compared: [i, i + 1],
       });
 
       if (shouldSwap) {
@@ -46,12 +54,10 @@ export function* performBubbleSortGenerator(
     }
   }
   for (let i = 0; i < size; i++) {
-    yield {
-      items: structuredClone(dataset),
-      swapCount,
-      compareCount,
-      verify: i,
-    };
+    yield generateFrameData({
+      verifyAt: i,
+    });
   }
-  yield generateFrameData({});
+
+  yield generateFrameData();
 }

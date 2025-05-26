@@ -2,7 +2,7 @@ import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performInsertionSort } from "@/services/sorters/insertion-sort";
+import { performInsertionSort } from "@/services/sorting-animators/insertion-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import type { InsertionSortFrameState } from "@/types/sorters/insertion-sort";
 import { CircleRounded } from "@mui/icons-material";

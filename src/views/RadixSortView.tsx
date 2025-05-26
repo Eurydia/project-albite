@@ -5,7 +5,7 @@ import {
 } from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performRadixSort } from "@/services/sorters/radix-sort";
+import { performRadixSort } from "@/services/sorting-animators/radix-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import type { RadixSortFrameState } from "@/types/sorters/radix-sort";
 import {

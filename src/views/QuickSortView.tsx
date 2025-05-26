@@ -2,7 +2,7 @@ import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performQuickSort } from "@/services/sorters/quick-sort";
+import { performQuickSort } from "@/services/sorting-animators/quick-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import type { QuicksortFrameState } from "@/types/sorters/quick-sort";
 import {
