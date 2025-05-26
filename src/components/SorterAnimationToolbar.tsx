@@ -12,11 +12,7 @@ type Props = {
   onShuffle: () => void;
 };
 export const SorterAnimationToolbar: FC<Props> = memo(
-  ({
-    onNextFrame,
-    onPrevFrame: onPreviousFrame,
-    onShuffle,
-  }) => {
+  ({ onNextFrame, onPrevFrame, onShuffle }) => {
     return (
       <Toolbar
         variant="dense"
@@ -26,9 +22,9 @@ export const SorterAnimationToolbar: FC<Props> = memo(
         <Button
           startIcon={<FastRewindRounded />}
           variant="contained"
-          onClick={onPreviousFrame}
+          onClick={onPrevFrame}
         >
-          Previous Frame
+          Previous
         </Button>
         <Button
           startIcon={<AutorenewRounded />}
@@ -42,7 +38,7 @@ export const SorterAnimationToolbar: FC<Props> = memo(
           endIcon={<FastForwardRounded />}
           onClick={onNextFrame}
         >
-          Next Frame
+          Next
         </Button>
       </Toolbar>
     );

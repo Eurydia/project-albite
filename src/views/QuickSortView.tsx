@@ -23,7 +23,13 @@ import {
   grey,
   orange,
 } from "@mui/material/colors";
-import { Fragment, memo, useEffect, type FC } from "react";
+import {
+  Fragment,
+  memo,
+  useCallback,
+  useEffect,
+  type FC,
+} from "react";
 import { useLoaderData } from "react-router";
 
 type SortElementProps = {
@@ -107,9 +113,13 @@ const QuickSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
 
   const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
+    useSortAnimatorGenerator(
       quickSortAnimator(generateDataset(size))
     );
+
+  const handleReset = useCallback(() => {
+    reset(quickSortAnimator(generateDataset(size)));
+  }, [reset, size]);
 
   const { playNote } = useMusicalScale();
 
@@ -178,7 +188,7 @@ const QuickSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={handleReset}
         />
       </Stack>
       <Grid

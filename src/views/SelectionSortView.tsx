@@ -20,7 +20,12 @@ import {
   grey,
   orange,
 } from "@mui/material/colors";
-import { memo, useEffect, type FC } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  type FC,
+} from "react";
 import { useLoaderData } from "react-router";
 
 type SortItemProps = {
@@ -85,9 +90,13 @@ const SelectionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
 
   const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
+    useSortAnimatorGenerator(
       selectionSortAnimator(generateDataset(size))
     );
+
+  const handleReset = useCallback(() => {
+    reset(selectionSortAnimator(generateDataset(size)));
+  }, [reset, size]);
 
   const { playNote } = useMusicalScale();
 
@@ -161,7 +170,7 @@ const SelectionSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={handleReset}
         />
       </Stack>
       <Grid

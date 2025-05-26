@@ -18,8 +18,12 @@ import {
   grey,
   orange,
 } from "@mui/material/colors";
-import { isEqual } from "lodash";
-import { memo, useEffect, type FC } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  type FC,
+} from "react";
 import { useLoaderData } from "react-router";
 
 type SortElementProps = {
@@ -61,14 +65,13 @@ const SortElement: FC<SortElementProps> = memo(
         }}
       />
     );
-  },
-  isEqual
+  }
 );
 
 const BubbleSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
+    useSortAnimatorGenerator(
       bubbleSortAnimator(generateDataset(size))
     );
   const { playNote } = useMusicalScale();
@@ -94,6 +97,10 @@ const BubbleSortView_: FC = () => {
     playNote(frame.items.at(frame.verifyAt)!);
   }, [frame, playNote]);
 
+  const handleReset = useCallback(() => {
+    reset(bubbleSortAnimator(generateDataset(size)));
+  }, [reset, size]);
+
   if (frame === null) {
     return <Typography>Loading...</Typography>;
   }
@@ -102,21 +109,15 @@ const BubbleSortView_: FC = () => {
 
   return (
     <Box
+      height="100vh"
       sx={{
         backgroundColor: "black",
         display: "flex",
         flexDirection: "column",
       }}
-      height="100vh"
     >
-      <Stack
-        spacing={1}
-        component="div"
-      >
-        <Typography
-          fontWeight={900}
-          sx={{ userSelect: "none" }}
-        >
+      <Stack spacing={1}>
+        <Typography fontWeight={900}>
           {`Bubble sort`}
         </Typography>
         <Stack
@@ -128,7 +129,6 @@ const BubbleSortView_: FC = () => {
         >
           <Typography
             sx={{
-              userSelect: "none",
               color: green["A200"],
             }}
           >
@@ -136,7 +136,6 @@ const BubbleSortView_: FC = () => {
           </Typography>
           <Typography
             sx={{
-              userSelect: "none",
               color: blue["A200"],
             }}
           >
@@ -146,7 +145,7 @@ const BubbleSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={handleReset}
         />
       </Stack>
       <Grid

@@ -9,43 +9,27 @@ export function* mergeSortAnimator(
   let readCount = 0;
   let compareCount = 0;
 
-  let auxiMemory: number[] = [];
+  const auxiMemory = new Array(size).fill(0);
 
   function* generateFrame({
-    terminals,
-    compared,
-    mainMemReadAt,
-    mainMemWrittenAt,
-    verifyAt,
-    auxiMemReadAt,
-    auxiMemWrittenAt,
-  }: {
-    terminals?: number[];
-    compared?: number[];
-    verifyAt?: number;
-    mainMemReadAt?: number;
-    mainMemWrittenAt?: number;
-    auxiMemReadAt?: number;
-    auxiMemWrittenAt?: number;
-    key?: number;
-  } = {}): Generator<MergeSortFrameData> {
+    mainMem,
+    auxiMem,
+  }: Partial<{
+    mainMem: Omit<MergeSortFrameData["mainMem"], "items">;
+    auxiMem: Omit<MergeSortFrameData["auxiMem"], "items">;
+  }> = {}): Generator<MergeSortFrameData> {
     yield {
       compareCount,
       readCount,
       writeCount,
-      auxiMem: {
-        items: structuredClone(auxiMemory),
-        readAt: auxiMemReadAt,
-        writtenAt: auxiMemWrittenAt,
-      },
       mainMem: {
         items: structuredClone(dataset),
-        readAt: mainMemReadAt,
-        writtenAt: mainMemWrittenAt,
+        ...mainMem,
       },
-      terminals,
-      compared,
-      verifyAt,
+      auxiMem: {
+        items: structuredClone(auxiMemory),
+        ...auxiMem,
+      },
     };
   }
 
@@ -53,11 +37,11 @@ export function* mergeSortAnimator(
     startIndex: number,
     endIndex: number
   ): Generator<MergeSortFrameData> {
-    if (endIndex - startIndex === 0) {
+    if (endIndex - startIndex <= 0) {
       return;
     }
 
-    const middleIndex: number = Math.floor(
+    const middleIndex = Math.floor(
       (startIndex + endIndex) / 2
     );
 
@@ -68,23 +52,28 @@ export function* mergeSortAnimator(
     let lPtr = startIndex;
     let rPtr = middleIndex + 1;
     let auxPtr = 0;
-    auxiMemory = [];
+    auxiMemory.fill(0);
 
     while (lPtr <= middleIndex && rPtr <= endIndex) {
+      const cmpRes = dataset[lPtr] > dataset[rPtr];
       compareCount++;
       yield* generateFrame({
-        terminals: [startIndex, endIndex],
-        compared: [lPtr, rPtr],
+        mainMem: {
+          terminals: [startIndex, endIndex],
+          compared: [lPtr, rPtr],
+        },
       });
-      if (dataset[lPtr] > dataset[rPtr]) {
+      if (cmpRes) {
         readCount++;
         writeCount++;
         auxiMemory[auxPtr] = dataset[rPtr];
 
         yield* generateFrame({
-          terminals: [startIndex, endIndex],
-          mainMemReadAt: rPtr,
-          mainMemWrittenAt: auxPtr,
+          mainMem: {
+            readAt: rPtr,
+            writtenAt: auxPtr,
+            terminals: [startIndex, endIndex],
+          },
         });
 
         auxPtr++;
@@ -96,9 +85,13 @@ export function* mergeSortAnimator(
       writeCount++;
       auxiMemory[auxPtr] = dataset[lPtr];
       yield* generateFrame({
-        terminals: [startIndex, endIndex],
-        mainMemReadAt: lPtr,
-        auxiMemWrittenAt: auxPtr,
+        mainMem: {
+          readAt: lPtr,
+          terminals: [startIndex, endIndex],
+        },
+        auxiMem: {
+          writtenAt: auxPtr,
+        },
       });
 
       lPtr++;
@@ -112,9 +105,13 @@ export function* mergeSortAnimator(
       auxiMemory[auxPtr] = dataset[lPtr];
 
       yield* generateFrame({
-        terminals: [startIndex, endIndex],
-        mainMemReadAt: lPtr,
-        auxiMemWrittenAt: auxPtr,
+        mainMem: {
+          terminals: [startIndex, endIndex],
+          readAt: lPtr,
+        },
+        auxiMem: {
+          writtenAt: auxPtr,
+        },
       });
 
       lPtr++;
@@ -125,10 +122,15 @@ export function* mergeSortAnimator(
       readCount++;
       writeCount++;
       auxiMemory[auxPtr] = dataset[rPtr];
+
       yield* generateFrame({
-        terminals: [startIndex, endIndex],
-        mainMemReadAt: rPtr,
-        auxiMemWrittenAt: auxPtr,
+        mainMem: {
+          readAt: rPtr,
+          terminals: [startIndex, endIndex],
+        },
+        auxiMem: {
+          writtenAt: auxPtr,
+        },
       });
 
       rPtr++;
@@ -139,10 +141,15 @@ export function* mergeSortAnimator(
       readCount++;
       writeCount++;
       dataset[startIndex + i] = auxiMemory[i];
+
       generateFrame({
-        terminals: [startIndex, endIndex],
-        mainMemWrittenAt: startIndex + i,
-        auxiMemReadAt: i,
+        mainMem: {
+          terminals: [startIndex, endIndex],
+          writtenAt: startIndex + i,
+        },
+        auxiMem: {
+          readAt: i,
+        },
       });
     }
   }
@@ -153,8 +160,11 @@ export function* mergeSortAnimator(
 
   for (let i = 0; i < size; i++) {
     yield* generateFrame({
-      verifyAt: i,
+      mainMem: {
+        verifyAt: i,
+      },
     });
   }
+
   yield* generateFrame();
 }

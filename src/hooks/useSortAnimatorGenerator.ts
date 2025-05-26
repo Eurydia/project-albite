@@ -6,24 +6,11 @@ import {
   useState,
 } from "react";
 
-const unwrappedNext = <T>(
-  generator: Generator<T, void, unknown>
-): T | null => {
-  const next = generator.next();
-  if (next.done === undefined || !next.done) {
-    return next.value;
-  }
-  return null;
-};
-
 export const useSortAnimatorGenerator = <T extends object>(
-  animator: () => Generator<T, void, unknown>
+  animator: Generator<T, void, unknown>
 ) => {
-  const animatorRef = useRef(animator());
-  const framesRef = useRef<(T | null)[]>([
-    unwrappedNext(animatorRef.current),
-  ]);
-  const [frameIndex, setFrameIndex] = useState(0);
+  const animatorRef = useRef(animator);
+  const framesRef = useRef<T[]>([]);
 
   useEffect(() => {
     const frame = animatorRef.current.next();
@@ -32,14 +19,19 @@ export const useSortAnimatorGenerator = <T extends object>(
     }
   }, []);
 
-  const reset = useCallback(() => {
-    animatorRef.current = animator();
-    const frame = animatorRef.current.next();
-    if (frame.done === undefined || !frame.done) {
-      framesRef.current = [frame.value];
-      setFrameIndex(0);
-    }
-  }, [animator]);
+  const [frameIndex, setFrameIndex] = useState(0);
+
+  const reset = useCallback(
+    (animator: Generator<T, void, unknown>) => {
+      animatorRef.current = animator;
+      const frame = animatorRef.current.next();
+      if (frame.done === undefined || !frame.done) {
+        framesRef.current = [frame.value];
+        setFrameIndex(0);
+      }
+    },
+    []
+  );
 
   const nextFrame = useCallback(() => {
     const frame = animatorRef.current.next();

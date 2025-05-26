@@ -18,7 +18,7 @@ import {
   grey,
   orange,
 } from "@mui/material/colors";
-import { type FC, memo } from "react";
+import { type FC, memo, useCallback } from "react";
 import { useLoaderData } from "react-router";
 
 type MainMemItemProps = {
@@ -32,16 +32,16 @@ const MainMemItem: FC<MainMemItemProps> = memo(
 
     let backgroundColor: string = grey["A200"];
     if (frame.verifyAt === index) {
-      backgroundColor = orange["A400"];
+      backgroundColor = orange["A200"];
     } else if (frame.readAt === index) {
-      backgroundColor = deepPurple["A400"];
+      backgroundColor = deepPurple["A200"];
     } else if (frame.writtenAt === index) {
-      backgroundColor = green["A200"];
+      backgroundColor = green["A100"];
     } else if (
       frame.compared !== undefined &&
       frame.compared.includes(index)
     ) {
-      backgroundColor = blue["A200"];
+      backgroundColor = blue["A100"];
     } else if (frame.terminals !== undefined) {
       const tMin = Math.min(...frame.terminals);
       const tMax = Math.max(...frame.terminals);
@@ -72,7 +72,7 @@ type AuxiMemItemProps = {
 const AuxiMemItem: FC<AuxiMemItemProps> = memo(
   ({ value, index, frame }) => {
     const height =
-      Math.min(value / frame.items.length, 1) * 100;
+      Math.min(value / frame.items.length) * 100;
 
     let backgroundColor: string = grey["A200"];
     if (frame.readAt === index) {
@@ -99,9 +99,13 @@ const MergeSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
 
   const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
+    useSortAnimatorGenerator(
       mergeSortAnimator(generateDataset(size))
     );
+
+  const handleReset = useCallback(() => {
+    reset(mergeSortAnimator(generateDataset(size)));
+  }, [reset, size]);
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
@@ -136,21 +140,21 @@ const MergeSortView_: FC = () => {
         >
           <Typography
             sx={{
-              color: blue["A200"],
+              color: green["A200"],
             }}
           >
             {`Writes: ${writeCount}`}
           </Typography>
           <Typography
             sx={{
-              color: deepPurple["A100"],
+              color: deepPurple["A200"],
             }}
           >
             {`Reads: ${readCount}`}
           </Typography>
           <Typography
             sx={{
-              color: deepPurple["A100"],
+              color: blue["A200"],
             }}
           >
             {`Compares: ${compareCount}`}
@@ -159,7 +163,7 @@ const MergeSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={handleReset}
         />
       </Stack>
       <Grid
@@ -206,7 +210,7 @@ const MergeSortView_: FC = () => {
         >
           <Grid
             container
-            columns={mainMem.items.length}
+            columns={auxiMem.items.length}
             spacing={0}
             sx={{
               height: "100%",

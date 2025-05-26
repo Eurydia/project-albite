@@ -20,7 +20,12 @@ import {
   deepPurple,
   grey,
 } from "@mui/material/colors";
-import { memo, useEffect, type FC } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  type FC,
+} from "react";
 import { useLoaderData } from "react-router";
 
 type SortItemProps = {
@@ -107,9 +112,13 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
 const RadixSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
+    useSortAnimatorGenerator(
       radixSortAnimator(generateDataset(size))
     );
+
+  const handleReset = useCallback(() => {
+    reset(radixSortAnimator(generateDataset(size)));
+  }, [reset, size]);
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
@@ -164,7 +173,7 @@ const RadixSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={handleReset}
         />
       </Stack>
       <Grid

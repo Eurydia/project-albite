@@ -15,7 +15,12 @@ import {
   Typography,
 } from "@mui/material";
 import { blue, grey, orange } from "@mui/material/colors";
-import { memo, useEffect, type FC } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  type FC,
+} from "react";
 import { useLoaderData } from "react-router";
 
 type SortItemProps = {
@@ -99,9 +104,13 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
 const CountingSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
+    useSortAnimatorGenerator(
       countingSortAnimator(generateDataset(size))
     );
+
+  const handleReset = useCallback(() => {
+    reset(countingSortAnimator(generateDataset(size)));
+  }, [reset, size]);
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
@@ -118,10 +127,7 @@ const CountingSortView_: FC = () => {
       }}
       height="100vh"
     >
-      <Stack
-        spacing={1}
-        component="div"
-      >
+      <Stack spacing={1}>
         <Typography fontWeight={900}>
           {`Counting sort`}
         </Typography>
@@ -149,7 +155,7 @@ const CountingSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={handleReset}
         />
       </Stack>
       <Grid

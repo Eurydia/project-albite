@@ -92,7 +92,7 @@ const SortItem: FC<SortItemProps> = ({
 const InsertionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
+    useSortAnimatorGenerator(
       insertionSortAnimation(generateDataset(size))
     );
 
@@ -118,6 +118,10 @@ const InsertionSortView_: FC = () => {
     }
     playNote(frame.items.at(frame.verifyAt)!);
   }, [frame, playNote]);
+
+  const handleReset = () => {
+    reset(insertionSortAnimation(generateDataset(size)));
+  };
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
@@ -168,7 +172,7 @@ const InsertionSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={handleReset}
         />
       </Stack>
       <Grid
