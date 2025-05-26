@@ -2,11 +2,15 @@ import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performInsertionSort } from "@/services/sorters/insertion-sort";
+import { performQuickSort } from "@/services/sorters/quick-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { InsertionSortFrameState } from "@/types/sorters/insertion-sort";
-import { CircleRounded } from "@mui/icons-material";
+import type { QuicksortFrameState } from "@/types/sorters/quick-sort";
 import {
+  ChangeHistoryRounded,
+  CircleOutlined,
+} from "@mui/icons-material";
+import {
+  alpha,
   Box,
   Grid,
   Stack,
@@ -15,84 +19,99 @@ import {
 } from "@mui/material";
 import {
   blue,
-  deepPurple,
+  green,
   grey,
   orange,
-  purple,
 } from "@mui/material/colors";
-import { memo, useEffect, type FC } from "react";
+import { Fragment, memo, useEffect, type FC } from "react";
 import { useLoaderData } from "react-router";
 
-type SortItemProps = {
-  index: number;
+type SortElementProps = {
   value: number;
-  data: InsertionSortFrameState;
+  index: number;
+  frame: QuicksortFrameState;
 };
-const SortItem: FC<SortItemProps> = ({
-  value,
-  data,
-  index,
-}) => {
-  const { palette } = useTheme();
+const SortElement: FC<SortElementProps> = memo(
+  ({ frame, index, value }) => {
+    const { palette } = useTheme();
+    const height = (value / Math.max(...frame.items)) * 100;
 
-  const { leftBound, verify, compared, swapped, key } =
-    data;
+    let backgroundColor: string = grey["A200"];
+    if (frame.terminals !== undefined) {
+      const tMin = Math.min(...frame.terminals);
+      const tMax = Math.max(...frame.terminals);
+      if (index < tMin || index > tMax) {
+        backgroundColor = grey["A700"];
+      }
+    }
+    if (
+      frame.compared !== undefined &&
+      frame.compared.includes(index)
+    ) {
+      backgroundColor = blue["A200"];
+    }
+    if (
+      frame.swapped !== undefined &&
+      frame.swapped.includes(index)
+    ) {
+      backgroundColor = green["A200"];
+    }
 
-  let backgroundColor: string = grey["300"];
-  if (leftBound !== undefined && index > leftBound) {
-    backgroundColor = grey["900"];
-  } else if (verify === index) {
-    backgroundColor = orange["A200"];
-  } else if (
-    compared !== undefined &&
-    compared.includes(index)
-  ) {
-    backgroundColor = blue["A200"];
-  } else if (
-    swapped !== undefined &&
-    swapped.includes(index)
-  ) {
-    backgroundColor = deepPurple["A200"];
-  }
-
-  const height = (value / Math.max(...data.items)) * 100;
-
-  return (
-    <Grid
-      size={1}
-      sx={{
-        backgroundColor,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-end",
-        justifyContent: "center",
-        height: `${height}%`,
-        overflow: "clip",
-      }}
-    >
-      {key !== undefined && key === index && (
-        <CircleRounded
+    if (frame.verify === index) {
+      backgroundColor = orange["A200"];
+    }
+    let icon = <Fragment />;
+    if (frame.partition === index) {
+      icon = (
+        <ChangeHistoryRounded
           sx={{
-            width: "100%",
-            aspectRatio: "1/1",
             color: palette.getContrastText(backgroundColor),
+            width: "100%",
           }}
         />
-      )}
-    </Grid>
-  );
-};
+      );
+    } else if (frame.key === index) {
+      icon = (
+        <CircleOutlined
+          sx={{
+            color: palette.getContrastText(backgroundColor),
+            width: "100%",
+          }}
+        />
+      );
+    }
 
-const InsertionSortView_: FC = () => {
+    return (
+      <Grid
+        size={1}
+        sx={{
+          backgroundColor: alpha(backgroundColor, 0.6),
+          height: `${height}%`,
+          display: "flex",
+          alignItems: "center",
+          flexDirection: "column",
+          justifyContent: "center",
+          overflow: "clip",
+        }}
+      >
+        {icon}
+      </Grid>
+    );
+  }
+);
+
+const QuickSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
+
   const { frame, nextFrame, prevFrame, shuffleDataset } =
     useSortAnimator(
       generateDataset(size),
-      performInsertionSort
+      performQuickSort
     );
 
-  const { playNote } = useMusicalScale();
-
+  const { playNote } = useMusicalScale({
+    maxOctave: 3,
+  });
   useEffect(() => {
     if (frame === null || frame.compared === undefined) {
       return;
@@ -118,7 +137,7 @@ const InsertionSortView_: FC = () => {
     return <Typography>Loading...</Typography>;
   }
 
-  const { compareCount, items, swapCount } = frame;
+  const { items, compareCount, swapCount } = frame;
 
   return (
     <Box
@@ -126,15 +145,12 @@ const InsertionSortView_: FC = () => {
         backgroundColor: "black",
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
       }}
+      height="100vh"
     >
       <Stack spacing={1}>
-        <Typography
-          fontWeight={900}
-          sx={{ userSelect: "none" }}
-        >
-          {`Insertion sort`}
+        <Typography fontWeight={900}>
+          {`Quick sort`}
         </Typography>
         <Stack
           spacing={1}
@@ -145,16 +161,14 @@ const InsertionSortView_: FC = () => {
         >
           <Typography
             sx={{
-              userSelect: "none",
-              color: purple["A100"],
+              color: green["A200"],
             }}
           >
             {`Swaps: ${swapCount}`}
           </Typography>
           <Typography
             sx={{
-              userSelect: "none",
-              color: blue["A100"],
+              color: blue["A200"],
             }}
           >
             {`Comparisons: ${compareCount}`}
@@ -174,11 +188,11 @@ const InsertionSortView_: FC = () => {
         sx={{ flexBasis: 0, flexGrow: 1 }}
       >
         {items.map((value, index) => (
-          <SortItem
+          <SortElement
             key={`sort-item-${index}`}
+            frame={frame}
             index={index}
             value={value}
-            data={frame}
           />
         ))}
       </Grid>
@@ -186,6 +200,4 @@ const InsertionSortView_: FC = () => {
   );
 };
 
-export const InsertionSortView: FC = memo(
-  InsertionSortView_
-);
+export const QuickSortView = memo(QuickSortView_);

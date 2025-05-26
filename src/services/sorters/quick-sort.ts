@@ -1,21 +1,21 @@
 import type { QuicksortFrameState } from "@/types/sorters/quick-sort";
 
-export const quickSort = (
+export const performQuickSort = (
   dataset: number[],
   frameStates: QuicksortFrameState[]
 ) => {
   const size = dataset.length;
   let swapCount = 0;
-  let comparisonCount = 0;
+  let compareCount = 0;
 
   const generateFrameState = (
     data: Omit<
       QuicksortFrameState,
-      "items" | "swapCount" | "comparisonCount"
+      "items" | "swapCount" | "compareCount"
     >
   ) => {
     frameStates.push({
-      comparisonCount,
+      compareCount,
       swapCount,
       items: structuredClone(dataset),
       ...data,
@@ -23,7 +23,7 @@ export const quickSort = (
   };
   const generateVerfiyFrameState = (pos: number) => {
     frameStates.push({
-      comparisonCount,
+      compareCount,
       swapCount,
       items: structuredClone(dataset),
       verify: pos,
@@ -48,7 +48,7 @@ export const quickSort = (
     for (let i = lowIndex; i < highIndex; i++) {
       const shouldSkip = dataset[i] > dataset[highIndex];
 
-      comparisonCount++;
+      compareCount++;
       generateFrameState({
         compared: [i, highIndex],
         terminals: [lowIndex, highIndex],
@@ -66,7 +66,6 @@ export const quickSort = (
       dataset[i] = b;
 
       swapCount++;
-
       generateFrameState({
         swapped: [i, pivotIndex],
         terminals: [lowIndex, highIndex],
@@ -76,8 +75,8 @@ export const quickSort = (
       pivotIndex++;
     }
 
-    const a: number = dataset[pivotIndex];
-    const b: number = dataset[highIndex];
+    const a = dataset[pivotIndex];
+    const b = dataset[highIndex];
     dataset[pivotIndex] = b;
     dataset[highIndex] = a;
 

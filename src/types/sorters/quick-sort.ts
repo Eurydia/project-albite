@@ -1,7 +1,7 @@
 export type QuicksortFrameState = {
   items: number[];
   swapCount: number;
-  comparisonCount: number;
+  compareCount: number;
   verify?: number;
   compared?: number[];
   swapped?: number[];

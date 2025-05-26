@@ -5,76 +5,85 @@ import {
 } from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performCountingSort } from "@/services/sorters/counting-sort";
+import { performRadixSort } from "@/services/sorters/radix-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
+import type { RadixSortFrameState } from "@/types/sorters/radix-sort";
 import {
-  alpha,
   Box,
   Grid,
   Stack,
   Typography,
 } from "@mui/material";
-import { grey, orange, teal } from "@mui/material/colors";
+import {
+  blue,
+  deepPurple,
+  grey,
+  orange,
+  teal,
+} from "@mui/material/colors";
 import { memo, useEffect, type FC } from "react";
 import { useLoaderData } from "react-router";
 
-type ItemElementProps = {
-  height: number;
-  isRead: boolean;
-  isWritten: boolean;
+type SortItemProps = {
+  index: number;
+  value: number;
+  mem: RadixSortFrameState["mainMem"];
 };
-const ItemElement: FC<ItemElementProps> = memo(
-  ({ height, isRead, isWritten }) => {
-    let bgColor: string;
-    if (isRead) {
-      bgColor = teal.A200;
-    } else if (isWritten) {
-      bgColor = orange.A200;
-    } else {
-      bgColor = grey[200];
+const SortItem: FC<SortItemProps> = memo(
+  ({ index, value, mem }) => {
+    const height = (value / mem.items.length) * 100;
+
+    let backgroundColor: string = grey["200"];
+    if (mem.read === index) {
+      backgroundColor = blue["A200"];
+    } else if (mem.written === index) {
+      backgroundColor = deepPurple["A400"];
     }
 
     return (
       <Grid
         size={1}
-        height={`${height}%`}
-        bgcolor={alpha(bgColor, 0.8)}
+        sx={{
+          height: `${height}%`,
+          backgroundColor,
+        }}
       />
     );
   }
 );
 
 type MemoryDisplayProps = {
-  items: number[];
-  readAt?: number;
-  writtenAt?: number;
+  mem:
+    | RadixSortFrameState["mainMem"]
+    | RadixSortFrameState["auxiMem"]
+    | RadixSortFrameState["sortMem"];
   pattern: readonly number[];
 };
 const MemoryDisplay: FC<MemoryDisplayProps> = memo(
-  ({ items, readAt, writtenAt, pattern }) => {
+  ({ mem, pattern }) => {
     const { playNote } = useMusicalScale({
       scalePattern: pattern,
     });
 
     useEffect(() => {
-      if (readAt !== undefined) {
-        const item = items.at(readAt);
+      if (mem.read !== undefined) {
+        const item = mem.items.at(mem.read);
         if (item !== undefined && item >= 0) {
           playNote(item + 1);
         }
       }
-      if (writtenAt !== undefined) {
-        const item = items.at(writtenAt);
+      if (mem.written !== undefined) {
+        const item = mem.items.at(mem.written);
         if (item !== undefined && item >= 0) {
           playNote(item + 1);
         }
       }
-    }, [items, playNote, readAt, writtenAt]);
+    }, [mem, playNote]);
 
     return (
       <Grid
         container
-        columns={items.length}
+        columns={mem.items.length}
         spacing={0}
         sx={{
           height: "100%",
@@ -83,13 +92,13 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
           flexBasis: 0,
         }}
       >
-        {items.map((value, index) => {
+        {mem.items.map((value, index) => {
           return (
-            <ItemElement
+            <SortItem
               key={`sort-item-${index}`}
-              height={(value / items.length) * 100}
-              isRead={readAt === index}
-              isWritten={writtenAt === index}
+              index={index}
+              value={value}
+              mem={mem}
             />
           );
         })}
@@ -98,12 +107,12 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
   }
 );
 
-const CountingSortView_: FC = () => {
+const RadixSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, shuffleDataset } =
     useSortAnimator(
       generateDataset(size),
-      performCountingSort
+      performRadixSort
     );
 
   if (frame === null) {
@@ -131,7 +140,7 @@ const CountingSortView_: FC = () => {
             userSelect: "none",
           }}
         >
-          {`Counting sort`}
+          {`Radix sort`}
         </Typography>
         <Stack
           flexDirection="row"
@@ -173,10 +182,12 @@ const CountingSortView_: FC = () => {
       >
         <Grid
           size={1}
-          sx={{ flexGrow: 1 }}
+          sx={{
+            flexGrow: 1,
+          }}
         >
           <MemoryDisplay
-            {...frame.mainMem}
+            mem={frame.mainMem}
             pattern={MusicalScales.Phrygian}
           />
         </Grid>
@@ -185,7 +196,7 @@ const CountingSortView_: FC = () => {
           sx={{ flexGrow: 1 }}
         >
           <MemoryDisplay
-            {...frame.auxiMem}
+            mem={frame.auxiMem}
             pattern={MusicalScales.Dorian}
           />
         </Grid>
@@ -194,7 +205,7 @@ const CountingSortView_: FC = () => {
           sx={{ flexGrow: 1 }}
         >
           <MemoryDisplay
-            {...frame.sortMem}
+            mem={frame.sortMem}
             pattern={MusicalScales.Major}
           />
         </Grid>
@@ -203,4 +214,4 @@ const CountingSortView_: FC = () => {
   );
 };
 
-export const CountingSortView = memo(CountingSortView_);
+export const RadixSortView = memo(RadixSortView_);

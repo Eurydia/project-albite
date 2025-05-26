@@ -1,6 +1,6 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import {
-  SCALES,
+  MusicalScales,
   useMusicalScale,
 } from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
@@ -80,7 +80,7 @@ const SelectionSortView_: FC = () => {
     );
 
   const { playNote } = useMusicalScale({
-    scalePattern: SCALES.MajorPentatonic,
+    scalePattern: MusicalScales.MajorPentatonic,
   });
 
   useEffect(() => {

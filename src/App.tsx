@@ -17,6 +17,8 @@ import { BubbleSortView } from "./views/BubbleSortView";
 import { CountingSortView } from "./views/CountingSortView";
 import { HomeView } from "./views/HomeView";
 import { InsertionSortView } from "./views/InsertionSortView";
+import { QuickSortView } from "./views/QuickSortView";
+import { RadixSortView } from "./views/RadixSortView";
 import { SelectionSortView } from "./views/SelectionSortView";
 
 const theme = createTheme({
@@ -51,6 +53,14 @@ registerSorterView("/selection-sort", {
 registerSorterView("/insertion-sort", {
   display: { name: "Insertion Sort" },
   view: <InsertionSortView />,
+});
+registerSorterView("/quick-sort", {
+  display: { name: "Quick Sort" },
+  view: <QuickSortView />,
+});
+registerSorterView("/radix-sort", {
+  display: { name: "Radix Sort" },
+  view: <RadixSortView />, // Assuming Radix Sort uses the same view as Quick Sort
 });
 registerSorterView("/counting-sort", {
   display: { name: "Counting Sort" },

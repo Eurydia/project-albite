@@ -6,13 +6,13 @@ export const sorterRouterLoader: LoaderFunction = async ({
 }) => {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
-  const paramSize = searchParams.get("size") ?? "20";
+  const paramSize = searchParams.get("size") ?? "21";
 
   let size = Number.parseInt(paramSize);
   if (isNaN(size)) {
-    size = 20;
+    size = 21;
   } else if (size < 1) {
-    size = 20;
+    size = 21;
   }
   return {
     size,

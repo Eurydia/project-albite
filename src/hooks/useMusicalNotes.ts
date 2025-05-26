@@ -1,16 +1,6 @@
 import { useCallback, useRef } from "react";
 
-interface UseMusicalScaleOptions {
-  duration?: number;
-  fadeDuration?: number;
-  scalePattern?: readonly number[];
-  baseMidiNote?: number;
-  totalValues?: number;
-  waveform?: OscillatorType;
-  gain?: number;
-}
-
-export const SCALES = {
+export const MusicalScales = {
   Major: [0, 2, 4, 5, 7, 9, 11],
   NaturalMinor: [0, 2, 3, 5, 7, 8, 10],
   Dorian: [0, 2, 3, 5, 7, 9, 10],
@@ -23,14 +13,29 @@ export const SCALES = {
   BluesMinor: [0, 3, 5, 6, 7, 10],
 } as const;
 
-export const useMusicalScale = (
-  options: UseMusicalScaleOptions = {}
-) => {
+interface options {
+  /** Your base scale degrees in semitones, e.g. Major = [0,2,4,5,7,9,11] */
+  scalePattern?: readonly number[];
+  /** MIDI note at pattern-degree 0, octave 0 (default = C4 = 60) */
+  baseMidi?: number;
+  /** Maximum octave you want before it wraps back to 0 */
+  maxOctave?: number;
+  /** If true, octaves wrap; if false, they clamp at maxOctave */
+  wrapOctave?: boolean;
+  duration?: number;
+  fadeDuration?: number;
+  waveform?: OscillatorType;
+  gain?: number;
+}
+
+export const useMusicalScale = (options: options) => {
   const {
+    scalePattern = MusicalScales.Lydian,
+    baseMidi = 60,
+    maxOctave = 2,
+    wrapOctave = true,
     duration = 0.5,
     fadeDuration = 0.1,
-    scalePattern = SCALES.Major,
-    baseMidiNote = 60,
     waveform = "sine",
     gain = 0.2,
   } = options;
@@ -44,21 +49,34 @@ export const useMusicalScale = (
   };
 
   const mapValueToFrequency = useCallback(
-    (value: number, octaveOffset = 0): number => {
-      const degree = (value - 1) % scalePattern.length;
-      const octave =
-        Math.floor((value - 1) / scalePattern.length) +
-        octaveOffset;
+    (value: number) => {
+      // make sure we have a positive integer
+      const v = Math.max(1, Math.floor(value));
+
+      // which degree in the scale (wraps every scalePattern.length)
+      const degree = (v - 1) % scalePattern.length;
+
+      // raw octave count (increments each full pass through the pattern)
+      const rawOctave = Math.floor(
+        (v - 1) / scalePattern.length
+      );
+
+      // either wrap or clamp the octave
+      const octave = wrapOctave
+        ? rawOctave % (maxOctave + 1)
+        : Math.min(rawOctave, maxOctave);
+
+      // build MIDI note and convert to Hz
       const midi =
-        baseMidiNote + octave * 12 + scalePattern[degree];
+        baseMidi + scalePattern[degree] + octave * 12;
       return 440 * Math.pow(2, (midi - 69) / 12);
     },
-    [scalePattern, baseMidiNote]
+    [scalePattern, baseMidi, maxOctave, wrapOctave]
   );
 
   const playNote = useCallback(
-    (value: number, octaveOffset = 0) => {
-      const freq = mapValueToFrequency(value, octaveOffset);
+    (value: number) => {
+      const freq = mapValueToFrequency(value);
       const audioCtx = getAudioContext();
       const osc = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
@@ -86,10 +104,10 @@ export const useMusicalScale = (
     },
     [
       mapValueToFrequency,
-      duration,
-      fadeDuration,
       waveform,
       gain,
+      duration,
+      fadeDuration,
     ]
   );
 
