@@ -11,7 +11,7 @@ export const useSortAnimator = <T extends object>(
     return init;
   });
 
-  const shuffleDataset = useCallback(() => {
+  const reset = useCallback(() => {
     const nextFrames: T[] = [];
     sorter(dataset, nextFrames);
     setFrames(nextFrames);
@@ -35,7 +35,7 @@ export const useSortAnimator = <T extends object>(
   }, [frameIndex, frames]);
 
   return {
-    shuffleDataset,
+    reset,
     prevFrame,
     nextFrame,
     frame,

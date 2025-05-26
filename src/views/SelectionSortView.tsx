@@ -73,11 +73,15 @@ const SortItem: FC<SortItemProps> = memo(
 const SelectionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
 
-  const { frame, nextFrame, prevFrame, shuffleDataset } =
-    useSortAnimator(
-      generateDataset(size),
-      performSelectionSort
-    );
+  const {
+    frame,
+    nextFrame,
+    prevFrame,
+    reset: shuffleDataset,
+  } = useSortAnimator(
+    generateDataset(size),
+    performSelectionSort
+  );
 
   const { playNote } = useMusicalScale({
     scalePattern: MusicalScales.MajorPentatonic,

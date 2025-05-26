@@ -1,8 +1,8 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
-import { useSortAnimator } from "@/hooks/useSortAnimator";
+import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
-import { performBubbleSort } from "@/services/sorters/bubblesort";
+import { performBubbleSortGenerator } from "@/services/sorters/bubblesort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import {
   alpha,
@@ -18,7 +18,12 @@ import {
   orange,
 } from "@mui/material/colors";
 import { isEqual } from "lodash";
-import { memo, useEffect, type FC } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  type FC,
+} from "react";
 import { useLoaderData } from "react-router";
 
 type ItemProps = {
@@ -38,14 +43,14 @@ const ItemElement: FC<ItemProps> = memo(
     } else if (verify) {
       backgroundColor = orange["A200"];
     } else if (locked) {
-      backgroundColor = grey["A400"];
+      backgroundColor = grey["A700"];
     }
 
     return (
       <Grid
         size={1}
         sx={{
-          backgroundColor: alpha(backgroundColor, 0.8),
+          backgroundColor: alpha(backgroundColor, 0.7),
           height: `${height}%`,
         }}
       ></Grid>
@@ -56,20 +61,11 @@ const ItemElement: FC<ItemProps> = memo(
 
 const BubbleSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const { frame, nextFrame, prevFrame, shuffleDataset } =
-    useSortAnimator(
-      generateDataset(size),
-      performBubbleSort
+  const { frame, nextFrame, prevFrame, reset } =
+    useSortAnimatorGenerator(
+      performBubbleSortGenerator(generateDataset(size))
     );
-
-  const { playNote } = useMusicalScale({
-    scalePattern: [0, 2, 4, 6, 7, 9, 11],
-    baseMidiNote: 60,
-    gain: 0.3,
-    duration: 0.6,
-    fadeDuration: 0.2,
-    waveform: "sine",
-  });
+  const { playNote } = useMusicalScale({});
 
   useEffect(() => {
     if (frame === null || frame.swapped === undefined) {
@@ -91,6 +87,12 @@ const BubbleSortView_: FC = () => {
     }
     playNote(frame.items.at(frame.verify)!);
   }, [frame, playNote]);
+
+  const handleReset = useCallback(() => {
+    reset(
+      performBubbleSortGenerator(generateDataset(size))
+    );
+  }, [reset, size]);
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
@@ -152,7 +154,7 @@ const BubbleSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={shuffleDataset}
+          onShuffle={handleReset}
         />
       </Stack>
       <Grid

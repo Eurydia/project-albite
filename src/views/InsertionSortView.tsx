@@ -85,11 +85,15 @@ const SortItem: FC<SortItemProps> = ({
 
 const InsertionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const { frame, nextFrame, prevFrame, shuffleDataset } =
-    useSortAnimator(
-      generateDataset(size),
-      performInsertionSort
-    );
+  const {
+    frame,
+    nextFrame,
+    prevFrame,
+    reset: shuffleDataset,
+  } = useSortAnimator(
+    generateDataset(size),
+    performInsertionSort
+  );
 
   const { playNote } = useMusicalScale();
 

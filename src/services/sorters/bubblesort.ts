@@ -1,59 +1,27 @@
 import type { BubbleSortFrameData } from "@/types/sorters/bubble-sort";
 
-export const performBubbleSort = (
-  dataset: number[],
-  frames: BubbleSortFrameData[]
-) => {
+export function* performBubbleSortGenerator(
+  dataset: number[]
+): Generator<BubbleSortFrameData> {
   const size = dataset.length;
   let swapCount = 0;
   let compareCount = 0;
-
-  const generateFrameData = () => {
-    frames.push({
-      items: structuredClone(dataset),
-      swapCount,
-      compareCount,
-    });
-  };
-
-  const generateVerifyFrameData = (pos: number) => {
-    frames.push({
-      items: structuredClone(dataset),
-      verify: pos,
-      swapCount,
-      compareCount,
-    });
-  };
-
-  const generateSwapFrameData = (
-    bound: number,
-    a: number,
-    b: number
+  const generateFrameData = (
+    data: Pick<
+      BubbleSortFrameData,
+      "compare" | "rightBound" | "swapped"
+    >
   ) => {
-    frames.push({
+    return {
       items: structuredClone(dataset),
       swapCount,
       compareCount,
-      swapped: [a, b],
-      rightBound: bound,
-    });
+      ...data,
+    };
   };
 
-  const generateCompareFrameData = (
-    bound: number,
-    a: number,
-    b: number
-  ) => {
-    frames.push({
-      items: structuredClone(dataset),
-      swapCount,
-      compareCount,
-      compare: [a, b],
-      rightBound: bound,
-    });
-  };
+  yield generateFrameData({});
 
-  generateFrameData();
   for (let offset = 0; offset < size - 1; offset++) {
     for (let i = 0; i < size - offset - 1; i++) {
       const a = dataset[i];
@@ -61,18 +29,29 @@ export const performBubbleSort = (
 
       const shouldSwap = b <= a;
       compareCount++;
-      generateCompareFrameData(size - offset, i, i + 1);
+      yield generateFrameData({
+        rightBound: size - offset,
+        compare: [i, i + 1],
+      });
 
       if (shouldSwap) {
         dataset[i] = b;
         dataset[i + 1] = a;
         swapCount++;
-        generateSwapFrameData(size - offset, i, i + 1);
+        yield generateFrameData({
+          rightBound: size - offset,
+          swapped: [i, i + 1],
+        });
       }
     }
   }
   for (let i = 0; i < size; i++) {
-    generateVerifyFrameData(i);
+    yield {
+      items: structuredClone(dataset),
+      swapCount,
+      compareCount,
+      verify: i,
+    };
   }
-  generateFrameData();
-};
+  yield generateFrameData({});
+}

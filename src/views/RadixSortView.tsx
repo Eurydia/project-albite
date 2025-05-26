@@ -18,8 +18,6 @@ import {
   blue,
   deepPurple,
   grey,
-  orange,
-  teal,
 } from "@mui/material/colors";
 import { memo, useEffect, type FC } from "react";
 import { useLoaderData } from "react-router";
@@ -109,11 +107,15 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
 
 const RadixSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const { frame, nextFrame, prevFrame, shuffleDataset } =
-    useSortAnimator(
-      generateDataset(size),
-      performRadixSort
-    );
+  const {
+    frame,
+    nextFrame,
+    prevFrame,
+    reset: shuffleDataset,
+  } = useSortAnimator(
+    generateDataset(size),
+    performRadixSort
+  );
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
@@ -151,7 +153,7 @@ const RadixSortView_: FC = () => {
           <Typography
             sx={{
               userSelect: "none",
-              color: teal["A200"],
+              color: blue["A200"],
             }}
           >
             {`Writes: ${memWriteCount}`}
@@ -159,7 +161,7 @@ const RadixSortView_: FC = () => {
           <Typography
             sx={{
               userSelect: "none",
-              color: orange["A200"],
+              color: deepPurple["A100"],
             }}
           >
             {`Reads: ${memReadCount}`}
@@ -197,7 +199,7 @@ const RadixSortView_: FC = () => {
         >
           <MemoryDisplay
             mem={frame.auxiMem}
-            pattern={MusicalScales.Dorian}
+            pattern={MusicalScales.NaturalMinor}
           />
         </Grid>
         <Grid

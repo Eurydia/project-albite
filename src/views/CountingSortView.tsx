@@ -100,11 +100,15 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
 
 const CountingSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const { frame, nextFrame, prevFrame, shuffleDataset } =
-    useSortAnimator(
-      generateDataset(size),
-      performCountingSort
-    );
+  const {
+    frame,
+    nextFrame,
+    prevFrame,
+    reset: shuffleDataset,
+  } = useSortAnimator(
+    generateDataset(size),
+    performCountingSort
+  );
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
