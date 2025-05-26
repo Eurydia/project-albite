@@ -1,3 +1,10 @@
+export const BubbleSortFrameDataVariants = {
+  NORMAL: "normal",
+  SWAP: "swap",
+  COMPARE: "compare",
+  VERIFY: "verify",
+} as const;
+
 export type BubbleSortFrameDataCommon = {
   items: number[];
   swapCount: number;
@@ -5,18 +12,20 @@ export type BubbleSortFrameDataCommon = {
 };
 
 export type BubbleSortFrameData =
-  | ({ variant: "normal" } & BubbleSortFrameDataCommon)
   | ({
-      variant: "swap";
+      variant: typeof BubbleSortFrameDataVariants.NORMAL;
+    } & BubbleSortFrameDataCommon)
+  | ({
+      variant: typeof BubbleSortFrameDataVariants.SWAP;
       rightBound: number;
       swapped: number[];
     } & BubbleSortFrameDataCommon)
   | ({
-      variant: "compare";
+      variant: typeof BubbleSortFrameDataVariants.COMPARE;
       rightBound: number;
       compared: number[];
     } & BubbleSortFrameDataCommon)
   | ({
-      variant: "verify";
+      variant: typeof BubbleSortFrameDataVariants.VERIFY;
       verifyAt: number;
     } & BubbleSortFrameDataCommon);

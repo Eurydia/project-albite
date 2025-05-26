@@ -4,7 +4,10 @@ import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
 import { bubbleSortAnimator } from "@/services/sorting-animators/bubble-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { BubbleSortFrameData } from "@/types/sorters/bubble-sort";
+import {
+  BubbleSortFrameDataVariants,
+  type BubbleSortFrameData,
+} from "@/types/sorters/bubble-sort";
 import {
   alpha,
   Box,
@@ -37,18 +40,25 @@ const SortElement: FC<SortElementProps> = memo(
     const height = (value / frame.items.length) * 100;
 
     let backgroundColor: string = grey["200"];
-    if (frame === "number") {
-      if (frame. === index) {
+    switch (frame.variant) {
+      case BubbleSortFrameDataVariants.NORMAL:
+        backgroundColor = grey["200"];
+        break;
+      case BubbleSortFrameDataVariants.COMPARE:
+        backgroundColor = blue["A200"];
+        if (index > frame.rightBound) {
+          backgroundColor = grey["A700"];
+        }
+        break;
+      case BubbleSortFrameDataVariants.SWAP:
+        backgroundColor = green["A200"];
+        if (index > frame.rightBound) {
+          backgroundColor = grey["A700"];
+        }
+        break;
+      case BubbleSortFrameDataVariants.VERIFY:
         backgroundColor = orange["A200"];
-      }
-    } else if (frame.compare) {
-      backgroundColor = blue["A200"];
-    } else if (frame.swapped) {
-      backgroundColor = green["A200"];
-    } else if (frame.verifyAt === index) {
-      backgroundColor = orange["A200"];
-    } else if (locked) {
-      backgroundColor = grey["A700"];
+        break;
     }
 
     return (
@@ -73,45 +83,35 @@ const BubbleSortView_: FC = () => {
   const { playNote } = useMusicalScale({});
 
   useEffect(() => {
-    if (frame === null || frame.swapped === undefined) {
+    if (frame === null) {
       return;
     }
-    playNote(frame.items.at(Math.max(...frame.swapped))!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.compare == undefined) {
-      return;
+    let note: number | undefined;
+    switch (frame.variant) {
+      case BubbleSortFrameDataVariants.SWAP:
+        note = frame.items.at(Math.max(...frame.swapped))!;
+        break;
+      case BubbleSortFrameDataVariants.COMPARE:
+        note = frame.items.at(Math.max(...frame.compared))!;
+        break;
+      case BubbleSortFrameDataVariants.VERIFY:
+        note = frame.items.at(frame.verifyAt)!;
+        break;
+      default:
+        return;
     }
-    playNote(frame.items.at(Math.max(...frame.compare))!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.verify === undefined) {
-      return;
-    }
-    playNote(frame.items.at(frame.verify)!);
+    playNote(note);
   }, [frame, playNote]);
 
   const handleReset = useCallback(() => {
-    reset(
-      bubbleSortAnimator(generateDataset(size))
-    );
+    reset(bubbleSortAnimator(generateDataset(size)));
   }, [reset, size]);
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
   }
 
-  const {
-    items,
-    compare,
-    swapped,
-    swapCount,
-    compareCount,
-    verify,
-    rightBound,
-  } = frame;
+  const { items, swapCount, compareCount } = frame;
 
   return (
     <Box
@@ -172,20 +172,9 @@ const BubbleSortView_: FC = () => {
         {items.map((value, index) => (
           <SortElement
             key={`sort-item-${index}`}
-            height={(value / items.length) * 100}
-            compare={
-              compare !== undefined &&
-              compare.includes(index)
-            }
-            swapped={
-              swapped !== undefined &&
-              swapped.includes(index)
-            }
-            verify={verify === index}
-            locked={
-              rightBound !== undefined &&
-              index >= rightBound
-            }
+            index={index}
+            value={value}
+            frame={frame}
           />
         ))}
       </Grid>
