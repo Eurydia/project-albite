@@ -1,13 +1,13 @@
 import { useCallback, useRef } from "react";
 
 interface UseMusicalScaleOptions {
-  duration?: number; // seconds
-  fadeDuration?: number; // seconds
-  scalePattern?: readonly number[]; // semitone intervals
-  baseMidiNote?: number; // MIDI note for root (default C4 = 60)
-  totalValues?: number; // total mapped items
-  waveform?: OscillatorType; // 'sine' | 'square' | ...
-  gain?: number; // 0–1
+  duration?: number;
+  fadeDuration?: number;
+  scalePattern?: readonly number[];
+  baseMidiNote?: number;
+  totalValues?: number;
+  waveform?: OscillatorType;
+  gain?: number;
 }
 
 export const SCALES = {

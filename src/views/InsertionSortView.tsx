@@ -86,7 +86,7 @@ const InsertionSortView_: FC = () => {
       performInsertionSort
     );
 
-  const { playNote } = useMusicalScale();
+  const { playNote } = useMusicalScale({ duration: 1 });
 
   useEffect(() => {
     if (frame === null || frame.compared === undefined) {
