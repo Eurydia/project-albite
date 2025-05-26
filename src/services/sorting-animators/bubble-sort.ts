@@ -13,7 +13,6 @@ export function* bubbleSortAnimator(
       "items" | "swapCount" | "compareCount"
     > = {}
   ): Generator<BubbleSortFrameData> {
-    console.debug(data);
     yield {
       items: structuredClone(dataset),
       swapCount,

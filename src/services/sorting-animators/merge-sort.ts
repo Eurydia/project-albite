@@ -71,8 +71,10 @@ export function* mergeSortAnimator(
         yield* generateFrame({
           mainMem: {
             readAt: rPtr,
-            writtenAt: auxPtr,
             terminals: [startIndex, endIndex],
+          },
+          auxiMem: {
+            writtenAt: auxPtr,
           },
         });
 
@@ -142,7 +144,7 @@ export function* mergeSortAnimator(
       writeCount++;
       dataset[startIndex + i] = auxiMemory[i];
 
-      generateFrame({
+      yield* generateFrame({
         mainMem: {
           terminals: [startIndex, endIndex],
           writtenAt: startIndex + i,

@@ -63,7 +63,7 @@ export function* selectionSortAnimator(
 
   for (let i = 0; i < size; i++) {
     yield* generateFrame({
-      key: i,
+      verifyAt: i,
     });
   }
 

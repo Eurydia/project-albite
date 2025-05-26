@@ -96,7 +96,7 @@ export function* quickSortAnimator(
 
   yield* generateFrameState();
 
-  __quickSort(0, size - 1);
+  yield* __quickSort(0, size - 1);
 
   for (let i = 0; i < size; i++) {
     yield {

@@ -1,4 +1,5 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
+import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
 import { mergeSortAnimator } from "@/services/sorting-animators/merge-sort";
@@ -18,7 +19,7 @@ import {
   grey,
   orange,
 } from "@mui/material/colors";
-import { type FC, memo, useCallback } from "react";
+import { type FC, memo, useEffect } from "react";
 import { useLoaderData } from "react-router";
 
 type MainMemItemProps = {
@@ -76,9 +77,9 @@ const AuxiMemItem: FC<AuxiMemItemProps> = memo(
 
     let backgroundColor: string = grey["A200"];
     if (frame.readAt === index) {
-      backgroundColor = deepPurple["A400"];
+      backgroundColor = deepPurple["A200"];
     } else if (frame.writtenAt === index) {
-      backgroundColor = green["A200"];
+      backgroundColor = green["A100"];
     }
 
     backgroundColor = alpha(backgroundColor, 0.7);
@@ -99,13 +100,54 @@ const MergeSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
 
   const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(
+    useSortAnimatorGenerator(() =>
       mergeSortAnimator(generateDataset(size))
     );
 
-  const handleReset = useCallback(() => {
-    reset(mergeSortAnimator(generateDataset(size)));
-  }, [reset, size]);
+  const { playNote } = useMusicalScale();
+  useEffect(() => {
+    if (frame === null) {
+      return;
+    }
+    if (frame.mainMem.compared !== undefined) {
+      playNote(
+        frame.mainMem.items.at(
+          Math.max(...frame.mainMem.compared)
+        )!
+      );
+    }
+    if (frame.mainMem.verifyAt !== undefined) {
+      playNote(
+        frame.mainMem.items.at(frame.mainMem.verifyAt)!
+      );
+    }
+    if (frame.mainMem.readAt !== undefined) {
+      playNote(
+        frame.mainMem.items.at(frame.mainMem.readAt)!
+      );
+    }
+    if (frame.mainMem.writtenAt !== undefined) {
+      playNote(
+        frame.mainMem.items.at(frame.mainMem.writtenAt)!
+      );
+    }
+  }, [frame, playNote]);
+
+  useEffect(() => {
+    if (frame === null) {
+      return;
+    }
+    if (frame.auxiMem.readAt !== undefined) {
+      playNote(
+        frame.auxiMem.items.at(frame.auxiMem.readAt)!
+      );
+    }
+    if (frame.auxiMem.writtenAt !== undefined) {
+      playNote(
+        frame.auxiMem.items.at(frame.auxiMem.writtenAt)!
+      );
+    }
+  }, [frame, playNote]);
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
@@ -163,7 +205,7 @@ const MergeSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={handleReset}
+          onShuffle={reset}
         />
       </Stack>
       <Grid

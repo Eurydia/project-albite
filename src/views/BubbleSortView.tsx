@@ -18,12 +18,7 @@ import {
   grey,
   orange,
 } from "@mui/material/colors";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  type FC,
-} from "react";
+import { memo, useEffect, type FC } from "react";
 import { useLoaderData } from "react-router";
 
 type SortElementProps = {
@@ -71,9 +66,10 @@ const SortElement: FC<SortElementProps> = memo(
 const BubbleSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(
+    useSortAnimatorGenerator(() =>
       bubbleSortAnimator(generateDataset(size))
     );
+
   const { playNote } = useMusicalScale();
 
   useEffect(() => {
@@ -96,10 +92,6 @@ const BubbleSortView_: FC = () => {
     }
     playNote(frame.items.at(frame.verifyAt)!);
   }, [frame, playNote]);
-
-  const handleReset = useCallback(() => {
-    reset(bubbleSortAnimator(generateDataset(size)));
-  }, [reset, size]);
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
@@ -145,7 +137,7 @@ const BubbleSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={handleReset}
+          onShuffle={reset}
         />
       </Stack>
       <Grid

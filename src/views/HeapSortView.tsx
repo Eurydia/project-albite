@@ -1,8 +1,5 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import {
-  MusicalScales,
-  useMusicalScale,
-} from "@/hooks/useMusicalNotes";
+import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
 import { heapSortAnimator } from "@/services/sorting-animators/heap-sort";
@@ -27,13 +24,7 @@ import {
   green,
   grey,
 } from "@mui/material/colors";
-import {
-  Fragment,
-  memo,
-  useCallback,
-  useEffect,
-  type FC,
-} from "react";
+import { Fragment, memo, useEffect, type FC } from "react";
 import { useLoaderData } from "react-router";
 
 type SortElementProps = {
@@ -114,13 +105,11 @@ const SortElement: FC<SortElementProps> = memo(
 const HeapSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(
+    useSortAnimatorGenerator(() =>
       heapSortAnimator(generateDataset(size))
     );
 
-  const { playNote } = useMusicalScale({
-    scalePattern: MusicalScales.MajorPentatonic,
-  });
+  const { playNote } = useMusicalScale();
 
   useEffect(() => {
     if (frame === null || frame.compared === undefined) {
@@ -142,10 +131,6 @@ const HeapSortView_: FC = () => {
     }
     playNote(frame.items.at(frame.verifyAt)!);
   }, [frame, playNote]);
-
-  const handleReset = useCallback(() => {
-    reset(heapSortAnimator(generateDataset(size)));
-  }, [reset, size]);
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;
@@ -191,7 +176,7 @@ const HeapSortView_: FC = () => {
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={handleReset}
+          onShuffle={reset}
         />
       </Stack>
       <Grid
