@@ -34,7 +34,7 @@ export const useMusicalScale = (options: options = {}) => {
     baseMidi = 60,
     maxOctave = 2,
     wrapOctave = true,
-    duration = 0.5,
+    duration = 1,
     fadeDuration = 0.1,
     waveform = "sine",
     gain = 0.2,

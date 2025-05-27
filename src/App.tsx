@@ -1,10 +1,5 @@
-import {
-  alpha,
-  createTheme,
-  CssBaseline,
-  ThemeProvider,
-} from "@mui/material";
-import { grey } from "@mui/material/colors";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { memo, type FC } from "react";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -13,6 +8,7 @@ import {
   getSorterRoutes,
   registerSorterView,
 } from "./routes";
+import { theme } from "./theme";
 import { BubbleSortView } from "./views/BubbleSortView";
 import { CountingSortView } from "./views/CountingSortView";
 import { HeapSortView } from "./views/HeapSortView";
@@ -23,65 +19,39 @@ import { QuickSortView } from "./views/QuickSortView";
 import { RadixSortView } from "./views/RadixSortView";
 import { SelectionSortView } from "./views/SelectionSortView";
 
-const theme = createTheme({
-  palette: { mode: "dark", primary: grey },
-  typography: {
-    fontFamily: "monospace",
-  },
-  components: {
-    MuiButton: {
-      defaultProps: {
-        disableElevation: true,
-        disableRipple: true,
-        color: "primary",
-      },
-    },
-    MuiTypography: {
-      defaultProps: {
-        color: alpha("#fff", 0.8),
-      },
-      styleOverrides: {
-        root: {
-          userSelect: "none",
-        },
-      },
-    },
-  },
-});
-
-registerSorterView("/bubble-sort", {
+registerSorterView("bubble-sort", {
   display: { name: "Bubble Sort" },
   view: <BubbleSortView />,
 });
-registerSorterView("/selection-sort", {
+registerSorterView("selection-sort", {
   display: { name: "Selection Sort" },
   view: <SelectionSortView />,
 });
-registerSorterView("/insertion-sort", {
+registerSorterView("insertion-sort", {
   display: { name: "Insertion Sort" },
   view: <InsertionSortView />,
 });
-registerSorterView("/quick-sort", {
+registerSorterView("quick-sort", {
   display: { name: "Quick Sort" },
   view: <QuickSortView />,
 });
-registerSorterView("/heap-sort", {
+registerSorterView("heap-sort", {
   display: { name: "Heap Sort" },
   view: <HeapSortView />,
 });
-registerSorterView("/merge-sort", {
+registerSorterView("merge-sort", {
   display: { name: "Merge Sort" },
   view: <MergeSortView />,
 });
-registerSorterView("/heap-sort", {
+registerSorterView("heap-sort", {
   display: { name: "Heap Sort" },
   view: <HeapSortView />,
 });
-registerSorterView("/radix-sort", {
+registerSorterView("radix-sort", {
   display: { name: "Radix Sort" },
   view: <RadixSortView />,
 });
-registerSorterView("/counting-sort", {
+registerSorterView("counting-sort", {
   display: { name: "Counting Sort" },
   view: <CountingSortView />,
 });
@@ -92,18 +62,21 @@ const router = createBrowserRouter(
       path: "/",
       children: [
         { index: true, element: <HomeView /> },
-        ...getSorterRoutes(),
+        {
+          path: "/sorters",
+          children: getSorterRoutes(),
+        },
       ],
     },
   ],
   { basename: import.meta.env.BASE_URL }
 );
 
-export const App = () => {
+export const App: FC = memo(() => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline enableColorScheme />
       <RouterProvider router={router} />
     </ThemeProvider>
   );
-};
+});

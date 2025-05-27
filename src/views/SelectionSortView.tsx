@@ -5,7 +5,7 @@ import { generateDataset } from "@/services/generate-dataset";
 import { selectionSortAnimator } from "@/services/sorting-animators/selection-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import type { SelectionSortFrameState } from "@/types/sorters/selection-sort";
-import { KeyRounded } from "@mui/icons-material";
+import { ChangeHistoryRounded } from "@mui/icons-material";
 import {
   alpha,
   Box,
@@ -14,12 +14,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import {
-  blue,
-  green,
-  grey,
-  orange,
-} from "@mui/material/colors";
+import { grey } from "@mui/material/colors";
 import { memo, useEffect, type FC } from "react";
 import { useLoaderData } from "react-router";
 
@@ -36,25 +31,25 @@ const SortItem: FC<SortItemProps> = memo(
 
     let backgroundColor: string = grey[200];
     if (frame.verifyAt === index) {
-      backgroundColor = orange["A200"];
+      backgroundColor = palette.opVerify.main;
     } else if (
       frame.leftBound !== undefined &&
       index < frame.leftBound
     ) {
-      backgroundColor = grey["A700"];
+      backgroundColor = palette.rangeBounded.main;
     } else if (
       frame.compared !== undefined &&
       frame.compared.includes(index)
     ) {
-      backgroundColor = blue["A200"];
+      backgroundColor = palette.opCompare.main;
     } else if (
       frame.swapped !== undefined &&
       frame.swapped.includes(index)
     ) {
-      backgroundColor = green["A200"];
+      backgroundColor = palette.opSwap.main;
     }
 
-    backgroundColor = alpha(backgroundColor, 0.7);
+    backgroundColor = alpha(backgroundColor, 0.8);
 
     return (
       <Grid
@@ -69,7 +64,7 @@ const SortItem: FC<SortItemProps> = memo(
         }}
       >
         {frame.key === index && (
-          <KeyRounded
+          <ChangeHistoryRounded
             sx={{
               color:
                 palette.getContrastText(backgroundColor),
@@ -84,6 +79,7 @@ const SortItem: FC<SortItemProps> = memo(
 const SelectionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
 
+  const { palette } = useTheme();
   const { frame, nextFrame, prevFrame, reset } =
     useSortAnimatorGenerator(() =>
       selectionSortAnimator(generateDataset(size))
@@ -92,24 +88,20 @@ const SelectionSortView_: FC = () => {
   const { playNote } = useMusicalScale();
 
   useEffect(() => {
-    if (frame === null || frame.compared === undefined) {
+    if (frame === null) {
       return;
     }
-    playNote(frame.items.at(Math.max(...frame.compared))!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.swapped === undefined) {
-      return;
+    if (frame.compared !== undefined) {
+      const pos = Math.max(...frame.compared);
+      playNote(frame.items.at(pos)!);
     }
-    playNote(frame.items.at(Math.max(...frame.swapped))!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.verifyAt === undefined) {
-      return;
+    if (frame.swapped !== undefined) {
+      const pos = Math.max(...frame.swapped);
+      playNote(frame.items.at(pos)!);
     }
-    playNote(frame.verifyAt!);
+    if (frame.verifyAt !== undefined) {
+      playNote(frame.verifyAt);
+    }
   }, [frame, playNote]);
 
   if (frame === null) {
@@ -120,18 +112,26 @@ const SelectionSortView_: FC = () => {
 
   return (
     <Box
+      component="div"
+      onKeyDown={(e) => {
+        if (e.key === "ArrowRight") {
+          nextFrame();
+        } else if (e.key === "ArrowLeft") {
+          prevFrame();
+        } else if (e.key === " ") {
+          reset();
+        }
+      }}
       sx={{
+        flexBasis: 0,
+        flexGrow: 1,
         backgroundColor: "black",
         display: "flex",
         flexDirection: "column",
       }}
-      height="100vh"
     >
       <Stack spacing={1}>
-        <Typography
-          fontWeight={900}
-          sx={{ userSelect: "none" }}
-        >
+        <Typography fontWeight={900}>
           {`Selection sort`}
         </Typography>
         <Stack
@@ -143,16 +143,14 @@ const SelectionSortView_: FC = () => {
         >
           <Typography
             sx={{
-              userSelect: "none",
-              color: green["A200"],
+              color: palette.opSwap.main,
             }}
           >
             {`Swaps: ${swapCount}`}
           </Typography>
           <Typography
             sx={{
-              userSelect: "none",
-              color: blue["A200"],
+              color: palette.opCompare.main,
             }}
           >
             {`Comparisons: ${compareCount}`}
