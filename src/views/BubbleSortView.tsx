@@ -1,10 +1,10 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
-import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
+import { useSortAnimator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
 import { bubbleSortAnimator } from "@/services/sorting-animators/bubble-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { BubbleSortFrameData } from "@/types/sorters/bubble-sort";
+import type { BubbleSortFrameData } from "@/types/sorting-animators/bubble-sort";
 import {
   alpha,
   Box,
@@ -65,10 +65,14 @@ const SortElement: FC<SortElementProps> = memo(
 
 const BubbleSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
-      bubbleSortAnimator(generateDataset(size))
-    );
+  const {
+    frame,
+    nextFrame,
+    prevFrame,
+    shuffleDataset: reset,
+  } = useSortAnimator(() =>
+    bubbleSortAnimator(generateDataset(size))
+  );
 
   const { playNote } = useMusicalScale();
 

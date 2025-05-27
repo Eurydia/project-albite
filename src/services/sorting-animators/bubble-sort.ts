@@ -1,6 +1,8 @@
-import type { BubbleSortFrameData } from "@/types/sorters/bubble-sort";
+import type { BubbleSortFrameData } from "@/types/sorting-animators/bubble-sort";
+import { generateDataset } from "../generate-dataset";
+import { SortAnimatorBase } from "./base";
 
-export function* bubbleSortAnimator(
+function* bubbleSortAnimator(
   dataset: number[]
 ): Generator<BubbleSortFrameData> {
   const size = dataset.length;
@@ -8,10 +10,7 @@ export function* bubbleSortAnimator(
   let compareCount = 0;
 
   function* generateFrame(
-    data: Omit<
-      BubbleSortFrameData,
-      "items" | "swapCount" | "compareCount"
-    > = {}
+    data: Partial<BubbleSortFrameData> = {}
   ): Generator<BubbleSortFrameData> {
     yield {
       items: structuredClone(dataset),
@@ -54,4 +53,10 @@ export function* bubbleSortAnimator(
   }
 
   yield* generateFrame();
+}
+
+export class BubbleSortAnimator extends SortAnimatorBase<BubbleSortFrameData> {
+  protected getGeneratorFunction(): Generator<BubbleSortFrameData> {
+    return bubbleSortAnimator(generateDataset(this.size));
+  }
 }

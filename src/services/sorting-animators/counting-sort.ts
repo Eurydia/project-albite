@@ -1,53 +1,43 @@
-import type { CountingSortFrameState } from "@/types/sorters/counting-sort";
+import type { CountingSortFrameState } from "@/types/sorting-animators/counting-sort";
+import { generateDataset } from "../generate-dataset";
+import { SortAnimatorBase } from "./base";
 
-export function* countingSortAnimator(
+function* countingSortAnimator(
   dataset: number[]
 ): Generator<CountingSortFrameState> {
   const size = dataset.length;
   const maxValue = Math.max(...dataset);
 
-  let memWriteCount = 0;
-  let memReadCount = 0;
+  let writeCount = 0;
+  let readCount = 0;
 
   const auxiMemory = new Array(maxValue + 1).fill(0);
   const sortMemory = new Array(size).fill(0);
 
   const generateFrame = ({
-    verifyAt = undefined,
-    mainMemRead = undefined,
-    mainMemWritten = undefined,
-    auxiMemRead = undefined,
-    auxiMemWritten = undefined,
-    sortMemRead = undefined,
-    sortMemWritten = undefined,
-  }: {
-    verifyAt?: number;
-    mainMemRead?: number;
-    mainMemWritten?: number;
-    auxiMemRead?: number;
-    auxiMemWritten?: number;
-    sortMemRead?: number;
-    sortMemWritten?: number;
-  } = {}): CountingSortFrameState => {
+    auxiMem,
+    mainMem,
+    sortMem,
+  }: Partial<{
+    mainMem: Partial<CountingSortFrameState["mainMem"]>;
+    auxiMem: Partial<CountingSortFrameState["auxiMem"]>;
+    sortMem: Partial<CountingSortFrameState["sortMem"]>;
+  }> = {}): CountingSortFrameState => {
     return {
       mainMem: {
+        ...mainMem,
         items: structuredClone(dataset),
-        readAt: mainMemRead,
-        writtenAt: mainMemWritten,
       },
       auxiMem: {
+        ...auxiMem,
         items: structuredClone(auxiMemory),
-        readAt: auxiMemRead,
-        writtenAt: auxiMemWritten,
       },
       sortMem: {
+        ...sortMem,
         items: structuredClone(sortMemory),
-        readAt: sortMemRead,
-        writtenAt: sortMemWritten,
       },
-      readCount: memReadCount,
-      writeCount: memWriteCount,
-      verifyAt,
+      readCount: readCount,
+      writeCount: writeCount,
     };
   };
 
@@ -55,21 +45,25 @@ export function* countingSortAnimator(
 
   for (let i = 0; i < size; i++) {
     auxiMemory[dataset[i]]++;
-    memReadCount++;
-    memWriteCount++;
+    readCount++;
+    writeCount++;
     yield generateFrame({
-      mainMemRead: i,
-      auxiMemWritten: dataset[i],
+      mainMem: { readAt: i },
+      auxiMem: {
+        writtenAt: dataset[i],
+      },
     });
   }
 
   for (let i = 1; i <= maxValue; i++) {
     auxiMemory[i] += auxiMemory[i - 1];
-    memReadCount++;
-    memWriteCount++;
+    readCount++;
+    writeCount++;
     yield generateFrame({
-      auxiMemRead: i,
-      auxiMemWritten: i + 1,
+      auxiMem: {
+        writtenAt: i,
+        readAt: i - 1,
+      },
     });
   }
 
@@ -78,40 +72,58 @@ export function* countingSortAnimator(
 
     auxiMemory[dataset[i]]--;
 
-    memReadCount++;
-    memReadCount++;
-    memWriteCount++;
+    readCount++;
+    readCount++;
+    writeCount++;
     yield generateFrame({
-      mainMemRead: i,
-      auxiMemRead: dataset[i],
-      sortMemWritten: auxiMemory[dataset[i]] - 1,
+      mainMem: {
+        readAt: i,
+      },
+      auxiMem: {
+        readAt: dataset[i],
+      },
+      sortMem: {
+        writtenAt: auxiMemory[dataset[i]] - 1,
+      },
     });
 
     auxiMemory[dataset[i]]--;
 
-    memReadCount++;
-    memWriteCount++;
+    readCount++;
+    writeCount++;
     yield generateFrame({
-      mainMemRead: i,
-      auxiMemWritten: dataset[i],
+      mainMem: { readAt: i },
+      auxiMem: {
+        writtenAt: dataset[i],
+      },
     });
   }
 
   for (let i = 0; i < size; i++) {
     dataset[i] = sortMemory[i];
 
-    memReadCount++;
-    memWriteCount++;
+    readCount++;
+    writeCount++;
     yield generateFrame({
-      mainMemWritten: i,
-      sortMemRead: i,
+      mainMem: {
+        writtenAt: i,
+      },
+      sortMem: {
+        readAt: i,
+      },
     });
   }
 
   for (let i = 0; i < size; i++) {
     yield generateFrame({
-      verifyAt: i,
+      mainMem: { verifyAt: i },
     });
   }
   yield generateFrame();
+}
+
+export class CountingSortAnimator extends SortAnimatorBase<CountingSortFrameState> {
+  protected getGeneratorFunction(): Generator<CountingSortFrameState> {
+    return countingSortAnimator(generateDataset(this.size));
+  }
 }

@@ -1,10 +1,10 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
-import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
+import { useSortAnimator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
 import { quickSortAnimator } from "@/services/sorting-animators/quick-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { QuicksortFrameState } from "@/types/sorters/quick-sort";
+import type { QuicksortFrameState } from "@/types/sorting-animators/quick-sort";
 import {
   ChangeHistoryRounded,
   CircleOutlined,
@@ -106,10 +106,14 @@ const SortElement: FC<SortElementProps> = memo(
 const QuickSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
 
-  const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
-      quickSortAnimator(generateDataset(size))
-    );
+  const {
+    frame,
+    nextFrame,
+    prevFrame,
+    shuffleDataset: reset,
+  } = useSortAnimator(() =>
+    quickSortAnimator(generateDataset(size))
+  );
 
   const { playNote } = useMusicalScale();
 

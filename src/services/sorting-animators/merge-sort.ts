@@ -1,6 +1,8 @@
-import type { MergeSortFrameData } from "@/types/sorters/merge-sort";
+import type { MergeSortFrameData } from "@/types/sorting-animators/merge-sort";
+import { generateDataset } from "../generate-dataset";
+import { SortAnimatorBase } from "./base";
 
-export function* mergeSortAnimator(
+function* mergeSortAnimator(
   dataset: number[]
 ): Generator<MergeSortFrameData> {
   const size = dataset.length;
@@ -15,20 +17,20 @@ export function* mergeSortAnimator(
     mainMem,
     auxiMem,
   }: Partial<{
-    mainMem: Omit<MergeSortFrameData["mainMem"], "items">;
-    auxiMem: Omit<MergeSortFrameData["auxiMem"], "items">;
+    mainMem: Partial<MergeSortFrameData["mainMem"]>;
+    auxiMem: Partial<MergeSortFrameData["auxiMem"]>;
   }> = {}): Generator<MergeSortFrameData> {
     yield {
       compareCount,
       readCount,
       writeCount,
       mainMem: {
-        items: structuredClone(dataset),
         ...mainMem,
+        items: structuredClone(dataset),
       },
       auxiMem: {
-        items: structuredClone(auxiMemory),
         ...auxiMem,
+        items: structuredClone(auxiMemory),
       },
     };
   }
@@ -169,4 +171,10 @@ export function* mergeSortAnimator(
   }
 
   yield* generateFrame();
+}
+
+export class MergeSortAnimator extends SortAnimatorBase<MergeSortFrameData> {
+  protected getGeneratorFunction(): Generator<MergeSortFrameData> {
+    return mergeSortAnimator(generateDataset(this.size));
+  }
 }

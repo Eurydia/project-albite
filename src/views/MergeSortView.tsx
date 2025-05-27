@@ -1,10 +1,10 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
-import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
+import { useSortAnimator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
 import { mergeSortAnimator } from "@/services/sorting-animators/merge-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { MergeSortFrameData } from "@/types/sorters/merge-sort";
+import type { MergeSortFrameData } from "@/types/sorting-animators/merge-sort";
 import {
   alpha,
   Box,
@@ -99,10 +99,14 @@ const AuxiMemItem: FC<AuxiMemItemProps> = memo(
 const MergeSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
 
-  const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
-      mergeSortAnimator(generateDataset(size))
-    );
+  const {
+    frame,
+    nextFrame,
+    prevFrame,
+    shuffleDataset: reset,
+  } = useSortAnimator(() =>
+    mergeSortAnimator(generateDataset(size))
+  );
 
   const { playNote } = useMusicalScale();
   useEffect(() => {

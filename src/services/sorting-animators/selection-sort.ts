@@ -1,6 +1,8 @@
-import type { SelectionSortFrameState } from "@/types/sorters/selection-sort";
+import type { SelectionSortFrameState } from "@/types/sorting-animators/selection-sort";
+import { generateDataset } from "../generate-dataset";
+import { SortAnimatorBase } from "./base";
 
-export function* selectionSortAnimator(
+function* selectionSortAnimator(
   dataset: number[]
 ): Generator<SelectionSortFrameState> {
   const size = dataset.length;
@@ -8,10 +10,7 @@ export function* selectionSortAnimator(
   let compareCount = 0;
 
   function* generateFrame(
-    data: Omit<
-      SelectionSortFrameState,
-      "items" | "swapCount" | "compareCount"
-    > = {}
+    data: Partial<SelectionSortFrameState> = {}
   ): Generator<SelectionSortFrameState> {
     yield {
       items: structuredClone(dataset),
@@ -68,4 +67,12 @@ export function* selectionSortAnimator(
   }
 
   yield* generateFrame();
+}
+
+export class SelectionSortAnimator extends SortAnimatorBase<SelectionSortFrameState> {
+  protected getGeneratorFunction(): Generator<SelectionSortFrameState> {
+    return selectionSortAnimator(
+      generateDataset(this.size)
+    );
+  }
 }

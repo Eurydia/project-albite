@@ -1,6 +1,8 @@
-import type { HeapSortFrameState } from "@/types/sorters/heap-sort";
+import type { HeapSortFrameState } from "@/types/sorting-animators/heap-sort";
+import { generateDataset } from "../generate-dataset";
+import { SortAnimatorBase } from "./base";
 
-export function* heapSortAnimator(
+function* heapSortAnimator(
   dataset: number[]
 ): Generator<HeapSortFrameState> {
   const size = dataset.length;
@@ -8,16 +10,13 @@ export function* heapSortAnimator(
   let compareCount = 0;
 
   function* generateFrame(
-    data: Omit<
-      HeapSortFrameState,
-      "items" | "swapCount" | "compareCount"
-    > = {}
+    data: Partial<HeapSortFrameState> = {}
   ): Generator<HeapSortFrameState> {
     yield {
+      ...data,
       items: structuredClone(dataset),
       swapCount,
       compareCount,
-      ...data,
     };
   }
 
@@ -116,4 +115,10 @@ export function* heapSortAnimator(
   }
 
   yield* generateFrame();
+}
+
+export class HeapSortAnimator extends SortAnimatorBase<HeapSortFrameState> {
+  protected getGeneratorFunction(): Generator<HeapSortFrameState> {
+    return heapSortAnimator(generateDataset(this.size));
+  }
 }

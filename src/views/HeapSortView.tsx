@@ -1,10 +1,10 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
-import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
+import { useSortAnimator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
 import { heapSortAnimator } from "@/services/sorting-animators/heap-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { HeapSortFrameState } from "@/types/sorters/heap-sort";
+import type { HeapSortFrameState } from "@/types/sorting-animators/heap-sort";
 import {
   ChangeHistoryRounded,
   CircleOutlined,
@@ -104,10 +104,14 @@ const SortElement: FC<SortElementProps> = memo(
 
 const HeapSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
-      heapSortAnimator(generateDataset(size))
-    );
+  const {
+    frame,
+    nextFrame,
+    prevFrame,
+    shuffleDataset: reset,
+  } = useSortAnimator(() =>
+    heapSortAnimator(generateDataset(size))
+  );
 
   const { playNote } = useMusicalScale();
 

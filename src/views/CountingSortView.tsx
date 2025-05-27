@@ -3,7 +3,7 @@ import {
   MusicalScales,
   useMusicalScale,
 } from "@/hooks/useMusicalNotes";
-import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
+import { useSortAnimator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
 import { countingSortAnimator } from "@/services/sorting-animators/counting-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
@@ -98,10 +98,14 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
 
 const CountingSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
-      countingSortAnimator(generateDataset(size))
-    );
+  const {
+    frame,
+    nextFrame,
+    prevFrame,
+    shuffleDataset: reset,
+  } = useSortAnimator(() =>
+    countingSortAnimator(generateDataset(size))
+  );
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;

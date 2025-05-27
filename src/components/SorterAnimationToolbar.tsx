@@ -1,7 +1,7 @@
 import {
   AutorenewRounded,
-  FastForwardRounded,
-  FastRewindRounded,
+  ChevronLeftRounded,
+  ChevronRightRounded,
 } from "@mui/icons-material";
 import { Button, Toolbar } from "@mui/material";
 import { memo, type FC } from "react";
@@ -17,28 +17,25 @@ export const SorterAnimationToolbar: FC<Props> = memo(
       <Toolbar
         variant="dense"
         disableGutters
-        sx={{ gap: { xs: 1, md: 2 }, flexWrap: "wrap" }}
+        sx={{ gap: 1, flexWrap: "wrap" }}
       >
         <Button
-          startIcon={<FastRewindRounded />}
           variant="contained"
           onClick={onPrevFrame}
         >
-          Previous
+          <ChevronLeftRounded />
         </Button>
         <Button
-          startIcon={<AutorenewRounded />}
           variant="contained"
           onClick={onShuffle}
         >
-          Shuffle
+          <AutorenewRounded />
         </Button>
         <Button
           variant="contained"
-          endIcon={<FastForwardRounded />}
           onClick={onNextFrame}
         >
-          Next
+          <ChevronRightRounded />
         </Button>
       </Toolbar>
     );

@@ -1,6 +1,8 @@
-import type { RadixSortFrameState } from "@/types/sorters/radix-sort";
+import type { RadixSortFrameState } from "@/types/sorting-animators/radix-sort";
+import { generateDataset } from "../generate-dataset";
+import { SortAnimatorBase } from "./base";
 
-export function* radixSortAnimator(
+function* radixSortAnimator(
   dataset: number[]
 ): Generator<RadixSortFrameState> {
   const size = dataset.length;
@@ -9,41 +11,32 @@ export function* radixSortAnimator(
   let memWriteCount = 0;
   let memReadCount = 0;
 
-  const auxiMemory: number[] = new Array(size).fill(0);
-  const sortMemory: number[] = new Array(size).fill(0);
+  const auxiMemory = new Array(size).fill(0);
+  const sortMemory = new Array(size).fill(0);
 
   function* generateFrame({
-    mainMemRead,
-    mainMemWritten,
-    auxiMemRead,
-    auxiMemWritten,
-    sortMemRead,
-    sortMemWritten,
-  }: {
-    mainMemRead?: number;
-    mainMemWritten?: number;
-    auxiMemRead?: number;
-    auxiMemWritten?: number;
-    sortMemRead?: number;
-    sortMemWritten?: number;
-  } = {}): Generator<RadixSortFrameState> {
+    mainMem,
+    auxiMem,
+    sortMem,
+  }: Partial<{
+    mainMem: Partial<RadixSortFrameState["mainMem"]>;
+    auxiMem: Partial<RadixSortFrameState["auxiMem"]>;
+    sortMem: Partial<RadixSortFrameState["sortMem"]>;
+  }> = {}): Generator<RadixSortFrameState> {
     yield {
       memReadCount,
       memWriteCount,
       mainMem: {
+        ...mainMem,
         items: structuredClone(dataset),
-        read: mainMemRead,
-        written: mainMemWritten,
       },
       auxiMem: {
+        ...auxiMem,
         items: structuredClone(auxiMemory),
-        read: auxiMemRead,
-        written: auxiMemWritten,
       },
       sortMem: {
+        ...sortMem,
         items: structuredClone(sortMemory),
-        read: sortMemRead,
-        written: sortMemWritten,
       },
     };
   }
@@ -58,8 +51,12 @@ export function* radixSortAnimator(
       memReadCount++;
       memWriteCount++;
       yield* generateFrame({
-        mainMemRead: i,
-        auxiMemWritten: tIndex,
+        mainMem: {
+          readAt: i,
+        },
+        auxiMem: {
+          writtenAt: tIndex,
+        },
       });
     }
 
@@ -69,8 +66,10 @@ export function* radixSortAnimator(
       memReadCount++;
       memWriteCount++;
       yield* generateFrame({
-        auxiMemRead: i - 1,
-        auxiMemWritten: i,
+        auxiMem: {
+          readAt: i - 1,
+          writtenAt: i,
+        },
       });
     }
 
@@ -82,10 +81,16 @@ export function* radixSortAnimator(
       memReadCount++;
       memWriteCount++;
       yield* generateFrame({
-        mainMemRead: i,
-        auxiMemRead: tIndex,
-        auxiMemWritten: i,
-        sortMemWritten: auxiMemory[tIndex] - 1,
+        mainMem: {
+          readAt: i,
+        },
+        auxiMem: {
+          readAt: tIndex,
+          writtenAt: i,
+        },
+        sortMem: {
+          writtenAt: auxiMemory[tIndex] - 1,
+        },
       });
 
       auxiMemory[tIndex]--;
@@ -93,8 +98,12 @@ export function* radixSortAnimator(
       memReadCount++;
       memWriteCount++;
       yield* generateFrame({
-        mainMemRead: i,
-        auxiMemWritten: tIndex,
+        mainMem: {
+          readAt: i,
+        },
+        auxiMem: {
+          writtenAt: tIndex,
+        },
       });
     }
 
@@ -104,8 +113,12 @@ export function* radixSortAnimator(
       memReadCount++;
       memWriteCount++;
       yield* generateFrame({
-        mainMemWritten: i,
-        sortMemRead: i,
+        mainMem: {
+          writtenAt: i,
+        },
+        sortMem: {
+          readAt: i,
+        },
       });
     }
   }
@@ -122,21 +135,18 @@ export function* radixSortAnimator(
   }
 
   for (let i = 0; i < size; i++) {
-    yield {
-      memReadCount,
-      memWriteCount,
-      verify: i,
+    yield* generateFrame({
       mainMem: {
-        items: structuredClone(dataset),
+        verifyAt: i,
       },
-      auxiMem: {
-        items: structuredClone(auxiMemory),
-      },
-      sortMem: {
-        items: structuredClone(sortMemory),
-      },
-    };
+    });
   }
 
   yield* generateFrame();
+}
+
+export class RadixSortAnimator extends SortAnimatorBase<RadixSortFrameState> {
+  protected getGeneratorFunction(): Generator<RadixSortFrameState> {
+    return radixSortAnimator(generateDataset(this.size));
+  }
 }

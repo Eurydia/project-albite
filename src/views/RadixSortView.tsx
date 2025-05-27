@@ -3,11 +3,11 @@ import {
   MusicalScales,
   useMusicalScale,
 } from "@/hooks/useMusicalNotes";
-import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
+import { useSortAnimator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
 import { radixSortAnimator } from "@/services/sorting-animators/radix-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { RadixSortFrameState } from "@/types/sorters/radix-sort";
+import type { RadixSortFrameState } from "@/types/sorting-animators/radix-sort";
 import {
   alpha,
   Box,
@@ -33,9 +33,9 @@ const SortItem: FC<SortItemProps> = memo(
     const height = (value / mem.items.length) * 100;
 
     let backgroundColor: string = grey["200"];
-    if (mem.read === index) {
+    if (mem.readAt === index) {
       backgroundColor = blue["A200"];
-    } else if (mem.written === index) {
+    } else if (mem.writtenAt === index) {
       backgroundColor = deepPurple["A400"];
     }
     backgroundColor = alpha(backgroundColor, 0.7);
@@ -63,14 +63,14 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
     });
 
     useEffect(() => {
-      if (mem.read !== undefined) {
-        const item = mem.items.at(mem.read);
+      if (mem.readAt !== undefined) {
+        const item = mem.items.at(mem.readAt);
         if (item !== undefined && item >= 0) {
           playNote(item + 1);
         }
       }
-      if (mem.written !== undefined) {
-        const item = mem.items.at(mem.written);
+      if (mem.writtenAt !== undefined) {
+        const item = mem.items.at(mem.writtenAt);
         if (item !== undefined && item >= 0) {
           playNote(item + 1);
         }
@@ -106,10 +106,14 @@ const MemoryDisplay: FC<MemoryDisplayProps> = memo(
 
 const RadixSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
-      radixSortAnimator(generateDataset(size))
-    );
+  const {
+    frame,
+    nextFrame,
+    prevFrame,
+    shuffleDataset: reset,
+  } = useSortAnimator(() =>
+    radixSortAnimator(generateDataset(size))
+  );
 
   if (frame === null) {
     return <Typography>Loading...</Typography>;

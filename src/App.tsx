@@ -4,6 +4,7 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router";
+import { SorterRouteLayout } from "./layouts/SorterRouteLayouts";
 import {
   getSorterRoutes,
   registerSorterView,
@@ -63,7 +64,8 @@ const router = createBrowserRouter(
       children: [
         { index: true, element: <HomeView /> },
         {
-          path: "/sorters",
+          path: "sorters",
+          element: <SorterRouteLayout />,
           children: getSorterRoutes(),
         },
       ],

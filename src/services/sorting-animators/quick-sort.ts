@@ -1,22 +1,21 @@
-import type { QuicksortFrameState } from "@/types/sorters/quick-sort";
+import type { QuicksortFrameState } from "@/types/sorting-animators/quick-sort";
+import { generateDataset } from "../generate-dataset";
+import { SortAnimatorBase } from "./base";
 
-export function* quickSortAnimator(
+function* quickSortAnimator(
   dataset: number[]
 ): Generator<QuicksortFrameState> {
   const size = dataset.length;
   let swapCount = 0;
   let compareCount = 0;
 
-  function* generateFrameState(
-    data: Omit<
-      QuicksortFrameState,
-      "items" | "swapCount" | "compareCount"
-    > = {}
+  function* generateFrame(
+    data: Partial<QuicksortFrameState> = {}
   ): Generator<QuicksortFrameState> {
     yield {
+      items: structuredClone(dataset),
       compareCount,
       swapCount,
-      items: structuredClone(dataset),
       ...data,
     };
   }
@@ -25,11 +24,11 @@ export function* quickSortAnimator(
     lowIndex: number,
     highIndex: number
   ) {
-    yield* generateFrameState({
+    yield* generateFrame({
       terminals: [lowIndex, highIndex],
     });
 
-    yield* generateFrameState({
+    yield* generateFrame({
       terminals: [lowIndex, highIndex],
       key: highIndex,
       partition: lowIndex,
@@ -38,9 +37,8 @@ export function* quickSortAnimator(
     let pivotIndex = lowIndex;
     for (let i = lowIndex; i < highIndex; i++) {
       const shouldSkip = dataset[i] > dataset[highIndex];
-
       compareCount++;
-      yield* generateFrameState({
+      yield* generateFrame({
         compared: [i, highIndex],
         terminals: [lowIndex, highIndex],
         key: highIndex,
@@ -57,7 +55,7 @@ export function* quickSortAnimator(
       dataset[i] = b;
 
       swapCount++;
-      yield* generateFrameState({
+      yield* generateFrame({
         swapped: [i, pivotIndex],
         terminals: [lowIndex, highIndex],
         key: highIndex,
@@ -72,7 +70,7 @@ export function* quickSortAnimator(
     dataset[highIndex] = a;
 
     swapCount++;
-    yield* generateFrameState({
+    yield* generateFrame({
       swapped: [pivotIndex, highIndex],
       terminals: [lowIndex, highIndex],
       key: highIndex,
@@ -94,18 +92,21 @@ export function* quickSortAnimator(
     yield* __quickSort(p + 1, highIndex);
   }
 
-  yield* generateFrameState();
+  yield* generateFrame();
 
   yield* __quickSort(0, size - 1);
 
   for (let i = 0; i < size; i++) {
-    yield {
-      compareCount,
-      swapCount,
-      items: structuredClone(dataset),
+    yield* generateFrame({
       verifyAt: i,
-    };
+    });
   }
 
-  yield* generateFrameState();
+  yield* generateFrame();
+}
+
+export class QuickSortAnimator extends SortAnimatorBase<QuicksortFrameState> {
+  protected getGeneratorFunction(): Generator<QuicksortFrameState> {
+    return quickSortAnimator(generateDataset(this.size));
+  }
 }

@@ -1,20 +1,20 @@
 export type RadixSortFrameState = {
-  verify?: number;
   memWriteCount: number;
   memReadCount: number;
   mainMem: {
     items: number[];
-    read?: number;
-    written?: number;
+    readAt?: number;
+    writtenAt?: number;
+    verifyAt?: number;
   };
   auxiMem: {
     items: number[];
-    read?: number;
-    written?: number;
+    readAt?: number;
+    writtenAt?: number;
   };
   sortMem: {
     items: number[];
-    read?: number;
-    written?: number;
+    readAt?: number;
+    writtenAt?: number;
   };
 };

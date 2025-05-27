@@ -1,13 +1,12 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
-import { useSortAnimatorGenerator } from "@/hooks/useSortAnimatorGenerator";
+import { useSortAnimator } from "@/hooks/useSortAnimatorGenerator";
 import { generateDataset } from "@/services/generate-dataset";
 import { selectionSortAnimator } from "@/services/sorting-animators/selection-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { SelectionSortFrameState } from "@/types/sorters/selection-sort";
+import type { SelectionSortFrameState } from "@/types/sorting-animators/selection-sort";
 import { ChangeHistoryRounded } from "@mui/icons-material";
 import {
-  alpha,
   Box,
   Grid,
   Stack,
@@ -49,8 +48,6 @@ const SortItem: FC<SortItemProps> = memo(
       backgroundColor = palette.opSwap.main;
     }
 
-    backgroundColor = alpha(backgroundColor, 0.8);
-
     return (
       <Grid
         size={1}
@@ -78,12 +75,15 @@ const SortItem: FC<SortItemProps> = memo(
 
 const SelectionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-
   const { palette } = useTheme();
-  const { frame, nextFrame, prevFrame, reset } =
-    useSortAnimatorGenerator(() =>
-      selectionSortAnimator(generateDataset(size))
-    );
+  const {
+    frame,
+    nextFrame,
+    prevFrame,
+    shuffleDataset: reset,
+  } = useSortAnimator(() =>
+    selectionSortAnimator(generateDataset(size))
+  );
 
   const { playNote } = useMusicalScale();
 
@@ -112,14 +112,21 @@ const SelectionSortView_: FC = () => {
 
   return (
     <Box
+      autoFocus
+      tabIndex={0}
       component="div"
       onKeyDown={(e) => {
-        if (e.key === "ArrowRight") {
-          nextFrame();
-        } else if (e.key === "ArrowLeft") {
-          prevFrame();
-        } else if (e.key === " ") {
-          reset();
+        console.log(e.key === " ");
+        switch (e.key) {
+          case "ArrowRight":
+            nextFrame();
+            break;
+          case "ArrowLeft":
+            prevFrame();
+            break;
+          case " ":
+            reset();
+            break;
         }
       }}
       sx={{

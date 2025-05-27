@@ -1,3 +1,4 @@
+import type { SortAnimatorBase } from "@/services/sorting-animators/base";
 import {
   useCallback,
   useMemo,
@@ -5,44 +6,23 @@ import {
   useState,
 } from "react";
 
-export const useSortAnimatorGenerator = <T extends object>(
-  animator: () => Generator<T, void, unknown>
+export const useSortAnimator = <T extends object>(
+  animator: SortAnimatorBase<T>
 ) => {
-  const framesRef = useRef<T[]>([]);
-  const [gen, setGen] = useState<
-    Generator<T, void, unknown>
-  >(() => {
-    const gen = animator();
-    const next = gen.next();
-    if (next.done === undefined || !next.done) {
-      framesRef.current = [next.value];
-    }
-    return gen;
-  });
+  const animatorRef = useRef(animator);
   const [frameIndex, setFrameIndex] = useState<number>(0);
 
-  const reset = useCallback(() => {
-    const gen_ = animator();
-    const next = gen_.next();
-    if (next.done === undefined || !next.done) {
-      framesRef.current = [next.value];
-    }
-    setGen(gen_);
+  const shuffleDataset = useCallback(() => {
+    animatorRef.current.reset();
     setFrameIndex(0);
-  }, [animator]);
+  }, []);
 
   const nextFrame = useCallback(() => {
-    const frame = gen.next();
-    if (frame.done === undefined || !frame.done) {
-      framesRef.current.push(frame.value);
-    }
+    const frameCount = animatorRef.current.nextFrame();
     setFrameIndex((prev) => {
-      return Math.min(
-        framesRef.current.length - 1,
-        prev + 1
-      );
+      return Math.min(frameCount - 1, prev + 1);
     });
-  }, [gen]);
+  }, []);
 
   const prevFrame = useCallback(() => {
     setFrameIndex((prev) => {
@@ -51,11 +31,11 @@ export const useSortAnimatorGenerator = <T extends object>(
   }, []);
 
   const frame = useMemo(() => {
-    return framesRef.current.at(frameIndex) ?? null;
+    return animatorRef.current.getFrame(frameIndex);
   }, [frameIndex]);
 
   return {
-    reset,
+    shuffleDataset,
     prevFrame,
     nextFrame,
     frame,

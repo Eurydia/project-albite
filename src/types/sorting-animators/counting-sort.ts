@@ -1,11 +1,11 @@
 export type CountingSortFrameState = {
   writeCount: number;
   readCount: number;
-  verifyAt?: number;
   mainMem: {
     items: number[];
     readAt?: number;
     writtenAt?: number;
+    verifyAt?: number;
   };
   auxiMem: {
     items: number[];

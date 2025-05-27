@@ -1,6 +1,8 @@
-import type { InsertionSortFrameState } from "@/types/sorters/insertion-sort";
+import type { InsertionSortFrameState } from "@/types/sorting-animators/insertion-sort";
+import { generateDataset } from "../generate-dataset";
+import { SortAnimatorBase } from "./base";
 
-export function* insertionSortAnimation(
+function* insertionSortAnimator(
   dataset: number[]
 ): Generator<InsertionSortFrameState> {
   const size = dataset.length;
@@ -8,16 +10,13 @@ export function* insertionSortAnimation(
   let compareCount = 0;
 
   function* generateFrame(
-    data: Omit<
-      InsertionSortFrameState,
-      "items" | "swapCount" | "compareCount"
-    > = {}
+    data: Partial<InsertionSortFrameState> = {}
   ): Generator<InsertionSortFrameState> {
     yield {
+      ...data,
       items: structuredClone(dataset),
       swapCount,
       compareCount,
-      ...data,
     };
   }
 
@@ -67,4 +66,12 @@ export function* insertionSortAnimation(
   }
 
   yield* generateFrame();
+}
+
+export class InsertionSortAnimator extends SortAnimatorBase<InsertionSortFrameState> {
+  protected getGeneratorFunction(): Generator<InsertionSortFrameState> {
+    return insertionSortAnimator(
+      generateDataset(this.size)
+    );
+  }
 }
