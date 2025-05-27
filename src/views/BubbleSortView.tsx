@@ -1,55 +1,56 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import { useSortAnimator } from "@/hooks/useSortAnimatorGenerator";
-import { generateDataset } from "@/services/generate-dataset";
-import { bubbleSortAnimator } from "@/services/sorting-animators/bubble-sort";
+import { BubbleSortAnimator } from "@/services/sorting-animators/bubble-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 import type { BubbleSortFrameData } from "@/types/sorting-animators/bubble-sort";
+import { PanToolAltRounded } from "@mui/icons-material";
 import {
-  alpha,
   Box,
   Grid,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
+import { grey } from "@mui/material/colors";
 import {
-  blue,
-  green,
-  grey,
-  orange,
-} from "@mui/material/colors";
-import { memo, useEffect, type FC } from "react";
+  memo,
+  useCallback,
+  useEffect,
+  type FC,
+  type KeyboardEvent,
+} from "react";
 import { useLoaderData } from "react-router";
 
-type SortElementProps = {
+type SortRegionElementProps = {
   index: number;
   value: number;
   frame: BubbleSortFrameData;
 };
-const SortElement: FC<SortElementProps> = memo(
+const SortRegionElement: FC<SortRegionElementProps> = memo(
   ({ index, value, frame }) => {
+    const { palette } = useTheme();
     const height = (value / frame.items.length) * 100;
 
     let backgroundColor: string = grey["200"];
     if (frame.verifyAt === index) {
-      backgroundColor = orange["A200"];
+      backgroundColor = palette.opVerify.main;
     } else if (
       frame.compared !== undefined &&
       frame.compared.includes(index)
     ) {
-      backgroundColor = blue["A200"];
+      backgroundColor = palette.opCompare.main;
     } else if (
       frame.swapped !== undefined &&
       frame.swapped.includes(index)
     ) {
-      backgroundColor = green["A200"];
+      backgroundColor = palette.opSwap.main;
     } else if (
       frame.rightBound !== undefined &&
       index > frame.rightBound
     ) {
-      backgroundColor = grey["A700"];
+      backgroundColor = palette.rangeBounded.main;
     }
-    backgroundColor = alpha(backgroundColor, 0.7);
 
     return (
       <Grid
@@ -63,53 +64,83 @@ const SortElement: FC<SortElementProps> = memo(
   }
 );
 
+type SortRegionProps = {
+  size: number;
+  frame: BubbleSortFrameData;
+};
+const SortRegion: FC<SortRegionProps> = memo(
+  ({ frame, size }) => {
+    const { playNote } = useMusicalScale();
+
+    useEffect(() => {
+      if (frame.compared !== undefined) {
+        const pos = Math.max(...frame.compared);
+        playNote(frame.items.at(pos)!);
+      }
+      if (frame.swapped !== undefined) {
+        const pos = Math.max(...frame.swapped);
+        playNote(frame.items.at(pos)!);
+      }
+      if (frame.verifyAt !== undefined) {
+        playNote(frame.verifyAt);
+      }
+    }, [frame, playNote]);
+
+    return (
+      <Grid
+        container
+        columns={size}
+        spacing={0}
+        alignItems="flex-end"
+        sx={{ flexBasis: 0, flexGrow: 1 }}
+      >
+        {frame.items.map((value, index) => (
+          <SortRegionElement
+            key={`sort-item-${index}`}
+            index={index}
+            value={value}
+            frame={frame}
+          />
+        ))}
+      </Grid>
+    );
+  }
+);
+
 const BubbleSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const {
-    frame,
-    nextFrame,
-    prevFrame,
-    shuffleDataset: reset,
-  } = useSortAnimator(() =>
-    bubbleSortAnimator(generateDataset(size))
+  const { frame, nextFrame, prevFrame, shuffleDataset } =
+    useSortAnimator(new BubbleSortAnimator(size));
+  const { palette } = useTheme();
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      switch (event.key) {
+        case "ArrowRight":
+          nextFrame();
+          break;
+        case "ArrowLeft":
+          prevFrame();
+          break;
+        case "r":
+          shuffleDataset();
+          break;
+        default:
+          return;
+      }
+    },
+    [nextFrame, prevFrame, shuffleDataset]
   );
-
-  const { playNote } = useMusicalScale();
-
-  useEffect(() => {
-    if (frame === null || frame.compared === undefined) {
-      return;
-    }
-    playNote(frame.items.at(Math.max(...frame.compared))!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.swapped === undefined) {
-      return;
-    }
-    playNote(frame.items.at(Math.max(...frame.swapped))!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.verifyAt === undefined) {
-      return;
-    }
-    playNote(frame.items.at(frame.verifyAt)!);
-  }, [frame, playNote]);
-
-  if (frame === null) {
-    return <Typography>Loading...</Typography>;
-  }
-
-  const { items, swapCount, compareCount } = frame;
 
   return (
     <Box
-      height="100vh"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       sx={{
-        backgroundColor: "black",
         display: "flex",
         flexDirection: "column",
+        flexBasis: 0,
+        flexGrow: 1,
       }}
     >
       <Stack spacing={1}>
@@ -125,41 +156,47 @@ const BubbleSortView_: FC = () => {
         >
           <Typography
             sx={{
-              color: green["A200"],
+              color: palette.opSwap.main,
             }}
           >
-            {`Swaps: ${swapCount}`}
+            {`Swaps: ${frame?.swapCount ?? 0}`}
           </Typography>
           <Typography
             sx={{
-              color: blue["A200"],
+              color: palette.opCompare.main,
             }}
           >
-            {`Comparisons: ${compareCount}`}
+            {`Comparisons: ${frame?.compareCount ?? 0}`}
           </Typography>
         </Stack>
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={shuffleDataset}
         />
       </Stack>
-      <Grid
-        container
-        columns={size}
-        spacing={0}
-        alignItems="flex-end"
-        sx={{ flexBasis: 0, flexGrow: 1 }}
-      >
-        {items.map((value, index) => (
-          <SortElement
-            key={`sort-item-${index}`}
-            index={index}
-            value={value}
-            frame={frame}
-          />
-        ))}
-      </Grid>
+      {frame === undefined && (
+        <Box
+          onClick={shuffleDataset}
+          sx={{
+            flexBasis: 0,
+            flexGrow: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+          }}
+        >
+          <PanToolAltRounded />
+          <Typography>Shuffle once</Typography>
+        </Box>
+      )}
+      {frame !== undefined && (
+        <SortRegion
+          frame={frame}
+          size={size}
+        />
+      )}
     </Box>
   );
 };

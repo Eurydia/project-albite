@@ -10,29 +10,48 @@ export const useSortAnimator = <T extends object>(
   animator: SortAnimatorBase<T>
 ) => {
   const animatorRef = useRef(animator);
-  const [frameIndex, setFrameIndex] = useState<number>(0);
+  const [frameIndex, setFrameIndex] = useState(0);
+  const [frames, setFrames] = useState<T[]>([]);
 
   const shuffleDataset = useCallback(() => {
     animatorRef.current.reset();
-    setFrameIndex(0);
+
+    const nextFrames: T[] = [];
+    const nextFrame = animatorRef.current.next();
+    if (nextFrame !== undefined) {
+      nextFrames.push(nextFrame);
+    }
+
+    setFrames(nextFrames);
+    setFrameIndex(nextFrames.length - 1);
   }, []);
 
   const nextFrame = useCallback(() => {
-    const frameCount = animatorRef.current.nextFrame();
-    setFrameIndex((prev) => {
-      return Math.min(frameCount - 1, prev + 1);
-    });
-  }, []);
+    if (frameIndex < frames.length - 1) {
+      setFrameIndex(
+        Math.min(frameIndex + 1, frames.length - 1)
+      );
+      return;
+    }
+
+    const newFrame = animatorRef.current.next();
+    if (newFrame === undefined) {
+      return;
+    }
+    const nextFrames = [...frames, newFrame];
+    setFrames(nextFrames);
+    setFrameIndex(
+      Math.min(frameIndex + 1, nextFrames.length - 1)
+    );
+  }, [frameIndex, frames]);
 
   const prevFrame = useCallback(() => {
-    setFrameIndex((prev) => {
-      return Math.max(0, prev - 1);
-    });
+    setFrameIndex((prev) => Math.max(0, prev - 1));
   }, []);
 
   const frame = useMemo(() => {
-    return animatorRef.current.getFrame(frameIndex);
-  }, [frameIndex]);
+    return frames.at(frameIndex);
+  }, [frameIndex, frames]);
 
   return {
     shuffleDataset,

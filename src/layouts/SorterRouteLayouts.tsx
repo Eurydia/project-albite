@@ -9,13 +9,14 @@ export const SorterRouteLayout: FC = memo(() => {
       <Toolbar
         variant="dense"
         disableGutters
-        sx={{ backgroundColor: "black" }}
       >
         <Button
           variant="text"
           component={NavLink}
           to="/"
           startIcon={<KeyboardArrowLeftRounded />}
+          disableElevation
+          disableRipple
         >
           Home
         </Button>
