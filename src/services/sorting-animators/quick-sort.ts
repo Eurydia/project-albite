@@ -13,10 +13,10 @@ function* quickSortAnimator(
     data: Partial<QuicksortFrameState> = {}
   ): Generator<QuicksortFrameState> {
     yield {
+      ...data,
       items: structuredClone(dataset),
       compareCount,
       swapCount,
-      ...data,
     };
   }
 

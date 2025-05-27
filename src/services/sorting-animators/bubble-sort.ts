@@ -13,10 +13,10 @@ function* bubbleSortAnimator(
     data: Partial<BubbleSortFrameData> = {}
   ): Generator<BubbleSortFrameData> {
     yield {
+      ...data,
       items: structuredClone(dataset),
       swapCount,
       compareCount,
-      ...data,
     };
   }
 

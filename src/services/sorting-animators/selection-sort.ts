@@ -13,10 +13,10 @@ function* selectionSortAnimator(
     data: Partial<SelectionSortFrameState> = {}
   ): Generator<SelectionSortFrameState> {
     yield {
+      ...data,
       items: structuredClone(dataset),
       swapCount,
       compareCount,
-      ...data,
     };
   }
 
