@@ -1,93 +1,17 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import { useMusicalScale } from "@/hooks/useMusicalNotes";
+import { InsertionSortVisualizer } from "@/components/visualizers/InsertionSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
-import { generateDataset } from "@/services/generate-dataset";
-import { insertionSortAnimation } from "@/services/sorting-animators/insertion-sort";
+import { InsertionSortAnimator } from "@/services/sorting-animators/insertion-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { InsertionSortFrameState } from "@/types/sorting-animators/insertion-sort";
-import { CircleRounded } from "@mui/icons-material";
+import { PanToolAltRounded } from "@mui/icons-material";
 import {
-  alpha,
   Box,
-  Grid,
   Stack,
   Typography,
   useTheme,
 } from "@mui/material";
-import {
-  blue,
-  deepPurple,
-  grey,
-  orange,
-  purple,
-} from "@mui/material/colors";
-import { memo, useEffect, type FC } from "react";
+import { memo, type FC } from "react";
 import { useLoaderData } from "react-router";
-
-type SortItemProps = {
-  index: number;
-  value: number;
-  data: InsertionSortFrameState;
-};
-const SortItem: FC<SortItemProps> = ({
-  value,
-  data,
-  index,
-}) => {
-  const { palette } = useTheme();
-
-  const {
-    leftBound,
-    verifyAt: verify,
-    compared,
-    swapped,
-    key,
-  } = data;
-
-  let backgroundColor: string = grey["300"];
-  if (leftBound !== undefined && index > leftBound) {
-    backgroundColor = grey["900"];
-  } else if (verify === index) {
-    backgroundColor = orange["A200"];
-  } else if (
-    compared !== undefined &&
-    compared.includes(index)
-  ) {
-    backgroundColor = blue["A200"];
-  } else if (
-    swapped !== undefined &&
-    swapped.includes(index)
-  ) {
-    backgroundColor = deepPurple["A200"];
-  }
-  backgroundColor = alpha(backgroundColor, 0.7);
-  const height = (value / Math.max(...data.items)) * 100;
-
-  return (
-    <Grid
-      size={1}
-      sx={{
-        backgroundColor,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-end",
-        justifyContent: "center",
-        height: `${height}%`,
-        overflow: "clip",
-      }}
-    >
-      {key !== undefined && key === index && (
-        <CircleRounded
-          sx={{
-            width: "100%",
-            aspectRatio: "1/1",
-            color: palette.getContrastText(backgroundColor),
-          }}
-        />
-      )}
-    </Grid>
-  );
-};
 
 const InsertionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
@@ -95,54 +19,24 @@ const InsertionSortView_: FC = () => {
     frame,
     nextFrame,
     prevFrame,
-    shuffleDataset: reset,
-  } = useSortAnimator(() =>
-    insertionSortAnimation(generateDataset(size))
-  );
-
-  const { playNote } = useMusicalScale();
-
-  useEffect(() => {
-    if (frame === null || frame.compared === undefined) {
-      return;
-    }
-    playNote(frame.items.at(frame.compared.at(0)!)!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.swapped === undefined) {
-      return;
-    }
-    playNote(frame.items.at(frame.swapped.at(0)!)!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.verifyAt === undefined) {
-      return;
-    }
-    playNote(frame.items.at(frame.verifyAt)!);
-  }, [frame, playNote]);
-
-  if (frame === null) {
-    return <Typography>Loading...</Typography>;
-  }
-
-  const { compareCount, items, swapCount } = frame;
-
+    shuffleDataset,
+    handleAnimationControlKeyDown,
+  } = useSortAnimator(new InsertionSortAnimator(size));
+  const { palette } = useTheme();
   return (
     <Box
+      component="div"
+      tabIndex={0}
+      onKeyDown={handleAnimationControlKeyDown}
       sx={{
-        backgroundColor: "black",
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
+        flexBasis: 0,
+        flexGrow: 1,
       }}
     >
       <Stack spacing={1}>
-        <Typography
-          fontWeight={900}
-          sx={{ userSelect: "none" }}
-        >
+        <Typography fontWeight={900}>
           {`Insertion sort`}
         </Typography>
         <Stack
@@ -154,43 +48,47 @@ const InsertionSortView_: FC = () => {
         >
           <Typography
             sx={{
-              userSelect: "none",
-              color: purple["A100"],
+              color: palette.opSwap.main,
             }}
           >
-            {`Swaps: ${swapCount}`}
+            {`Swaps: ${frame?.swapCount ?? 0}`}
           </Typography>
           <Typography
             sx={{
-              userSelect: "none",
-              color: blue["A100"],
+              color: palette.opCompare.main,
             }}
           >
-            {`Comparisons: ${compareCount}`}
+            {`Comparisons: ${frame?.compareCount ?? 0}`}
           </Typography>
         </Stack>
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={shuffleDataset}
         />
       </Stack>
-      <Grid
-        container
-        columns={size}
-        spacing={0}
-        alignItems="flex-end"
-        sx={{ flexBasis: 0, flexGrow: 1 }}
-      >
-        {items.map((value, index) => (
-          <SortItem
-            key={`sort-item-${index}`}
-            index={index}
-            value={value}
-            data={frame}
-          />
-        ))}
-      </Grid>
+      {frame === undefined && (
+        <Box
+          onClick={shuffleDataset}
+          sx={{
+            flexBasis: 0,
+            flexGrow: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+          }}
+        >
+          <PanToolAltRounded />
+          <Typography>Shuffle once</Typography>
+        </Box>
+      )}
+      {frame !== undefined && (
+        <InsertionSortVisualizer
+          frame={frame}
+          size={size}
+        />
+      )}
     </Box>
   );
 };

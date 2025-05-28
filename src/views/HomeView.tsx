@@ -12,7 +12,7 @@ import { Link } from "react-router";
 export const HomeView: FC = memo(() => {
   return (
     <Box
-      maxWidth="md"
+      maxWidth="lg"
       marginX="auto"
       marginY={4}
     >
