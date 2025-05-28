@@ -103,6 +103,7 @@ function* heapSortAnimator(
     swapCount++;
     yield* generateFrame({
       swapped: [0, i],
+      rightBound: i,
     });
 
     yield* __heapsort_rebuild(i, 0);

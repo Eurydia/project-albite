@@ -71,10 +71,7 @@ const BubbleSortView_: FC = () => {
         <ShuffleRequestRegion onClick={shuffleDataset} />
       )}
       {frame !== undefined && (
-        <BubbleSortVisualizer
-          frame={frame}
-          size={size}
-        />
+        <BubbleSortVisualizer frame={frame} />
       )}
     </Box>
   );

@@ -1,7 +1,4 @@
-import {
-  MusicalScales,
-  useMusicalScale,
-} from "@/hooks/useMusicalNotes";
+import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import type { MergeSortFrameData } from "@/types/sorting-animators/merge-sort";
 import { Grid, useTheme } from "@mui/material";
 import { memo, useEffect, type FC } from "react";
@@ -32,7 +29,7 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
       const tMin = Math.min(...frame.terminals);
       const tMax = Math.max(...frame.terminals);
       if (index < tMin || index > tMax) {
-        backgroundColor = palette.rangeBounded.main;
+        backgroundColor = palette.rangeBounded.dark;
       }
     }
     return (
@@ -47,16 +44,19 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
   }
 );
 
-type MainMemVisualizerProps = {
+type MemVisualizerProps = {
+  playAudio?: boolean;
   mem: MergeSortFrameData["mainMem"];
 };
-const MainMemVisualizer: FC<MainMemVisualizerProps> = memo(
-  ({ mem }) => {
-    const { playNote } = useMusicalScale({
-      scalePattern: MusicalScales.BluesMinor,
-    });
+const MemVisualizer: FC<MemVisualizerProps> = memo(
+  ({ mem, playAudio }) => {
+    const { playNote } = useMusicalScale();
 
     useEffect(() => {
+      if (!playAudio) {
+        return;
+      }
+
       if (mem.compared !== undefined) {
         const pos = Math.max(...mem.compared);
         const item = mem.items.at(pos);
@@ -83,58 +83,7 @@ const MainMemVisualizer: FC<MainMemVisualizerProps> = memo(
           playNote(item);
         }
       }
-    }, [mem, playNote]);
-    return (
-      <Grid
-        container
-        columns={mem.items.length}
-        spacing={0}
-        sx={{
-          height: "100%",
-          alignItems: "flex-end",
-          flexGrow: 1,
-          flexBasis: 0,
-        }}
-      >
-        {mem.items.map((value, index) => {
-          return (
-            <VisualizerItem
-              key={`sort-item-${index}`}
-              index={index}
-              value={value}
-              frame={mem}
-            />
-          );
-        })}
-      </Grid>
-    );
-  }
-);
-
-type AuxiMemVisualizerProps = {
-  mem: MergeSortFrameData["auxiMem"];
-};
-const AuxiMemVisualizer: FC<AuxiMemVisualizerProps> = memo(
-  ({ mem }) => {
-    const { playNote } = useMusicalScale({
-      scalePattern: MusicalScales.Major,
-    });
-
-    useEffect(() => {
-      if (mem.readAt !== undefined) {
-        const item = mem.items.at(mem.readAt);
-        if (item !== undefined) {
-          playNote(item);
-        }
-      }
-      if (mem.writtenAt !== undefined) {
-        const item = mem.items.at(mem.writtenAt);
-        if (item !== undefined) {
-          playNote(item);
-        }
-      }
-    }, [mem, playNote]);
-
+    }, [mem, playNote, playAudio]);
     return (
       <Grid
         container
@@ -183,13 +132,16 @@ export const MergeSortVisualizer: FC<Props> = memo(
             flexGrow: 1,
           }}
         >
-          <MainMemVisualizer mem={frame.mainMem} />
+          <MemVisualizer
+            mem={frame.mainMem}
+            playAudio
+          />
         </Grid>
         <Grid
           size={1}
           sx={{ flexGrow: 1 }}
         >
-          <AuxiMemVisualizer mem={frame.auxiMem} />
+          <MemVisualizer mem={frame.auxiMem} />
         </Grid>
       </Grid>
     );

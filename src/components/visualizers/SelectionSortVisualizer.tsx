@@ -22,7 +22,7 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
       frame.leftBound !== undefined &&
       index < frame.leftBound
     ) {
-      backgroundColor = palette.rangeBounded.main;
+      backgroundColor = palette.rangeBounded.dark;
     } else if (
       frame.compared !== undefined &&
       frame.compared.includes(index)

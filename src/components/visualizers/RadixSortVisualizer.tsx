@@ -1,7 +1,4 @@
-import {
-  MusicalScales,
-  useMusicalScale,
-} from "@/hooks/useMusicalNotes";
+import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import type { RadixSortFrameState } from "@/types/sorting-animators/radix-sort";
 import { Grid, useTheme } from "@mui/material";
 import { memo, useEffect, type FC } from "react";
@@ -21,6 +18,8 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
       backgroundColor = palette.opRead.main;
     } else if (mem.writtenAt === index) {
       backgroundColor = palette.opWrite.main;
+    } else if (mem.verifyAt === index) {
+      backgroundColor = palette.opVerify.main;
     }
 
     return (
@@ -35,17 +34,18 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
   }
 );
 
-type Visualizer = {
+type VisualizerProps = {
+  playAudio?: boolean;
   mem: RadixSortFrameState["mainMem"];
-  pattern: readonly number[];
 };
-const MemoryDisplay: FC<Visualizer> = memo(
-  ({ mem, pattern }) => {
-    const { playNote } = useMusicalScale({
-      scalePattern: pattern,
-    });
+const Visualizer: FC<VisualizerProps> = memo(
+  ({ mem, playAudio }) => {
+    const { playNote } = useMusicalScale();
 
     useEffect(() => {
+      if (!playAudio) {
+        return;
+      }
       if (mem.readAt !== undefined) {
         const item = mem.items.at(mem.readAt);
         if (item !== undefined) {
@@ -58,7 +58,13 @@ const MemoryDisplay: FC<Visualizer> = memo(
           playNote(item);
         }
       }
-    }, [mem, playNote]);
+      if (mem.verifyAt !== undefined) {
+        const item = mem.items.at(mem.verifyAt);
+        if (item !== undefined) {
+          playNote(item);
+        }
+      }
+    }, [mem, playNote, playAudio]);
 
     return (
       <Grid
@@ -108,28 +114,22 @@ export const RadixSortVisualizer: FC<Props> = memo(
             flexGrow: 1,
           }}
         >
-          <MemoryDisplay
+          <Visualizer
             mem={frame.mainMem}
-            pattern={MusicalScales.Phrygian}
+            playAudio
           />
         </Grid>
         <Grid
           size={1}
           sx={{ flexGrow: 1 }}
         >
-          <MemoryDisplay
-            mem={frame.auxiMem}
-            pattern={MusicalScales.NaturalMinor}
-          />
+          <Visualizer mem={frame.auxiMem} />
         </Grid>
         <Grid
           size={1}
           sx={{ flexGrow: 1 }}
         >
-          <MemoryDisplay
-            mem={frame.sortMem}
-            pattern={MusicalScales.Major}
-          />
+          <Visualizer mem={frame.sortMem} />
         </Grid>
       </Grid>
     );

@@ -25,7 +25,7 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
       frame.rightBound !== undefined &&
       index > frame.rightBound
     ) {
-      backgroundColor = palette.rangeBounded.main;
+      backgroundColor = palette.rangeBounded.dark;
     } else if (
       frame.compared !== undefined &&
       frame.compared.includes(index)
@@ -48,7 +48,7 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
           height: `${height}%`,
           backgroundColor,
           display: "flex",
-          alignItems: "flex-end",
+          alignItems: "center",
           justifyContent: "center",
           overflow: "clip",
         }}

@@ -1,11 +1,11 @@
 import { alpha, createTheme } from "@mui/material";
 import {
   amber,
-  blue,
   deepPurple,
   green,
   grey,
-  orange,
+  indigo,
+  pink,
 } from "@mui/material/colors";
 
 declare module "@mui/material/styles" {
@@ -26,28 +26,16 @@ declare module "@mui/material/styles" {
     rangeBounded?: PaletteOptions["primary"];
   }
 }
-export const theme = createTheme({
+export let theme = createTheme({
   palette: {
-    mode: "dark",
     primary: grey,
-    opCompare: {
-      main: green["A200"],
-    },
-    opSwap: {
-      main: blue["A200"],
-    },
-    opWrite: {
-      main: deepPurple["A200"],
-    },
-    opRead: {
-      main: amber["A200"],
-    },
-    opVerify: {
-      main: orange["A200"],
-    },
-    rangeBounded: {
-      main: grey["A700"],
-    },
+    // opRead: deepOrange,
+    // opWrite: deepPurple,
+    // opCompare: indigo,
+    // opSwap: pink,
+    // opVerify: red,
+    // rangeBounded: grey,
+    mode: "dark",
     contrastThreshold: 5,
   },
   typography: {
@@ -71,5 +59,30 @@ export const theme = createTheme({
         },
       },
     },
+  },
+});
+
+theme = createTheme(theme, {
+  palette: {
+    opCompare: theme.palette.augmentColor({
+      color: {
+        main: green["400"],
+      },
+    }),
+    opSwap: theme.palette.augmentColor({
+      color: { main: indigo["A200"] },
+    }),
+    opWrite: theme.palette.augmentColor({
+      color: { main: deepPurple["A200"] },
+    }),
+    opRead: theme.palette.augmentColor({
+      color: { main: amber["A200"] },
+    }),
+    opVerify: theme.palette.augmentColor({
+      color: { main: pink["600"] },
+    }),
+    rangeBounded: theme.palette.augmentColor({
+      color: { main: grey["500"] },
+    }),
   },
 });

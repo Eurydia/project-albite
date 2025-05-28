@@ -13,8 +13,7 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
     const { palette } = useTheme();
     const height = (value / frame.items.length) * 100;
 
-    let backgroundColor: string =
-      palette.rangeBounded.light;
+    let backgroundColor = palette.rangeBounded.light;
     if (frame.verifyAt === index) {
       backgroundColor = palette.opVerify.main;
     } else if (
@@ -31,9 +30,9 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
       frame.rightBound !== undefined &&
       index > frame.rightBound
     ) {
-      backgroundColor = palette.rangeBounded.main;
+      backgroundColor = palette.rangeBounded.dark;
     }
-
+    console.log(backgroundColor);
     return (
       <Grid
         size={1}
@@ -47,21 +46,26 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
 );
 
 type Props = {
-  size: number;
   frame: BubbleSortFrameData;
 };
 export const BubbleSortVisualizer: FC<Props> = memo(
-  ({ frame, size }) => {
+  ({ frame }) => {
     const { playNote } = useMusicalScale();
 
     useEffect(() => {
       if (frame.compared !== undefined) {
         const pos = Math.max(...frame.compared);
-        playNote(frame.items.at(pos)!);
+        const item = frame.items.at(pos);
+        if (item !== undefined) {
+          playNote(item);
+        }
       }
       if (frame.swapped !== undefined) {
         const pos = Math.max(...frame.swapped);
-        playNote(frame.items.at(pos)!);
+        const item = frame.items.at(pos);
+        if (item !== undefined) {
+          playNote(item);
+        }
       }
       if (frame.verifyAt !== undefined) {
         playNote(frame.verifyAt);
@@ -71,7 +75,7 @@ export const BubbleSortVisualizer: FC<Props> = memo(
     return (
       <Grid
         container
-        columns={size}
+        columns={frame.items.length}
         spacing={0}
         alignItems="flex-end"
         sx={{ flexBasis: 0, flexGrow: 1 }}

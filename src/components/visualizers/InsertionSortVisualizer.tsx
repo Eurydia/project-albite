@@ -1,13 +1,7 @@
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import type { InsertionSortFrameState } from "@/types/sorting-animators/insertion-sort";
 import { CircleOutlined } from "@mui/icons-material";
-import { alpha, Grid, useTheme } from "@mui/material";
-import {
-  blue,
-  deepPurple,
-  grey,
-  orange,
-} from "@mui/material/colors";
+import { Grid, useTheme } from "@mui/material";
 import { memo, useEffect, type FC } from "react";
 
 type SortItemProps = {
@@ -21,28 +15,26 @@ const SortItem: FC<SortItemProps> = ({
   index,
 }) => {
   const { palette } = useTheme();
-
-  let backgroundColor: string = grey["300"];
+  const height = (value / Math.max(...frame.items)) * 100;
+  let backgroundColor = palette.rangeBounded.light;
   if (
     frame.leftBound !== undefined &&
     index > frame.leftBound
   ) {
-    backgroundColor = grey["900"];
+    backgroundColor = palette.rangeBounded.dark;
   } else if (frame.verifyAt === index) {
-    backgroundColor = orange["A200"];
+    backgroundColor = palette.opVerify.main;
   } else if (
     frame.compared !== undefined &&
     frame.compared.includes(index)
   ) {
-    backgroundColor = blue["A200"];
+    backgroundColor = palette.opCompare.main;
   } else if (
     frame.swapped !== undefined &&
     frame.swapped.includes(index)
   ) {
-    backgroundColor = deepPurple["A200"];
+    backgroundColor = palette.opSwap.main;
   }
-  backgroundColor = alpha(backgroundColor, 0.7);
-  const height = (value / Math.max(...frame.items)) * 100;
 
   return (
     <Grid
@@ -61,7 +53,6 @@ const SortItem: FC<SortItemProps> = ({
         <CircleOutlined
           sx={{
             width: "100%",
-            aspectRatio: "1/1",
             color: palette.getContrastText(backgroundColor),
           }}
         />

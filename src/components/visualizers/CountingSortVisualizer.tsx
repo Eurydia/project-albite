@@ -1,16 +1,13 @@
-import {
-  MusicalScales,
-  useMusicalScale,
-} from "@/hooks/useMusicalNotes";
+import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import type { CountingSortFrameState } from "@/types/sorting-animators/counting-sort";
 import { Grid, useTheme } from "@mui/material";
 import { type FC, memo, useEffect } from "react";
 
 type VisualizerItemProps = {
   height: number;
-  isVerify?: boolean;
-  isWritten?: boolean;
   isRead?: boolean;
+  isWritten?: boolean;
+  isVerify?: boolean;
 };
 const VisualizerItem: FC<VisualizerItemProps> = memo(
   ({ height, isRead, isWritten, isVerify }) => {
@@ -38,43 +35,41 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
 );
 
 type VisualizerProps = {
-  items: number[];
-  readAt?: number;
-  writtenAt?: number;
-  verifyAt?: number;
-  pattern: readonly number[];
+  playAudio?: boolean;
+  mem: CountingSortFrameState["mainMem"];
 };
 const Visualizer: FC<VisualizerProps> = memo(
-  ({ items, verifyAt, readAt, writtenAt, pattern }) => {
-    const { playNote } = useMusicalScale({
-      scalePattern: pattern,
-    });
+  ({ mem, playAudio }) => {
+    const { playNote } = useMusicalScale();
 
     useEffect(() => {
-      if (readAt !== undefined) {
-        const item = items.at(readAt);
+      if (!playAudio) {
+        return;
+      }
+      if (mem.readAt !== undefined) {
+        const item = mem.items.at(mem.readAt);
         if (item !== undefined && item > 0) {
           playNote(item);
         }
       }
-      if (writtenAt !== undefined) {
-        const item = items.at(writtenAt);
+      if (mem.writtenAt !== undefined) {
+        const item = mem.items.at(mem.writtenAt);
         if (item !== undefined && item > 0) {
           playNote(item);
         }
       }
-      if (verifyAt !== undefined) {
-        const item = items.at(verifyAt);
+      if (mem.verifyAt !== undefined) {
+        const item = mem.items.at(mem.verifyAt);
         if (item !== undefined) {
           playNote(item);
         }
       }
-    }, [items, playNote, readAt, verifyAt, writtenAt]);
+    }, [mem, playNote, playAudio]);
 
     return (
       <Grid
         container
-        columns={items.length}
+        columns={mem.items.length}
         spacing={0}
         sx={{
           height: "100%",
@@ -83,13 +78,14 @@ const Visualizer: FC<VisualizerProps> = memo(
           flexBasis: 0,
         }}
       >
-        {items.map((value, index) => {
+        {mem.items.map((value, index) => {
           return (
             <VisualizerItem
               key={`sort-item-${index}`}
-              height={(value / items.length) * 100}
-              isRead={readAt === index}
-              isWritten={writtenAt === index}
+              height={(value / mem.items.length) * 100}
+              isRead={mem.readAt === index}
+              isWritten={mem.writtenAt === index}
+              isVerify={mem.verifyAt === index}
             />
           );
         })}
@@ -118,27 +114,21 @@ export const CountingSortVisualizer: FC<Props> = memo(
           sx={{ flexGrow: 1 }}
         >
           <Visualizer
-            {...frame.mainMem}
-            pattern={MusicalScales.Phrygian}
+            mem={frame.mainMem}
+            playAudio
           />
         </Grid>
         <Grid
           size={1}
           sx={{ flexGrow: 1 }}
         >
-          <Visualizer
-            {...frame.auxiMem}
-            pattern={MusicalScales.Dorian}
-          />
+          <Visualizer mem={frame.auxiMem} />
         </Grid>
         <Grid
           size={1}
           sx={{ flexGrow: 1 }}
         >
-          <Visualizer
-            {...frame.sortMem}
-            pattern={MusicalScales.Major}
-          />
+          <Visualizer mem={frame.sortMem} />
         </Grid>
       </Grid>
     );

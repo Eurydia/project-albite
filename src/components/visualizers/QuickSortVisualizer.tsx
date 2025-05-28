@@ -22,9 +22,10 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
       const tMin = Math.min(...frame.terminals);
       const tMax = Math.max(...frame.terminals);
       if (index < tMin || index > tMax) {
-        backgroundColor = palette.rangeBounded.main;
+        backgroundColor = palette.rangeBounded.dark;
       }
-    } else if (
+    }
+    if (
       frame.compared !== undefined &&
       frame.compared.includes(index)
     ) {
