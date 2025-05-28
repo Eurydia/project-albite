@@ -13,7 +13,7 @@ export const MusicalScales = {
   BluesMinor: [0, 3, 5, 6, 7, 10],
 } as const;
 
-interface options {
+export type MusicalScaleOptions = {
   /** Your base scale degrees in semitones, e.g. Major = [0,2,4,5,7,9,11] */
   scalePattern?: readonly number[];
   /** MIDI note at pattern-degree 0, octave 0 (default = C4 = 60) */
@@ -26,23 +26,21 @@ interface options {
   fadeDuration?: number;
   waveform?: OscillatorType;
   gain?: number;
-}
+};
 
-export const useMusicalScale = (options: options = {}) => {
-  const {
-    scalePattern = MusicalScales.Lydian,
-    baseMidi = 60,
-    maxOctave = 2,
-    wrapOctave = true,
-    duration = 1,
-    fadeDuration = 0.1,
-    waveform = "sine",
-    gain = 0.2,
-  } = options;
-
+export const useMusicalScale = ({
+  scalePattern = MusicalScales.Lydian,
+  baseMidi = 60,
+  maxOctave = 2,
+  wrapOctave = true,
+  duration = 1,
+  fadeDuration = 0.1,
+  waveform = "sine",
+  gain = 0.2,
+}: MusicalScaleOptions = {}) => {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const getAudioContext = () => {
-    if (!audioCtxRef.current) {
+    if (audioCtxRef.current === null) {
       audioCtxRef.current = new window.AudioContext();
     }
     return audioCtxRef.current;
@@ -50,23 +48,18 @@ export const useMusicalScale = (options: options = {}) => {
 
   const mapValueToFrequency = useCallback(
     (value: number) => {
-      // make sure we have a positive integer
       const v = Math.max(1, Math.floor(value));
 
-      // which degree in the scale (wraps every scalePattern.length)
       const degree = (v - 1) % scalePattern.length;
 
-      // raw octave count (increments each full pass through the pattern)
       const rawOctave = Math.floor(
         (v - 1) / scalePattern.length
       );
 
-      // either wrap or clamp the octave
       const octave = wrapOctave
         ? rawOctave % (maxOctave + 1)
         : Math.min(rawOctave, maxOctave);
 
-      // build MIDI note and convert to Hz
       const midi =
         baseMidi + scalePattern[degree] + octave * 12;
       return 440 * Math.pow(2, (midi - 69) / 12);

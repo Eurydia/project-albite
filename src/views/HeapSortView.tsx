@@ -1,155 +1,40 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import { useMusicalScale } from "@/hooks/useMusicalNotes";
+import { HeapSortVisualizer } from "@/components/visualizers/HeapSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
-import { generateDataset } from "@/services/generate-dataset";
-import { heapSortAnimator } from "@/services/sorting-animators/heap-sort";
+import { HeapSortAnimator } from "@/services/sorting-animators/heap-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { HeapSortFrameState } from "@/types/sorting-animators/heap-sort";
+import { PanToolAltRounded } from "@mui/icons-material";
 import {
-  ChangeHistoryRounded,
-  CircleOutlined,
-} from "@mui/icons-material";
-import {
-  alpha,
   Box,
-  Grid,
   Stack,
   Typography,
   useTheme,
 } from "@mui/material";
-import {
-  blue,
-  deepOrange,
-  deepPurple,
-  green,
-  grey,
-} from "@mui/material/colors";
-import { Fragment, memo, useEffect, type FC } from "react";
+import { memo, type FC } from "react";
 import { useLoaderData } from "react-router";
-
-type SortElementProps = {
-  value: number;
-  index: number;
-  frame: HeapSortFrameState;
-};
-const SortElement: FC<SortElementProps> = memo(
-  ({ value, index, frame }) => {
-    const { palette } = useTheme();
-    const height = (value / Math.max(...frame.items)) * 100;
-
-    let backgroundColor: string = grey["A200"];
-    if (frame.verifyAt === index) {
-      backgroundColor = deepOrange["A200"];
-    }
-    if (
-      frame.rightBound !== undefined &&
-      index > frame.rightBound
-    ) {
-      backgroundColor = grey["A700"];
-    } else if (
-      frame.compared !== undefined &&
-      frame.compared.includes(index)
-    ) {
-      backgroundColor = blue["A200"];
-    } else if (
-      frame.swapped !== undefined &&
-      frame.swapped.includes(index)
-    ) {
-      backgroundColor = deepPurple["A400"];
-    }
-
-    backgroundColor = alpha(backgroundColor, 0.7);
-    const labelColor =
-      palette.getContrastText(backgroundColor);
-    let label = <Fragment />;
-    if (frame.parent === index) {
-      label = (
-        <CircleOutlined
-          sx={{
-            color: labelColor,
-            width: "100%",
-          }}
-        />
-      );
-    } else if (
-      frame.children !== undefined &&
-      frame.children.includes(index)
-    ) {
-      label = (
-        <ChangeHistoryRounded
-          sx={{
-            color: labelColor,
-            width: "100%",
-          }}
-        />
-      );
-    }
-    return (
-      <Grid
-        size={1}
-        sx={{
-          height: `${height}%`,
-          backgroundColor,
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "center",
-          overflow: "clip",
-        }}
-      >
-        {label}
-      </Grid>
-    );
-  }
-);
 
 const HeapSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
+  const { palette } = useTheme();
   const {
     frame,
     nextFrame,
     prevFrame,
-    shuffleDataset: reset,
-  } = useSortAnimator(() =>
-    heapSortAnimator(generateDataset(size))
-  );
-
-  const { playNote } = useMusicalScale();
-
-  useEffect(() => {
-    if (frame === null || frame.compared === undefined) {
-      return;
-    }
-    playNote(frame.items.at(Math.max(...frame.compared))!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.swapped === undefined) {
-      return;
-    }
-    playNote(frame.items.at(Math.max(...frame.swapped))!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.verifyAt === undefined) {
-      return;
-    }
-    playNote(frame.items.at(frame.verifyAt)!);
-  }, [frame, playNote]);
-
-  if (frame === null) {
-    return <Typography>Loading...</Typography>;
-  }
-
-  const { items, swapCount, compareCount } = frame;
+    shuffleDataset,
+    handleAnimationControlKeyDown,
+  } = useSortAnimator(new HeapSortAnimator(size));
 
   return (
     <Box
+      component="div"
+      tabIndex={0}
+      onKeyDown={handleAnimationControlKeyDown}
       sx={{
-        backgroundColor: "black",
+        flexBasis: 0,
+        flexGrow: 1,
         display: "flex",
         flexDirection: "column",
       }}
-      height="100vh"
     >
       <Stack spacing={1}>
         <Typography fontWeight={900}>
@@ -164,41 +49,47 @@ const HeapSortView_: FC = () => {
         >
           <Typography
             sx={{
-              color: green["A200"],
+              color: palette.opSwap.main,
             }}
           >
-            {`Swaps: ${swapCount}`}
+            {`Swaps: ${frame?.swapCount ?? 0}`}
           </Typography>
           <Typography
             sx={{
-              color: blue["A200"],
+              color: palette.opCompare.main,
             }}
           >
-            {`Comparisons: ${compareCount}`}
+            {`Comparisons: ${frame?.compareCount ?? 0}`}
           </Typography>
         </Stack>
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={shuffleDataset}
         />
       </Stack>
-      <Grid
-        container
-        columns={size}
-        spacing={0}
-        alignItems="flex-end"
-        sx={{ flexBasis: 0, flexGrow: 1 }}
-      >
-        {items.map((value, index) => (
-          <SortElement
-            key={`sort-item-${index}`}
-            value={value}
-            index={index}
-            frame={frame}
-          />
-        ))}
-      </Grid>
+      {frame === undefined && (
+        <Box
+          onClick={shuffleDataset}
+          sx={{
+            flexBasis: 0,
+            flexGrow: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+          }}
+        >
+          <PanToolAltRounded />
+          <Typography>Shuffle once</Typography>
+        </Box>
+      )}
+      {frame !== undefined && (
+        <HeapSortVisualizer
+          frame={frame}
+          size={size}
+        />
+      )}
     </Box>
   );
 };
