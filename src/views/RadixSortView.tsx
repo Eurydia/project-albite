@@ -1,145 +1,43 @@
+import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import {
-  MusicalScales,
-  useMusicalScale,
-} from "@/hooks/useMusicalNotes";
+import { RadixSortVisualizer } from "@/components/visualizers/RadixSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
-import { generateDataset } from "@/services/generate-dataset";
-import { radixSortAnimator } from "@/services/sorting-animators/radix-sort";
+import { RadixSortAnimator } from "@/services/sorting-animators/radix-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { RadixSortFrameState } from "@/types/sorting-animators/radix-sort";
 import {
-  alpha,
   Box,
-  Grid,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
-import {
-  blue,
-  deepPurple,
-  grey,
-} from "@mui/material/colors";
-import { memo, useEffect, type FC } from "react";
+import { memo, type FC } from "react";
 import { useLoaderData } from "react-router";
-
-type SortItemProps = {
-  index: number;
-  value: number;
-  mem: RadixSortFrameState["mainMem"];
-};
-const SortItem: FC<SortItemProps> = memo(
-  ({ index, value, mem }) => {
-    const height = (value / mem.items.length) * 100;
-
-    let backgroundColor: string = grey["200"];
-    if (mem.readAt === index) {
-      backgroundColor = blue["A200"];
-    } else if (mem.writtenAt === index) {
-      backgroundColor = deepPurple["A400"];
-    }
-    backgroundColor = alpha(backgroundColor, 0.7);
-
-    return (
-      <Grid
-        size={1}
-        sx={{
-          height: `${height}%`,
-          backgroundColor,
-        }}
-      />
-    );
-  }
-);
-
-type MemoryDisplayProps = {
-  mem: RadixSortFrameState["mainMem"];
-  pattern: readonly number[];
-};
-const MemoryDisplay: FC<MemoryDisplayProps> = memo(
-  ({ mem, pattern }) => {
-    const { playNote } = useMusicalScale({
-      scalePattern: pattern,
-    });
-
-    useEffect(() => {
-      if (mem.readAt !== undefined) {
-        const item = mem.items.at(mem.readAt);
-        if (item !== undefined && item >= 0) {
-          playNote(item + 1);
-        }
-      }
-      if (mem.writtenAt !== undefined) {
-        const item = mem.items.at(mem.writtenAt);
-        if (item !== undefined && item >= 0) {
-          playNote(item + 1);
-        }
-      }
-    }, [mem, playNote]);
-
-    return (
-      <Grid
-        container
-        columns={mem.items.length}
-        spacing={0}
-        sx={{
-          height: "100%",
-          alignItems: "flex-end",
-          flexGrow: 1,
-          flexBasis: 0,
-        }}
-      >
-        {mem.items.map((value, index) => {
-          return (
-            <SortItem
-              key={`sort-item-${index}`}
-              index={index}
-              value={value}
-              mem={mem}
-            />
-          );
-        })}
-      </Grid>
-    );
-  }
-);
 
 const RadixSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
+  const { palette } = useTheme();
   const {
     frame,
     nextFrame,
     prevFrame,
-    shuffleDataset: reset,
-  } = useSortAnimator(() =>
-    radixSortAnimator(generateDataset(size))
-  );
-
-  if (frame === null) {
-    return <Typography>Loading...</Typography>;
-  }
-
-  const { memReadCount, memWriteCount } = frame;
+    shuffleDataset,
+    handleAnimationControlKeyDown,
+  } = useSortAnimator(new RadixSortAnimator(size));
 
   return (
     <Box
+      component="div"
+      tabIndex={0}
+      onKeyDown={handleAnimationControlKeyDown}
       sx={{
-        backgroundColor: "black",
         display: "flex",
         flexDirection: "column",
+        flexGrow: 1,
+        flexBasis: 0,
       }}
-      height="100vh"
     >
-      <Stack
-        spacing={1}
-        component="div"
-      >
-        <Typography
-          fontWeight={900}
-          sx={{
-            userSelect: "none",
-          }}
-        >
+      <Stack spacing={1}>
+        <Typography fontWeight={900}>
           {`Radix sort`}
         </Typography>
         <Stack
@@ -150,66 +48,31 @@ const RadixSortView_: FC = () => {
         >
           <Typography
             sx={{
-              userSelect: "none",
-              color: blue["A200"],
+              color: palette.opWrite.main,
             }}
           >
-            {`Writes: ${memWriteCount}`}
+            {`Writes: ${frame?.memWriteCount ?? 0}`}
           </Typography>
           <Typography
             sx={{
-              userSelect: "none",
-              color: deepPurple["A100"],
+              color: palette.opRead.main,
             }}
           >
-            {`Reads: ${memReadCount}`}
+            {`Reads: ${frame?.memReadCount ?? 0}`}
           </Typography>
         </Stack>
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={shuffleDataset}
         />
       </Stack>
-      <Grid
-        container
-        spacing={2}
-        columns={1}
-        sx={{
-          flexGrow: 1,
-          flexBasis: 0,
-        }}
-      >
-        <Grid
-          size={1}
-          sx={{
-            flexGrow: 1,
-          }}
-        >
-          <MemoryDisplay
-            mem={frame.mainMem}
-            pattern={MusicalScales.Phrygian}
-          />
-        </Grid>
-        <Grid
-          size={1}
-          sx={{ flexGrow: 1 }}
-        >
-          <MemoryDisplay
-            mem={frame.auxiMem}
-            pattern={MusicalScales.NaturalMinor}
-          />
-        </Grid>
-        <Grid
-          size={1}
-          sx={{ flexGrow: 1 }}
-        >
-          <MemoryDisplay
-            mem={frame.sortMem}
-            pattern={MusicalScales.Major}
-          />
-        </Grid>
-      </Grid>
+      {frame === undefined && (
+        <ShuffleRequestRegion onClick={shuffleDataset} />
+      )}
+      {frame !== undefined && (
+        <RadixSortVisualizer frame={frame} />
+      )}
     </Box>
   );
 };

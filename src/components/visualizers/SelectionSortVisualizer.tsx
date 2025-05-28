@@ -1,22 +1,28 @@
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
-import type { BubbleSortFrameData } from "@/types/sorting-animators/bubble-sort";
+import type { SelectionSortFrameState } from "@/types/sorting-animators/selection-sort";
+import { ChangeHistoryRounded } from "@mui/icons-material";
 import { Grid, useTheme } from "@mui/material";
 import { memo, useEffect, type FC } from "react";
 
 type VisualizerItemProps = {
-  index: number;
   value: number;
-  frame: BubbleSortFrameData;
+  index: number;
+  frame: SelectionSortFrameState;
 };
 const VisualizerItem: FC<VisualizerItemProps> = memo(
-  ({ index, value, frame }) => {
+  ({ frame, index, value }) => {
     const { palette } = useTheme();
-    const height = (value / frame.items.length) * 100;
 
-    let backgroundColor: string =
-      palette.rangeBounded.light;
+    const height = (value / Math.max(...frame.items)) * 100;
+
+    let backgroundColor = palette.rangeBounded.light;
     if (frame.verifyAt === index) {
       backgroundColor = palette.opVerify.main;
+    } else if (
+      frame.leftBound !== undefined &&
+      index < frame.leftBound
+    ) {
+      backgroundColor = palette.rangeBounded.main;
     } else if (
       frame.compared !== undefined &&
       frame.compared.includes(index)
@@ -27,41 +33,55 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
       frame.swapped.includes(index)
     ) {
       backgroundColor = palette.opSwap.main;
-    } else if (
-      frame.rightBound !== undefined &&
-      index > frame.rightBound
-    ) {
-      backgroundColor = palette.rangeBounded.main;
     }
+    const iconColor =
+      palette.getContrastText(backgroundColor);
 
     return (
       <Grid
         size={1}
         sx={{
-          backgroundColor,
           height: `${height}%`,
+          backgroundColor,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "clip",
         }}
-      />
+      >
+        {frame.key === index && (
+          <ChangeHistoryRounded
+            sx={{
+              color: iconColor,
+            }}
+          />
+        )}
+      </Grid>
     );
   }
 );
 
-type Props = {
-  size: number;
-  frame: BubbleSortFrameData;
+type SelectionSortVisualizerProps = {
+  frame: SelectionSortFrameState;
 };
-export const BubbleSortVisualizer: FC<Props> = memo(
-  ({ frame, size }) => {
+export const SelectionSortVisualizer: FC<SelectionSortVisualizerProps> =
+  memo(({ frame }) => {
     const { playNote } = useMusicalScale();
 
     useEffect(() => {
       if (frame.compared !== undefined) {
         const pos = Math.max(...frame.compared);
-        playNote(frame.items.at(pos)!);
+        const item = frame.items.at(pos);
+        if (item !== undefined) {
+          playNote(item);
+        }
       }
       if (frame.swapped !== undefined) {
         const pos = Math.max(...frame.swapped);
-        playNote(frame.items.at(pos)!);
+        const item = frame.items.at(pos);
+        if (item !== undefined) {
+          playNote(item);
+        }
       }
       if (frame.verifyAt !== undefined) {
         playNote(frame.verifyAt);
@@ -71,7 +91,7 @@ export const BubbleSortVisualizer: FC<Props> = memo(
     return (
       <Grid
         container
-        columns={size}
+        columns={frame.items.length}
         spacing={0}
         alignItems="flex-end"
         sx={{ flexBasis: 0, flexGrow: 1 }}
@@ -79,12 +99,11 @@ export const BubbleSortVisualizer: FC<Props> = memo(
         {frame.items.map((value, index) => (
           <VisualizerItem
             key={`sort-item-${index}`}
-            index={index}
             value={value}
+            index={index}
             frame={frame}
           />
         ))}
       </Grid>
     );
-  }
-);
+  });

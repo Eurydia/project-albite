@@ -47,70 +47,126 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
   }
 );
 
+type MainMemVisualizerProps = {
+  mem: MergeSortFrameData["mainMem"];
+};
+const MainMemVisualizer: FC<MainMemVisualizerProps> = memo(
+  ({ mem }) => {
+    const { playNote } = useMusicalScale({
+      scalePattern: MusicalScales.BluesMinor,
+    });
+
+    useEffect(() => {
+      if (mem.compared !== undefined) {
+        const pos = Math.max(...mem.compared);
+        const item = mem.items.at(pos);
+        if (item !== undefined) {
+          playNote(item);
+        }
+      }
+      if (mem.verifyAt !== undefined) {
+        const pos = Math.max(mem.verifyAt);
+        const item = mem.items.at(pos);
+        if (item !== undefined) {
+          playNote(item);
+        }
+      }
+      if (mem.readAt !== undefined) {
+        const item = mem.items.at(mem.readAt);
+        if (item !== undefined) {
+          playNote(item);
+        }
+      }
+      if (mem.writtenAt !== undefined) {
+        const item = mem.items.at(mem.writtenAt);
+        if (item !== undefined) {
+          playNote(item);
+        }
+      }
+    }, [mem, playNote]);
+    return (
+      <Grid
+        container
+        columns={mem.items.length}
+        spacing={0}
+        sx={{
+          height: "100%",
+          alignItems: "flex-end",
+          flexGrow: 1,
+          flexBasis: 0,
+        }}
+      >
+        {mem.items.map((value, index) => {
+          return (
+            <VisualizerItem
+              key={`sort-item-${index}`}
+              index={index}
+              value={value}
+              frame={mem}
+            />
+          );
+        })}
+      </Grid>
+    );
+  }
+);
+
+type AuxiMemVisualizerProps = {
+  mem: MergeSortFrameData["auxiMem"];
+};
+const AuxiMemVisualizer: FC<AuxiMemVisualizerProps> = memo(
+  ({ mem }) => {
+    const { playNote } = useMusicalScale({
+      scalePattern: MusicalScales.Major,
+    });
+
+    useEffect(() => {
+      if (mem.readAt !== undefined) {
+        const item = mem.items.at(mem.readAt);
+        if (item !== undefined) {
+          playNote(item);
+        }
+      }
+      if (mem.writtenAt !== undefined) {
+        const item = mem.items.at(mem.writtenAt);
+        if (item !== undefined) {
+          playNote(item);
+        }
+      }
+    }, [mem, playNote]);
+
+    return (
+      <Grid
+        container
+        columns={mem.items.length}
+        spacing={0}
+        sx={{
+          height: "100%",
+          alignItems: "flex-end",
+          flexGrow: 1,
+          flexBasis: 0,
+        }}
+      >
+        {mem.items.map((value, index) => {
+          return (
+            <VisualizerItem
+              key={`sort-item-${index}`}
+              index={index}
+              value={value}
+              frame={mem}
+            />
+          );
+        })}
+      </Grid>
+    );
+  }
+);
+
 type Props = {
   frame: MergeSortFrameData;
 };
 export const MergeSortVisualizer: FC<Props> = memo(
   ({ frame }) => {
-    const { playNote } = useMusicalScale({
-      scalePattern: MusicalScales.BluesMinor,
-    });
-    const { playNote: playNoteAuxi } = useMusicalScale({
-      scalePattern: MusicalScales.Major,
-    });
-
-    useEffect(() => {
-      if (frame.mainMem.compared !== undefined) {
-        const pos = Math.max(...frame.mainMem.compared);
-        const item = frame.mainMem.items.at(pos);
-        if (item !== undefined) {
-          playNote(item);
-        }
-      }
-      if (frame.mainMem.verifyAt !== undefined) {
-        const pos = Math.max(frame.mainMem.verifyAt);
-        const item = frame.mainMem.items.at(pos);
-        if (item !== undefined) {
-          playNote(item);
-        }
-      }
-      if (frame.mainMem.readAt !== undefined) {
-        const item = frame.mainMem.items.at(
-          frame.mainMem.readAt
-        );
-        if (item !== undefined) {
-          playNote(item);
-        }
-      }
-      if (frame.mainMem.writtenAt !== undefined) {
-        const item = frame.mainMem.items.at(
-          frame.mainMem.writtenAt
-        );
-        if (item !== undefined) {
-          playNote(item);
-        }
-      }
-    }, [frame.mainMem, playNote]);
-
-    useEffect(() => {
-      if (frame.auxiMem.readAt !== undefined) {
-        const item = frame.auxiMem.items.at(
-          frame.auxiMem.readAt
-        );
-        if (item !== undefined) {
-          playNoteAuxi(item);
-        }
-      }
-      if (frame.auxiMem.writtenAt !== undefined) {
-        const item = frame.auxiMem.items.at(
-          frame.auxiMem.writtenAt
-        );
-        if (item !== undefined) {
-          playNoteAuxi(item);
-        }
-      }
-    }, [frame.auxiMem, playNoteAuxi]);
-
     return (
       <Grid
         container
@@ -127,55 +183,13 @@ export const MergeSortVisualizer: FC<Props> = memo(
             flexGrow: 1,
           }}
         >
-          <Grid
-            container
-            columns={frame.mainMem.items.length}
-            spacing={0}
-            sx={{
-              height: "100%",
-              alignItems: "flex-end",
-              flexGrow: 1,
-              flexBasis: 0,
-            }}
-          >
-            {frame.mainMem.items.map((value, index) => {
-              return (
-                <VisualizerItem
-                  key={`sort-item-${index}`}
-                  index={index}
-                  value={value}
-                  frame={frame.mainMem}
-                />
-              );
-            })}
-          </Grid>
+          <MainMemVisualizer mem={frame.mainMem} />
         </Grid>
         <Grid
           size={1}
           sx={{ flexGrow: 1 }}
         >
-          <Grid
-            container
-            columns={frame.auxiMem.items.length}
-            spacing={0}
-            sx={{
-              height: "100%",
-              alignItems: "flex-end",
-              flexGrow: 1,
-              flexBasis: 0,
-            }}
-          >
-            {frame.auxiMem.items.map((value, index) => {
-              return (
-                <VisualizerItem
-                  key={`sort-item-${index}`}
-                  index={index}
-                  value={value}
-                  frame={frame.auxiMem}
-                />
-              );
-            })}
-          </Grid>
+          <AuxiMemVisualizer mem={frame.auxiMem} />
         </Grid>
       </Grid>
     );

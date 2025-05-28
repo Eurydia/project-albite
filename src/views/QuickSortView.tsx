@@ -1,157 +1,40 @@
+import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import { useMusicalScale } from "@/hooks/useMusicalNotes";
+import { QuickSortVisualizer } from "@/components/visualizers/QuickSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
-import { generateDataset } from "@/services/generate-dataset";
-import { quickSortAnimator } from "@/services/sorting-animators/quick-sort";
+import { QuickSortAnimator } from "@/services/sorting-animators/quick-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import type { QuicksortFrameState } from "@/types/sorting-animators/quick-sort";
 import {
-  ChangeHistoryRounded,
-  CircleOutlined,
-} from "@mui/icons-material";
-import {
-  alpha,
   Box,
-  Grid,
   Stack,
   Typography,
   useTheme,
 } from "@mui/material";
-import {
-  blue,
-  green,
-  grey,
-  orange,
-} from "@mui/material/colors";
-import { Fragment, memo, useEffect, type FC } from "react";
+import { memo, type FC } from "react";
 import { useLoaderData } from "react-router";
-
-type SortElementProps = {
-  value: number;
-  index: number;
-  frame: QuicksortFrameState;
-};
-const SortElement: FC<SortElementProps> = memo(
-  ({ frame, index, value }) => {
-    const { palette } = useTheme();
-    const height = (value / Math.max(...frame.items)) * 100;
-
-    let backgroundColor: string = grey["A200"];
-    if (frame.terminals !== undefined) {
-      const tMin = Math.min(...frame.terminals);
-      const tMax = Math.max(...frame.terminals);
-      if (index < tMin || index > tMax) {
-        backgroundColor = grey["A700"];
-      }
-    }
-    if (
-      frame.compared !== undefined &&
-      frame.compared.includes(index)
-    ) {
-      backgroundColor = blue["A200"];
-    }
-    if (
-      frame.swapped !== undefined &&
-      frame.swapped.includes(index)
-    ) {
-      backgroundColor = green["A200"];
-    }
-
-    if (frame.verifyAt === index) {
-      backgroundColor = orange["A200"];
-    }
-
-    backgroundColor = alpha(backgroundColor, 0.7);
-
-    let icon = <Fragment />;
-    if (frame.partition === index) {
-      icon = (
-        <ChangeHistoryRounded
-          sx={{
-            color: palette.getContrastText(backgroundColor),
-            width: "100%",
-          }}
-        />
-      );
-    } else if (frame.key === index) {
-      icon = (
-        <CircleOutlined
-          sx={{
-            color: palette.getContrastText(backgroundColor),
-            width: "100%",
-          }}
-        />
-      );
-    }
-
-    return (
-      <Grid
-        size={1}
-        sx={{
-          backgroundColor,
-          height: `${height}%`,
-          display: "flex",
-          alignItems: "center",
-          flexDirection: "column",
-          justifyContent: "center",
-          overflow: "clip",
-        }}
-      >
-        {icon}
-      </Grid>
-    );
-  }
-);
 
 const QuickSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-
+  const { palette } = useTheme();
   const {
     frame,
     nextFrame,
     prevFrame,
-    shuffleDataset: reset,
-  } = useSortAnimator(() =>
-    quickSortAnimator(generateDataset(size))
-  );
-
-  const { playNote } = useMusicalScale();
-
-  useEffect(() => {
-    if (frame === null || frame.compared === undefined) {
-      return;
-    }
-    playNote(frame.items.at(Math.max(...frame.compared))!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.swapped === undefined) {
-      return;
-    }
-    playNote(frame.items.at(Math.max(...frame.swapped))!);
-  }, [frame, playNote]);
-
-  useEffect(() => {
-    if (frame === null || frame.verifyAt === undefined) {
-      return;
-    }
-    playNote(frame.items.at(frame.verifyAt)!);
-  }, [frame, playNote]);
-
-  if (frame === null) {
-    return <Typography>Loading...</Typography>;
-  }
-
-  const { items, compareCount, swapCount } = frame;
+    shuffleDataset,
+    handleAnimationControlKeyDown,
+  } = useSortAnimator(new QuickSortAnimator(size));
 
   return (
     <Box
+      component="div"
+      tabIndex={0}
+      onKeyDown={handleAnimationControlKeyDown}
       sx={{
-        backgroundColor: "black",
         display: "flex",
         flexDirection: "column",
+        flexGrow: 1,
+        flexBasis: 0,
       }}
-      height="100vh"
     >
       <Stack spacing={1}>
         <Typography fontWeight={900}>
@@ -166,41 +49,31 @@ const QuickSortView_: FC = () => {
         >
           <Typography
             sx={{
-              color: green["A200"],
+              color: palette.opSwap.main,
             }}
           >
-            {`Swaps: ${swapCount}`}
+            {`Swaps: ${frame?.swapCount ?? 0}`}
           </Typography>
           <Typography
             sx={{
-              color: blue["A200"],
+              color: palette.opCompare.main,
             }}
           >
-            {`Comparisons: ${compareCount}`}
+            {`Comparisons: ${frame?.compareCount ?? 0}`}
           </Typography>
         </Stack>
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={shuffleDataset}
         />
       </Stack>
-      <Grid
-        container
-        columns={size}
-        spacing={0}
-        alignItems="flex-end"
-        sx={{ flexBasis: 0, flexGrow: 1 }}
-      >
-        {items.map((value, index) => (
-          <SortElement
-            key={`sort-item-${index}`}
-            frame={frame}
-            index={index}
-            value={value}
-          />
-        ))}
-      </Grid>
+      {frame === undefined && (
+        <ShuffleRequestRegion onClick={shuffleDataset} />
+      )}
+      {frame !== undefined && (
+        <QuickSortVisualizer frame={frame} />
+      )}
     </Box>
   );
 };
