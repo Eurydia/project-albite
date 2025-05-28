@@ -1,9 +1,9 @@
+import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { CountingSortVisualizer } from "@/components/visualizers/CountingSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { CountingSortAnimator } from "@/services/sorting-animators/counting-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import { PanToolAltRounded } from "@mui/icons-material";
 import {
   Box,
   Stack,
@@ -68,20 +68,7 @@ const CountingSortView_: FC = () => {
         />
       </Stack>
       {frame === undefined && (
-        <Box
-          onClick={shuffleDataset}
-          sx={{
-            flexBasis: 0,
-            flexGrow: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-          }}
-        >
-          <PanToolAltRounded />
-          <Typography>Shuffle once</Typography>
-        </Box>
+        <ShuffleRequestRegion onClick={shuffleDataset} />
       )}
       {frame !== undefined && (
         <CountingSortVisualizer frame={frame} />

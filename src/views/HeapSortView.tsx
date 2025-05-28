@@ -1,9 +1,9 @@
+import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { HeapSortVisualizer } from "@/components/visualizers/HeapSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { HeapSortAnimator } from "@/services/sorting-animators/heap-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import { PanToolAltRounded } from "@mui/icons-material";
 import {
   Box,
   Stack,
@@ -69,20 +69,7 @@ const HeapSortView_: FC = () => {
         />
       </Stack>
       {frame === undefined && (
-        <Box
-          onClick={shuffleDataset}
-          sx={{
-            flexBasis: 0,
-            flexGrow: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-          }}
-        >
-          <PanToolAltRounded />
-          <Typography>Shuffle once</Typography>
-        </Box>
+        <ShuffleRequestRegion onClick={shuffleDataset} />
       )}
       {frame !== undefined && (
         <HeapSortVisualizer

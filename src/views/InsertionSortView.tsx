@@ -1,9 +1,9 @@
+import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { InsertionSortVisualizer } from "@/components/visualizers/InsertionSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { InsertionSortAnimator } from "@/services/sorting-animators/insertion-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import { PanToolAltRounded } from "@mui/icons-material";
 import {
   Box,
   Stack,
@@ -68,20 +68,7 @@ const InsertionSortView_: FC = () => {
         />
       </Stack>
       {frame === undefined && (
-        <Box
-          onClick={shuffleDataset}
-          sx={{
-            flexBasis: 0,
-            flexGrow: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-          }}
-        >
-          <PanToolAltRounded />
-          <Typography>Shuffle once</Typography>
-        </Box>
+        <ShuffleRequestRegion onClick={shuffleDataset} />
       )}
       {frame !== undefined && (
         <InsertionSortVisualizer
