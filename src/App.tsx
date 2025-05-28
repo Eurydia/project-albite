@@ -1,7 +1,7 @@
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { memo, type FC } from "react";
 import {
-  createBrowserRouter,
+  createHashRouter,
   RouterProvider,
 } from "react-router";
 import { SorterRouteLayout } from "./layouts/SorterRouteLayouts";
@@ -57,7 +57,7 @@ registerSorterView("counting-sort", {
   view: <CountingSortView />,
 });
 
-const router = createBrowserRouter(
+const router = createHashRouter(
   [
     {
       path: "/",
@@ -71,7 +71,7 @@ const router = createBrowserRouter(
       ],
     },
   ],
-  { basename: import.meta.env.BASE_URL }
+  { basename: "/project-albite/" }
 );
 
 export const App: FC = memo(() => {
