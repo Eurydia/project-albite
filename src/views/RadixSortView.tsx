@@ -3,7 +3,7 @@ import {
   MusicalScales,
   useMusicalScale,
 } from "@/hooks/useMusicalNotes";
-import { useSortAnimator } from "@/hooks/useSortAnimatorGenerator";
+import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { generateDataset } from "@/services/generate-dataset";
 import { radixSortAnimator } from "@/services/sorting-animators/radix-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";

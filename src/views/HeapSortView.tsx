@@ -1,6 +1,6 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
-import { useSortAnimator } from "@/hooks/useSortAnimatorGenerator";
+import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { generateDataset } from "@/services/generate-dataset";
 import { heapSortAnimator } from "@/services/sorting-animators/heap-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";

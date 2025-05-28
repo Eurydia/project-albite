@@ -4,6 +4,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type KeyboardEvent,
 } from "react";
 
 export const useSortAnimator = <T extends object>(
@@ -49,6 +50,25 @@ export const useSortAnimator = <T extends object>(
     setFrameIndex((prev) => Math.max(0, prev - 1));
   }, []);
 
+  const handleAnimationControlKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLElement>) => {
+      switch (e.key) {
+        case "ArrowRight":
+          nextFrame();
+          break;
+        case "ArrowLeft":
+          prevFrame();
+          break;
+        case "r":
+          shuffleDataset();
+          break;
+        default:
+          return;
+      }
+    },
+    [nextFrame, prevFrame, shuffleDataset]
+  );
+
   const frame = useMemo(() => {
     return frames.at(frameIndex);
   }, [frameIndex, frames]);
@@ -57,6 +77,7 @@ export const useSortAnimator = <T extends object>(
     shuffleDataset,
     prevFrame,
     nextFrame,
+    handleAnimationControlKeyDown,
     frame,
   };
 };

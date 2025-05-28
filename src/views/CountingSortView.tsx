@@ -1,126 +1,40 @@
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import {
-  MusicalScales,
-  useMusicalScale,
-} from "@/hooks/useMusicalNotes";
-import { useSortAnimator } from "@/hooks/useSortAnimatorGenerator";
-import { generateDataset } from "@/services/generate-dataset";
-import { countingSortAnimator } from "@/services/sorting-animators/counting-sort";
+import { CountingSortVisualizer } from "@/components/visualizers/CountingSortVisualizer";
+import { useSortAnimator } from "@/hooks/useSortAnimator";
+import { CountingSortAnimator } from "@/services/sorting-animators/counting-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
+import { PanToolAltRounded } from "@mui/icons-material";
 import {
-  alpha,
   Box,
-  Grid,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
-import { blue, grey, orange } from "@mui/material/colors";
-import { memo, useEffect, type FC } from "react";
+import { memo, type FC } from "react";
 import { useLoaderData } from "react-router";
-
-type SortItemProps = {
-  height: number;
-  isRead: boolean;
-  isWritten: boolean;
-};
-const SortItem: FC<SortItemProps> = memo(
-  ({ height, isRead, isWritten }) => {
-    let backgroundColor: string = grey[200];
-    if (isRead) {
-      backgroundColor = blue["A200"];
-    } else if (isWritten) {
-      backgroundColor = orange["A200"];
-    }
-
-    return (
-      <Grid
-        size={1}
-        height={`${height}%`}
-        bgcolor={alpha(backgroundColor, 0.8)}
-      />
-    );
-  }
-);
-
-type MemoryDisplayProps = {
-  items: number[];
-  readAt?: number;
-  writtenAt?: number;
-  pattern: readonly number[];
-};
-const MemoryDisplay: FC<MemoryDisplayProps> = memo(
-  ({ items, readAt, writtenAt, pattern }) => {
-    const { playNote } = useMusicalScale({
-      scalePattern: pattern,
-    });
-
-    useEffect(() => {
-      if (readAt !== undefined) {
-        const item = items.at(readAt);
-        if (item !== undefined && item >= 0) {
-          playNote(item + 1);
-        }
-      }
-      if (writtenAt !== undefined) {
-        const item = items.at(writtenAt);
-        if (item !== undefined && item >= 0) {
-          playNote(item + 1);
-        }
-      }
-    }, [items, playNote, readAt, writtenAt]);
-
-    return (
-      <Grid
-        container
-        columns={items.length}
-        spacing={0}
-        sx={{
-          height: "100%",
-          alignItems: "flex-end",
-          flexGrow: 1,
-          flexBasis: 0,
-        }}
-      >
-        {items.map((value, index) => {
-          return (
-            <SortItem
-              key={`sort-item-${index}`}
-              height={(value / items.length) * 100}
-              isRead={readAt === index}
-              isWritten={writtenAt === index}
-            />
-          );
-        })}
-      </Grid>
-    );
-  }
-);
 
 const CountingSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
+  const { palette } = useTheme();
   const {
     frame,
     nextFrame,
     prevFrame,
-    shuffleDataset: reset,
-  } = useSortAnimator(() =>
-    countingSortAnimator(generateDataset(size))
-  );
-
-  if (frame === null) {
-    return <Typography>Loading...</Typography>;
-  }
-
-  const { readCount, writeCount } = frame;
+    handleAnimationControlKeyDown,
+    shuffleDataset,
+  } = useSortAnimator(new CountingSortAnimator(size));
 
   return (
     <Box
+      component="div"
+      tabIndex={0}
+      onKeyDown={handleAnimationControlKeyDown}
       sx={{
-        backgroundColor: "black",
         display: "flex",
         flexDirection: "column",
+        flexBasis: 0,
+        flexGrow: 1,
       }}
-      height="100vh"
     >
       <Stack spacing={1}>
         <Typography fontWeight={900}>
@@ -134,62 +48,44 @@ const CountingSortView_: FC = () => {
         >
           <Typography
             sx={{
-              color: blue["A200"],
+              color: palette.opWrite.main,
             }}
           >
-            {`Writes: ${writeCount}`}
+            {`Writes: ${frame?.writeCount ?? 0}`}
           </Typography>
           <Typography
             sx={{
-              color: orange["A100"],
+              color: palette.opRead.main,
             }}
           >
-            {`Reads: ${readCount}`}
+            {`Reads: ${frame?.readCount ?? 0}`}
           </Typography>
         </Stack>
         <SorterAnimationToolbar
           onNextFrame={nextFrame}
           onPrevFrame={prevFrame}
-          onShuffle={reset}
+          onShuffle={shuffleDataset}
         />
       </Stack>
-      <Grid
-        container
-        spacing={2}
-        columns={1}
-        sx={{
-          flexGrow: 1,
-          flexBasis: 0,
-        }}
-      >
-        <Grid
-          size={1}
-          sx={{ flexGrow: 1 }}
+      {frame === undefined && (
+        <Box
+          onClick={shuffleDataset}
+          sx={{
+            flexBasis: 0,
+            flexGrow: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+          }}
         >
-          <MemoryDisplay
-            {...frame.mainMem}
-            pattern={MusicalScales.Phrygian}
-          />
-        </Grid>
-        <Grid
-          size={1}
-          sx={{ flexGrow: 1 }}
-        >
-          <MemoryDisplay
-            {...frame.auxiMem}
-            pattern={MusicalScales.Dorian}
-          />
-        </Grid>
-        <Grid
-          size={1}
-          sx={{ flexGrow: 1 }}
-        >
-          <MemoryDisplay
-            {...frame.sortMem}
-            pattern={MusicalScales.Major}
-          />
-        </Grid>
-      </Grid>
+          <PanToolAltRounded />
+          <Typography>Shuffle once</Typography>
+        </Box>
+      )}
+      {frame !== undefined && (
+        <CountingSortVisualizer frame={frame} />
+      )}
     </Box>
   );
 };
