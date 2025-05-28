@@ -32,7 +32,6 @@ const VisualizerItem: FC<VisualizerItemProps> = memo(
     ) {
       backgroundColor = palette.rangeBounded.dark;
     }
-    console.log(backgroundColor);
     return (
       <Grid
         size={1}

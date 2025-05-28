@@ -21,16 +21,17 @@ export const SorterAnimationToolbar: FC<Props> = memo(
       >
         <Button
           variant="contained"
-          onClick={onPrevFrame}
-        >
-          <ChevronLeftRounded />
-        </Button>
-        <Button
-          variant="contained"
           onClick={onShuffle}
         >
           <AutorenewRounded />
         </Button>
+        <Button
+          variant="contained"
+          onClick={onPrevFrame}
+        >
+          <ChevronLeftRounded />
+        </Button>
+
         <Button
           variant="contained"
           onClick={onNextFrame}

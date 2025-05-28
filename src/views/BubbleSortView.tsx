@@ -26,6 +26,8 @@ const BubbleSortView_: FC = () => {
 
   return (
     <Box
+      component="div"
+      autoFocus
       tabIndex={0}
       onKeyDown={handleAnimationControlKeyDown}
       sx={{
