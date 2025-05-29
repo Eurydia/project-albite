@@ -57,22 +57,19 @@ registerSorterView("counting-sort", {
   view: <CountingSortView />,
 });
 
-const router = createHashRouter(
-  [
-    {
-      path: "/",
-      children: [
-        { index: true, element: <HomeView /> },
-        {
-          path: "sorters",
-          element: <SorterRouteLayout />,
-          children: getSorterRoutes(),
-        },
-      ],
-    },
-  ],
-  { basename: "/project-albite/" }
-);
+const router = createHashRouter([
+  {
+    path: "/",
+    children: [
+      { index: true, element: <HomeView /> },
+      {
+        path: "sorters",
+        element: <SorterRouteLayout />,
+        children: getSorterRoutes(),
+      },
+    ],
+  },
+]);
 
 export const App: FC = memo(() => {
   return (
