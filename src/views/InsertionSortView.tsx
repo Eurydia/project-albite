@@ -71,10 +71,7 @@ const InsertionSortView_: FC = () => {
         <ShuffleRequestRegion onClick={shuffleDataset} />
       )}
       {frame !== undefined && (
-        <InsertionSortVisualizer
-          frame={frame}
-          size={size}
-        />
+        <InsertionSortVisualizer frame={frame} />
       )}
     </Box>
   );
