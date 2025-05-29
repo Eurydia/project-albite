@@ -1,4 +1,5 @@
 import { useAnimtionLoop } from "@/hooks/useAnimationLoop";
+import { usePlayNote } from "@/hooks/usePlayNote";
 import {
   AutorenewRounded,
   ChevronLeftRounded,
@@ -21,6 +22,9 @@ export const SorterAnimationToolbar: FC<Props> = memo(
       playAnimation,
       stopAnimation,
     } = useAnimtionLoop(onNextFrame);
+    const playNote = usePlayNote({
+      waveform: "sine",
+    });
 
     const handlePausePlay = useCallback(() => {
       if (animationActive) {
@@ -49,7 +53,13 @@ export const SorterAnimationToolbar: FC<Props> = memo(
         stopAnimation();
       }
       onShuffle();
-    }, [onShuffle, animationActive, stopAnimation]);
+      playNote(300);
+    }, [
+      animationActive,
+      onShuffle,
+      playNote,
+      stopAnimation,
+    ]);
 
     return (
       <Toolbar

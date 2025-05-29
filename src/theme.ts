@@ -29,12 +29,7 @@ declare module "@mui/material/styles" {
 export let theme = createTheme({
   palette: {
     primary: grey,
-    // opRead: deepOrange,
-    // opWrite: deepPurple,
-    // opCompare: indigo,
-    // opSwap: pink,
-    // opVerify: red,
-    // rangeBounded: grey,
+
     mode: "dark",
     contrastThreshold: 5,
   },

@@ -1,4 +1,8 @@
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
+import {
+  usePlayNote,
+  type UsePlayNoteOptions,
+} from "./usePlayNote";
 
 export const MusicalScales = {
   Major: [0, 2, 4, 5, 7, 9, 11],
@@ -22,29 +26,16 @@ export type MusicalScaleOptions = {
   maxOctave?: number;
   /** If true, octaves wrap; if false, they clamp at maxOctave */
   wrapOctave?: boolean;
-  duration?: number;
-  fadeDuration?: number;
-  waveform?: OscillatorType;
-  gain?: number;
-};
+} & UsePlayNoteOptions;
 
 export const useMusicalScale = ({
   scalePattern = MusicalScales.Lydian,
   baseMidi = 60,
   maxOctave = 2,
   wrapOctave = true,
-  duration = 1,
-  fadeDuration = 0.1,
-  waveform = "sine",
-  gain = 0.2,
+  ...rest
 }: MusicalScaleOptions = {}) => {
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const getAudioContext = () => {
-    if (audioCtxRef.current === null) {
-      audioCtxRef.current = new window.AudioContext();
-    }
-    return audioCtxRef.current;
-  };
+  const _playNote = usePlayNote(rest);
 
   const mapValueToFrequency = useCallback(
     (value: number) => {
@@ -68,40 +59,9 @@ export const useMusicalScale = ({
   );
 
   const playNote = useCallback(
-    (value: number) => {
-      const freq = mapValueToFrequency(value);
-      const audioCtx = getAudioContext();
-      const osc = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-
-      osc.type = waveform;
-      osc.frequency.setValueAtTime(
-        freq,
-        audioCtx.currentTime
-      );
-
-      gainNode.gain.setValueAtTime(
-        gain,
-        audioCtx.currentTime
-      );
-      gainNode.gain.exponentialRampToValueAtTime(
-        0.001,
-        audioCtx.currentTime + duration - fadeDuration
-      );
-
-      osc.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      osc.start(audioCtx.currentTime);
-      osc.stop(audioCtx.currentTime + duration);
-    },
-    [
-      mapValueToFrequency,
-      waveform,
-      gain,
-      duration,
-      fadeDuration,
-    ]
+    (value: number) =>
+      _playNote(mapValueToFrequency(value)),
+    [_playNote, mapValueToFrequency]
   );
 
   return { playNote };
