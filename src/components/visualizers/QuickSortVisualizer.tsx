@@ -5,75 +5,13 @@ import {
   CircleOutlined,
 } from "@mui/icons-material";
 import { Grid, useTheme } from "@mui/material";
-import { memo, useEffect, type FC } from "react";
-
-type VisualizerItemProps = {
-  value: number;
-  index: number;
-  frame: QuicksortFrameState;
-};
-const VisualizerItem: FC<VisualizerItemProps> = memo(
-  ({ frame, index, value }) => {
-    const { palette } = useTheme();
-    const height = (value / Math.max(...frame.items)) * 100;
-
-    let backgroundColor = palette.rangeBounded.light;
-    if (frame.terminals !== undefined) {
-      const tMin = Math.min(...frame.terminals);
-      const tMax = Math.max(...frame.terminals);
-      if (index < tMin || index > tMax) {
-        backgroundColor = palette.rangeBounded.dark;
-      }
-    }
-    if (
-      frame.compared !== undefined &&
-      frame.compared.includes(index)
-    ) {
-      backgroundColor = palette.opCompare.main;
-    } else if (
-      frame.swapped !== undefined &&
-      frame.swapped.includes(index)
-    ) {
-      backgroundColor = palette.opSwap.main;
-    } else if (frame.verifyAt === index) {
-      backgroundColor = palette.opVerify.main;
-    }
-
-    const iconColor =
-      palette.getContrastText(backgroundColor);
-    return (
-      <Grid
-        size={1}
-        sx={{
-          backgroundColor,
-          height: `${height}%`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-          overflow: "clip",
-        }}
-      >
-        {frame.partition === index && (
-          <ChangeHistoryRounded
-            sx={{
-              color: iconColor,
-              width: "100%",
-            }}
-          />
-        )}
-        {frame.key === index && (
-          <CircleOutlined
-            sx={{
-              color: iconColor,
-              width: "100%",
-            }}
-          />
-        )}
-      </Grid>
-    );
-  }
-);
+import {
+  memo,
+  useCallback,
+  useEffect,
+  type FC,
+} from "react";
+import { VisualizerItem } from "./VisualizerItem";
 
 type Props = {
   frame: QuicksortFrameState;
@@ -81,6 +19,7 @@ type Props = {
 export const QuickSortVisualizer: FC<Props> = memo(
   ({ frame }) => {
     const { playNote } = useMusicalScale();
+    const { palette } = useTheme();
 
     useEffect(() => {
       if (frame.compared !== undefined) {
@@ -107,6 +46,49 @@ export const QuickSortVisualizer: FC<Props> = memo(
       }
     }, [frame, playNote]);
 
+    const backgroundColorProvider = useCallback(
+      (index: number) => {
+        let backgroundColor = palette.rangeBounded.light;
+        if (frame.terminals !== undefined) {
+          const tMin = Math.min(...frame.terminals);
+          const tMax = Math.max(...frame.terminals);
+          if (index < tMin || index > tMax) {
+            backgroundColor = palette.rangeBounded.dark;
+          }
+        }
+        if (
+          frame.compared !== undefined &&
+          frame.compared.includes(index)
+        ) {
+          backgroundColor = palette.opCompare.main;
+        } else if (
+          frame.swapped !== undefined &&
+          frame.swapped.includes(index)
+        ) {
+          backgroundColor = palette.opSwap.main;
+        } else if (frame.verifyAt === index) {
+          backgroundColor = palette.opVerify.main;
+        }
+        return backgroundColor;
+      },
+      [
+        frame.compared,
+        frame.swapped,
+        frame.terminals,
+        frame.verifyAt,
+        palette.opCompare.main,
+        palette.opSwap.main,
+        palette.opVerify.main,
+        palette.rangeBounded.dark,
+        palette.rangeBounded.light,
+      ]
+    );
+
+    const mouseEnterHandleProvider = useCallback(
+      (value: number) => () => playNote(value),
+      [playNote]
+    );
+
     return (
       <Grid
         container
@@ -115,14 +97,38 @@ export const QuickSortVisualizer: FC<Props> = memo(
         alignItems="flex-end"
         sx={{ flexBasis: 0, flexGrow: 1 }}
       >
-        {frame.items.map((value, index) => (
-          <VisualizerItem
-            key={`sort-item-${index}`}
-            frame={frame}
-            index={index}
-            value={value}
-          />
-        ))}
+        {frame.items.map((value, index) => {
+          const backgroundColor =
+            backgroundColorProvider(index);
+          const iconColor =
+            palette.getContrastText(backgroundColor);
+
+          return (
+            <VisualizerItem
+              key={`sort-item-${index}`}
+              backgroundColor={backgroundColor}
+              height={(value / frame.items.length) * 100}
+              onMouseEnter={mouseEnterHandleProvider(value)}
+            >
+              {frame.partition === index && (
+                <ChangeHistoryRounded
+                  sx={{
+                    color: iconColor,
+                    width: "100%",
+                  }}
+                />
+              )}
+              {frame.key === index && (
+                <CircleOutlined
+                  sx={{
+                    color: iconColor,
+                    width: "100%",
+                  }}
+                />
+              )}
+            </VisualizerItem>
+          );
+        })}
       </Grid>
     );
   }

@@ -1,89 +1,112 @@
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import type { MergeSortFrameData } from "@/types/sorting-animators/merge-sort";
 import { Grid, useTheme } from "@mui/material";
-import { memo, useEffect, type FC } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  type FC,
+} from "react";
+import { VisualizerItem } from "./VisualizerItem";
 
-type VisualizerItemProps = {
-  index: number;
-  value: number;
-  frame: MergeSortFrameData["mainMem"];
-};
-const VisualizerItem: FC<VisualizerItemProps> = memo(
-  ({ index, value, frame }) => {
-    const { palette } = useTheme();
-    const height = (value / frame.items.length) * 100;
-
-    let backgroundColor = palette.rangeBounded.light;
-    if (frame.verifyAt === index) {
-      backgroundColor = palette.opVerify.main;
-    } else if (frame.readAt === index) {
-      backgroundColor = palette.opRead.main;
-    } else if (frame.writtenAt === index) {
-      backgroundColor = palette.opWrite.main;
-    } else if (
-      frame.compared !== undefined &&
-      frame.compared.includes(index)
-    ) {
-      backgroundColor = palette.opCompare.main;
-    } else if (frame.terminals !== undefined) {
-      const tMin = Math.min(...frame.terminals);
-      const tMax = Math.max(...frame.terminals);
-      if (index < tMin || index > tMax) {
-        backgroundColor = palette.rangeBounded.dark;
-      }
-    }
-    return (
-      <Grid
-        size={1}
-        sx={{
-          height: `${height}%`,
-          backgroundColor,
-        }}
-      />
-    );
-  }
-);
-
-type MemVisualizerProps = {
-  playAudio?: boolean;
+type VisualizerProps = {
+  playOnCompare?: boolean;
+  playOnRead?: boolean;
+  playOnWrite?: boolean;
+  playOnVerify?: boolean;
   mem: MergeSortFrameData["mainMem"];
 };
-const MemVisualizer: FC<MemVisualizerProps> = memo(
-  ({ mem, playAudio }) => {
+const Visualizer: FC<VisualizerProps> = memo(
+  ({
+    mem,
+    playOnCompare,
+    playOnRead,
+    playOnVerify,
+    playOnWrite,
+  }) => {
     const { playNote } = useMusicalScale();
-
+    const { palette } = useTheme();
     useEffect(() => {
-      if (!playAudio) {
-        return;
-      }
-
-      if (mem.compared !== undefined) {
+      if (playOnCompare && mem.compared !== undefined) {
         const pos = Math.max(...mem.compared);
         const item = mem.items.at(pos);
         if (item !== undefined) {
           playNote(item);
         }
       }
-      if (mem.verifyAt !== undefined) {
+      if (playOnVerify && mem.verifyAt !== undefined) {
         const pos = Math.max(mem.verifyAt);
         const item = mem.items.at(pos);
         if (item !== undefined) {
           playNote(item);
         }
       }
-      if (mem.readAt !== undefined) {
+      if (playOnRead && mem.readAt !== undefined) {
         const item = mem.items.at(mem.readAt);
         if (item !== undefined) {
           playNote(item);
         }
       }
-      if (mem.writtenAt !== undefined) {
+      if (playOnWrite && mem.writtenAt !== undefined) {
         const item = mem.items.at(mem.writtenAt);
         if (item !== undefined) {
           playNote(item);
         }
       }
-    }, [mem, playNote, playAudio]);
+    }, [
+      mem,
+      playNote,
+      playOnCompare,
+      playOnVerify,
+      playOnRead,
+      playOnWrite,
+    ]);
+
+    const backgroundColorProvider = useCallback(
+      (index: number) => {
+        let backgroundColor = palette.rangeBounded.light;
+        if (mem.verifyAt === index) {
+          backgroundColor = palette.opVerify.main;
+        } else if (mem.readAt === index) {
+          backgroundColor = palette.opRead.main;
+        } else if (mem.writtenAt === index) {
+          backgroundColor = palette.opWrite.main;
+        } else if (
+          mem.compared !== undefined &&
+          mem.compared.includes(index)
+        ) {
+          backgroundColor = palette.opCompare.main;
+        } else if (mem.terminals !== undefined) {
+          const tMin = Math.min(...mem.terminals);
+          const tMax = Math.max(...mem.terminals);
+          if (index < tMin || index > tMax) {
+            backgroundColor = palette.rangeBounded.dark;
+          }
+        }
+        return backgroundColor;
+      },
+      [
+        mem.compared,
+        mem.readAt,
+        mem.terminals,
+        mem.verifyAt,
+        mem.writtenAt,
+        palette.opCompare.main,
+        palette.opRead.main,
+        palette.opVerify.main,
+        palette.opWrite.main,
+        palette.rangeBounded.dark,
+        palette.rangeBounded.light,
+      ]
+    );
+
+    const mouseEnterHandleProvider = useCallback(
+      (value: number) => () => {
+        playNote(value);
+      },
+      [playNote]
+    );
+
     return (
       <Grid
         container
@@ -100,9 +123,11 @@ const MemVisualizer: FC<MemVisualizerProps> = memo(
           return (
             <VisualizerItem
               key={`sort-item-${index}`}
-              index={index}
-              value={value}
-              frame={mem}
+              onMouseEnter={mouseEnterHandleProvider(value)}
+              backgroundColor={backgroundColorProvider(
+                index
+              )}
+              height={(value / mem.items.length) * 100}
             />
           );
         })}
@@ -119,7 +144,6 @@ export const MergeSortVisualizer: FC<Props> = memo(
     return (
       <Grid
         container
-        spacing={2}
         columns={1}
         sx={{
           flexGrow: 1,
@@ -132,16 +156,22 @@ export const MergeSortVisualizer: FC<Props> = memo(
             flexGrow: 1,
           }}
         >
-          <MemVisualizer
+          <Visualizer
             mem={frame.mainMem}
-            playAudio
+            playOnCompare
+            playOnRead
+            playOnWrite
+            playOnVerify
           />
         </Grid>
         <Grid
           size={1}
           sx={{ flexGrow: 1 }}
         >
-          <MemVisualizer mem={frame.auxiMem} />
+          <Visualizer
+            mem={frame.auxiMem}
+            playOnRead
+          />
         </Grid>
       </Grid>
     );

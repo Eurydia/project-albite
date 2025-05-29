@@ -1,70 +1,81 @@
-import { useMusicalScale } from "@/hooks/useMusicalNotes";
+import {
+  MusicalScales,
+  useMusicalScale,
+} from "@/hooks/useMusicalNotes";
 import type { CountingSortFrameState } from "@/types/sorting-animators/counting-sort";
 import { Grid, useTheme } from "@mui/material";
-import { type FC, memo, useEffect } from "react";
-
-type VisualizerItemProps = {
-  height: number;
-  isRead?: boolean;
-  isWritten?: boolean;
-  isVerify?: boolean;
-};
-const VisualizerItem: FC<VisualizerItemProps> = memo(
-  ({ height, isRead, isWritten, isVerify }) => {
-    const { palette } = useTheme();
-
-    let backgroundColor = palette.rangeBounded.light;
-    if (isVerify) {
-      backgroundColor = palette.opVerify.main;
-    } else if (isRead) {
-      backgroundColor = palette.opRead.main;
-    } else if (isWritten) {
-      backgroundColor = palette.opWrite.main;
-    }
-
-    return (
-      <Grid
-        size={1}
-        sx={{
-          height: `${height}%`,
-          backgroundColor,
-        }}
-      />
-    );
-  }
-);
+import {
+  type FC,
+  memo,
+  useCallback,
+  useEffect,
+} from "react";
+import { VisualizerItem } from "./VisualizerItem";
 
 type VisualizerProps = {
-  playAudio?: boolean;
+  playOnRead?: boolean;
+  playOnWrite?: boolean;
+  playOnVerify?: boolean;
   mem: CountingSortFrameState["mainMem"];
 };
 const Visualizer: FC<VisualizerProps> = memo(
-  ({ mem, playAudio }) => {
-    const { playNote } = useMusicalScale();
+  ({ mem, playOnRead, playOnWrite, playOnVerify }) => {
+    const { playNote } = useMusicalScale({
+      gain: 0.05,
+      duration: 1,
+      fadeDuration: 0.2,
+      scalePattern: MusicalScales.Lydian,
+    });
+    const { palette } = useTheme();
 
     useEffect(() => {
-      if (!playAudio) {
-        return;
-      }
-      if (mem.readAt !== undefined) {
+      if (playOnRead && mem.readAt !== undefined) {
         const item = mem.items.at(mem.readAt);
         if (item !== undefined && item > 0) {
           playNote(item);
         }
       }
-      if (mem.writtenAt !== undefined) {
+      if (playOnWrite && mem.writtenAt !== undefined) {
         const item = mem.items.at(mem.writtenAt);
         if (item !== undefined && item > 0) {
           playNote(item);
         }
       }
-      if (mem.verifyAt !== undefined) {
+      if (playOnVerify && mem.verifyAt !== undefined) {
         const item = mem.items.at(mem.verifyAt);
         if (item !== undefined) {
           playNote(item);
         }
       }
-    }, [mem, playNote, playAudio]);
+    }, [
+      mem,
+      playNote,
+      playOnRead,
+      playOnWrite,
+      playOnVerify,
+    ]);
+
+    const backgroundColorProvider = useCallback(
+      (index: number) => {
+        let backgroundColor = palette.rangeBounded.light;
+        if (mem.verifyAt === index) {
+          backgroundColor = palette.opVerify.main;
+        } else if (mem.readAt === index) {
+          backgroundColor = palette.opRead.main;
+        } else if (mem.writtenAt === index) {
+          backgroundColor = palette.opWrite.main;
+        }
+        return backgroundColor;
+      },
+      [mem, palette]
+    );
+
+    const mouseEnterHandleProvider = useCallback(
+      (value: number) => () => {
+        playNote(value);
+      },
+      [playNote]
+    );
 
     return (
       <Grid
@@ -83,9 +94,10 @@ const Visualizer: FC<VisualizerProps> = memo(
             <VisualizerItem
               key={`sort-item-${index}`}
               height={(value / mem.items.length) * 100}
-              isRead={mem.readAt === index}
-              isWritten={mem.writtenAt === index}
-              isVerify={mem.verifyAt === index}
+              onMouseEnter={mouseEnterHandleProvider(value)}
+              backgroundColor={backgroundColorProvider(
+                index
+              )}
             />
           );
         })}
@@ -115,14 +127,19 @@ export const CountingSortVisualizer: FC<Props> = memo(
         >
           <Visualizer
             mem={frame.mainMem}
-            playAudio
+            playOnVerify
+            playOnRead
+            playOnWrite
           />
         </Grid>
         <Grid
           size={1}
           sx={{ flexGrow: 1 }}
         >
-          <Visualizer mem={frame.auxiMem} />
+          <Visualizer
+            mem={frame.auxiMem}
+            playOnWrite
+          />
         </Grid>
         <Grid
           size={1}

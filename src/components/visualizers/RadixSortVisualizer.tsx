@@ -1,70 +1,79 @@
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import type { RadixSortFrameState } from "@/types/sorting-animators/radix-sort";
 import { Grid, useTheme } from "@mui/material";
-import { memo, useEffect, type FC } from "react";
-
-type VisualizerItemProps = {
-  index: number;
-  value: number;
-  mem: RadixSortFrameState["mainMem"];
-};
-const VisualizerItem: FC<VisualizerItemProps> = memo(
-  ({ index, value, mem }) => {
-    const { palette } = useTheme();
-    const height = (value / mem.items.length) * 100;
-
-    let backgroundColor = palette.rangeBounded.light;
-    if (mem.readAt === index) {
-      backgroundColor = palette.opRead.main;
-    } else if (mem.writtenAt === index) {
-      backgroundColor = palette.opWrite.main;
-    } else if (mem.verifyAt === index) {
-      backgroundColor = palette.opVerify.main;
-    }
-
-    return (
-      <Grid
-        size={1}
-        sx={{
-          height: `${height}%`,
-          backgroundColor,
-        }}
-      />
-    );
-  }
-);
+import {
+  memo,
+  useCallback,
+  useEffect,
+  type FC,
+} from "react";
+import { VisualizerItem } from "./VisualizerItem";
 
 type VisualizerProps = {
-  playAudio?: boolean;
+  playOnRead?: boolean;
+  playOnWrite?: boolean;
+  playOnVerify?: boolean;
   mem: RadixSortFrameState["mainMem"];
 };
 const Visualizer: FC<VisualizerProps> = memo(
-  ({ mem, playAudio }) => {
+  ({ mem, playOnRead, playOnWrite, playOnVerify }) => {
     const { playNote } = useMusicalScale();
+    const { palette } = useTheme();
 
     useEffect(() => {
-      if (!playAudio) {
-        return;
-      }
-      if (mem.readAt !== undefined) {
+      if (playOnRead && mem.readAt !== undefined) {
         const item = mem.items.at(mem.readAt);
         if (item !== undefined) {
           playNote(item);
         }
       }
-      if (mem.writtenAt !== undefined) {
+      if (playOnWrite && mem.writtenAt !== undefined) {
         const item = mem.items.at(mem.writtenAt);
         if (item !== undefined) {
           playNote(item);
         }
       }
-      if (mem.verifyAt !== undefined) {
+      if (playOnVerify && mem.verifyAt !== undefined) {
         const item = mem.items.at(mem.verifyAt);
         if (item !== undefined) {
           playNote(item);
         }
       }
-    }, [mem, playNote, playAudio]);
+    }, [
+      mem,
+      playNote,
+      playOnRead,
+      playOnWrite,
+      playOnVerify,
+    ]);
+
+    const backgroundColorProvider = useCallback(
+      (index: number) => {
+        let backgroundColor = palette.rangeBounded.light;
+        if (mem.readAt === index) {
+          backgroundColor = palette.opRead.main;
+        } else if (mem.writtenAt === index) {
+          backgroundColor = palette.opWrite.main;
+        } else if (mem.verifyAt === index) {
+          backgroundColor = palette.opVerify.main;
+        }
+        return backgroundColor;
+      },
+      [
+        mem.readAt,
+        mem.verifyAt,
+        mem.writtenAt,
+        palette.opRead.main,
+        palette.opVerify.main,
+        palette.opWrite.main,
+        palette.rangeBounded.light,
+      ]
+    );
+
+    const onMouseEnter = useCallback(
+      (value: number) => () => playNote(value),
+      [playNote]
+    );
 
     return (
       <Grid
@@ -82,9 +91,11 @@ const Visualizer: FC<VisualizerProps> = memo(
           return (
             <VisualizerItem
               key={`sort-item-${index}`}
-              index={index}
-              value={value}
-              mem={mem}
+              height={(value / mem.items.length) * 100}
+              backgroundColor={backgroundColorProvider(
+                index
+              )}
+              onMouseEnter={onMouseEnter(value)}
             />
           );
         })}
@@ -116,14 +127,19 @@ export const RadixSortVisualizer: FC<Props> = memo(
         >
           <Visualizer
             mem={frame.mainMem}
-            playAudio
+            playOnVerify
+            playOnRead
+            playOnWrite
           />
         </Grid>
         <Grid
           size={1}
           sx={{ flexGrow: 1 }}
         >
-          <Visualizer mem={frame.auxiMem} />
+          <Visualizer
+            mem={frame.auxiMem}
+            playOnWrite
+          />
         </Grid>
         <Grid
           size={1}
