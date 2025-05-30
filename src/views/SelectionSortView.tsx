@@ -16,19 +16,13 @@ import { useLoaderData } from "react-router";
 const SelectionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { palette } = useTheme();
-  const {
-    frame,
-    nextFrame,
-    prevFrame,
-    shuffleDataset,
-    handleAnimationControlKeyDown,
-  } = useSortAnimator(new SelectionSortAnimator(size));
+  const { frame, nextFrame, prevFrame, shuffleDataset } =
+    useSortAnimator(new SelectionSortAnimator(size));
 
   return (
     <Box
       component="div"
       tabIndex={0}
-      onKeyDown={handleAnimationControlKeyDown}
       sx={{
         flexBasis: 0,
         flexGrow: 1,

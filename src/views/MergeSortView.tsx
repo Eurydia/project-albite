@@ -16,19 +16,13 @@ import { useLoaderData } from "react-router";
 const MergeSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { palette } = useTheme();
-  const {
-    frame,
-    nextFrame,
-    prevFrame,
-    shuffleDataset,
-    handleAnimationControlKeyDown,
-  } = useSortAnimator(new MergeSortAnimator(size));
+  const { frame, nextFrame, prevFrame, shuffleDataset } =
+    useSortAnimator(new MergeSortAnimator(size));
 
   return (
     <Box
       component="div"
       tabIndex={0}
-      onKeyDown={handleAnimationControlKeyDown}
       sx={{
         display: "flex",
         flexDirection: "column",

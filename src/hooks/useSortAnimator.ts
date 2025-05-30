@@ -4,10 +4,7 @@ import {
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent,
 } from "react";
-import { useAnimtionLoop } from "./useAnimationLoop";
-
 export const useSortAnimator = <T extends object>(
   animator: SortAnimatorBase<T>
 ) => {
@@ -53,42 +50,6 @@ export const useSortAnimator = <T extends object>(
     []
   );
 
-  const { animationActive, playAnimation, stopAnimation } =
-    useAnimtionLoop(nextFrame);
-
-  const handleAnimationControlKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLElement>) => {
-      switch (e.key) {
-        case "ArrowRight":
-          nextFrame();
-          break;
-        case "ArrowLeft":
-          prevFrame();
-          break;
-        case "r":
-          shuffleDataset();
-          break;
-        case " ":
-          if (!animationActive) {
-            playAnimation();
-          } else {
-            stopAnimation();
-          }
-          break;
-        default:
-          return;
-      }
-    },
-    [
-      animationActive,
-      nextFrame,
-      playAnimation,
-      prevFrame,
-      shuffleDataset,
-      stopAnimation,
-    ]
-  );
-
   const frame = useMemo(() => {
     return frames.at(frameIndex);
   }, [frameIndex, frames]);
@@ -97,10 +58,6 @@ export const useSortAnimator = <T extends object>(
     shuffleDataset,
     prevFrame,
     nextFrame,
-    handleAnimationControlKeyDown,
-    playAnimation,
-    stopAnimation,
-    animationActive,
     frame,
   };
 };

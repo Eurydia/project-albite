@@ -1,19 +1,15 @@
 import { useCallback, useRef } from "react";
 
 export type UsePlayNoteOptions = {
-  /** Oscillator waveform type (default = "sine") */
   waveform?: OscillatorType;
-  /** Initial gain (default = 0.2) */
   gain?: number;
-  /** Total note duration in seconds (default = 1) */
   duration?: number;
-  /** Fade-out duration in seconds (default = 0.1) */
   fadeDuration?: number;
 };
 
 export const usePlayNote = ({
   waveform = "sine",
-  gain = 0.2,
+  gain = 0.1,
   duration = 1,
   fadeDuration = 0.1,
 }: UsePlayNoteOptions = {}) => {

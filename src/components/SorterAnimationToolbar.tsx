@@ -21,7 +21,7 @@ export const SorterAnimationToolbar: FC<Props> = memo(
       animationActive,
       playAnimation,
       stopAnimation,
-    } = useAnimtionLoop(onNextFrame);
+    } = useAnimtionLoop(onNextFrame, 12);
     const playNote = usePlayNote({
       waveform: "sine",
     });

@@ -15,21 +15,14 @@ import { useLoaderData } from "react-router";
 
 const BubbleSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const {
-    frame,
-    nextFrame,
-    prevFrame,
-    shuffleDataset,
-    handleAnimationControlKeyDown,
-  } = useSortAnimator(new BubbleSortAnimator(size));
+  const { frame, nextFrame, prevFrame, shuffleDataset } =
+    useSortAnimator(new BubbleSortAnimator(size));
   const { palette } = useTheme();
 
   return (
     <Box
       component="div"
-      autoFocus
       tabIndex={0}
-      onKeyDown={handleAnimationControlKeyDown}
       sx={{
         display: "flex",
         flexDirection: "column",

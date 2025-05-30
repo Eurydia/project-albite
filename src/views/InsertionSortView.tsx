@@ -15,19 +15,13 @@ import { useLoaderData } from "react-router";
 
 const InsertionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const {
-    frame,
-    nextFrame,
-    prevFrame,
-    shuffleDataset,
-    handleAnimationControlKeyDown,
-  } = useSortAnimator(new InsertionSortAnimator(size));
+  const { frame, nextFrame, prevFrame, shuffleDataset } =
+    useSortAnimator(new InsertionSortAnimator(size));
   const { palette } = useTheme();
   return (
     <Box
       component="div"
       tabIndex={0}
-      onKeyDown={handleAnimationControlKeyDown}
       sx={{
         display: "flex",
         flexDirection: "column",

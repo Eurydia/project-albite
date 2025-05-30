@@ -16,19 +16,13 @@ import { useLoaderData } from "react-router";
 const CountingSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { palette } = useTheme();
-  const {
-    frame,
-    nextFrame,
-    prevFrame,
-    handleAnimationControlKeyDown,
-    shuffleDataset,
-  } = useSortAnimator(new CountingSortAnimator(size));
+  const { frame, nextFrame, prevFrame, shuffleDataset } =
+    useSortAnimator(new CountingSortAnimator(size));
 
   return (
     <Box
       component="div"
       tabIndex={0}
-      onKeyDown={handleAnimationControlKeyDown}
       sx={{
         display: "flex",
         flexDirection: "column",

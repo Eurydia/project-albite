@@ -16,19 +16,13 @@ import { useLoaderData } from "react-router";
 const RadixSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { palette } = useTheme();
-  const {
-    frame,
-    nextFrame,
-    prevFrame,
-    shuffleDataset,
-    handleAnimationControlKeyDown,
-  } = useSortAnimator(new RadixSortAnimator(size));
+  const { frame, nextFrame, prevFrame, shuffleDataset } =
+    useSortAnimator(new RadixSortAnimator(size));
 
   return (
     <Box
       component="div"
       tabIndex={0}
-      onKeyDown={handleAnimationControlKeyDown}
       sx={{
         display: "flex",
         flexDirection: "column",

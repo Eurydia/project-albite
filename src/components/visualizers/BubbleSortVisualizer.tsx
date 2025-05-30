@@ -82,7 +82,6 @@ export const BubbleSortVisualizer: FC<Props> = memo(
       <Grid
         container
         columns={frame.items.length}
-        spacing={0}
         alignItems="flex-end"
         sx={{ flexBasis: 0, flexGrow: 1 }}
       >
