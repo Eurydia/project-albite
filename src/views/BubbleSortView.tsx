@@ -1,27 +1,23 @@
+import { Box, Stack, Typography, useTheme } from "@mui/material";
+import { type FC, memo } from "react";
+import { useLoaderData } from "react-router";
 import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { BubbleSortVisualizer } from "@/components/visualizers/BubbleSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { BubbleSortAnimator } from "@/services/sorting-animators/bubble-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import {
-  Box,
-  Stack,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import { memo, type FC } from "react";
-import { useLoaderData } from "react-router";
 
 const BubbleSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const { frame, nextFrame, prevFrame, shuffleDataset } =
-    useSortAnimator(new BubbleSortAnimator(size));
+  const { frame, nextFrame, prevFrame, shuffleDataset } = useSortAnimator(
+    new BubbleSortAnimator(size),
+  );
   const { palette } = useTheme();
 
   return (
     <Box
-      component="div"
+      component="section"
       tabIndex={0}
       sx={{
         display: "flex",
@@ -30,8 +26,8 @@ const BubbleSortView_: FC = () => {
         flexGrow: 1,
       }}
     >
-      <Stack spacing={1}>
-        <Typography fontWeight={900}>
+      <Stack component="header" spacing={1}>
+        <Typography component="h1" variant="h5" fontWeight={900}>
           {`Bubble sort`}
         </Typography>
         <Stack
@@ -62,12 +58,8 @@ const BubbleSortView_: FC = () => {
           onShuffle={shuffleDataset}
         />
       </Stack>
-      {frame === undefined && (
-        <ShuffleRequestRegion onClick={shuffleDataset} />
-      )}
-      {frame !== undefined && (
-        <BubbleSortVisualizer frame={frame} />
-      )}
+      {frame === undefined && <ShuffleRequestRegion onClick={shuffleDataset} />}
+      {frame !== undefined && <BubbleSortVisualizer frame={frame} />}
     </Box>
   );
 };

@@ -3,7 +3,7 @@ import { generateDataset } from "../generate-dataset";
 import { SortAnimatorBase } from "./base";
 
 function* countingSortAnimator(
-  dataset: number[]
+  dataset: number[],
 ): Generator<CountingSortFrameState> {
   const size = dataset.length;
   const maxValue = Math.max(...dataset);

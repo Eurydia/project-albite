@@ -1,12 +1,8 @@
 import { useCallback, useRef, useState } from "react";
 
-export const useAnimtionLoop = (
-  animator: () => boolean,
-  frames: number
-) => {
+export const useAnimtionLoop = (animator: () => boolean, frames: number) => {
   const intervalRef = useRef<number>(undefined);
-  const [animationActive, setAnimationActive] =
-    useState(false);
+  const [animationActive, setAnimationActive] = useState(false);
 
   const stopAnimation = useCallback(() => {
     if (intervalRef.current === undefined) {

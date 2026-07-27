@@ -1,27 +1,23 @@
+import { Box, Stack, Typography, useTheme } from "@mui/material";
+import { type FC, memo } from "react";
+import { useLoaderData } from "react-router";
 import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { SelectionSortVisualizer } from "@/components/visualizers/SelectionSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { SelectionSortAnimator } from "@/services/sorting-animators/selection-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import {
-  Box,
-  Stack,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import { memo, type FC } from "react";
-import { useLoaderData } from "react-router";
 
 const SelectionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { palette } = useTheme();
-  const { frame, nextFrame, prevFrame, shuffleDataset } =
-    useSortAnimator(new SelectionSortAnimator(size));
+  const { frame, nextFrame, prevFrame, shuffleDataset } = useSortAnimator(
+    new SelectionSortAnimator(size),
+  );
 
   return (
     <Box
-      component="div"
+      component="section"
       tabIndex={0}
       sx={{
         flexBasis: 0,
@@ -30,8 +26,8 @@ const SelectionSortView_: FC = () => {
         flexDirection: "column",
       }}
     >
-      <Stack spacing={1}>
-        <Typography fontWeight={900}>
+      <Stack component="header" spacing={1}>
+        <Typography component="h1" variant="h5" fontWeight={900}>
           {`Selection sort`}
         </Typography>
         <Stack
@@ -62,16 +58,10 @@ const SelectionSortView_: FC = () => {
           onShuffle={shuffleDataset}
         />
       </Stack>
-      {frame === undefined && (
-        <ShuffleRequestRegion onClick={shuffleDataset} />
-      )}
-      {frame !== undefined && (
-        <SelectionSortVisualizer frame={frame} />
-      )}
+      {frame === undefined && <ShuffleRequestRegion onClick={shuffleDataset} />}
+      {frame !== undefined && <SelectionSortVisualizer frame={frame} />}
     </Box>
   );
 };
 
-export const SelectionSortView: FC = memo(
-  SelectionSortView_
-);
+export const SelectionSortView: FC = memo(SelectionSortView_);

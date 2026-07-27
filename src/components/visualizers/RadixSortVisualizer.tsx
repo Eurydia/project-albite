@@ -1,12 +1,7 @@
+import { Grid, useTheme } from "@mui/material";
+import { type FC, memo, useCallback, useEffect } from "react";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import type { RadixSortFrameState } from "@/types/sorting-animators/radix-sort";
-import { Grid, useTheme } from "@mui/material";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  type FC,
-} from "react";
 import { VisualizerItem } from "./VisualizerItem";
 
 type VisualizerProps = {
@@ -39,13 +34,7 @@ const Visualizer: FC<VisualizerProps> = memo(
           playNote(item);
         }
       }
-    }, [
-      mem,
-      playNote,
-      playOnRead,
-      playOnWrite,
-      playOnVerify,
-    ]);
+    }, [mem, playNote, playOnRead, playOnWrite, playOnVerify]);
 
     const backgroundColorProvider = useCallback(
       (index: number) => {
@@ -67,12 +56,12 @@ const Visualizer: FC<VisualizerProps> = memo(
         palette.opVerify.main,
         palette.opWrite.main,
         palette.rangeBounded.light,
-      ]
+      ],
     );
 
     const onMouseEnter = useCallback(
       (value: number) => () => playNote(value),
-      [playNote]
+      [playNote],
     );
 
     return (
@@ -92,62 +81,44 @@ const Visualizer: FC<VisualizerProps> = memo(
             <VisualizerItem
               key={`sort-item-${index}`}
               height={(value / mem.items.length) * 100}
-              backgroundColor={backgroundColorProvider(
-                index
-              )}
+              backgroundColor={backgroundColorProvider(index)}
               onMouseEnter={onMouseEnter(value)}
             />
           );
         })}
       </Grid>
     );
-  }
+  },
 );
 
 type Props = {
   frame: RadixSortFrameState;
 };
-export const RadixSortVisualizer: FC<Props> = memo(
-  ({ frame }) => {
-    return (
+export const RadixSortVisualizer: FC<Props> = memo(({ frame }) => {
+  return (
+    <Grid
+      container
+      spacing={2}
+      columns={1}
+      sx={{
+        flexGrow: 1,
+        flexBasis: 0,
+      }}
+    >
       <Grid
-        container
-        spacing={2}
-        columns={1}
+        size={1}
         sx={{
           flexGrow: 1,
-          flexBasis: 0,
         }}
       >
-        <Grid
-          size={1}
-          sx={{
-            flexGrow: 1,
-          }}
-        >
-          <Visualizer
-            mem={frame.mainMem}
-            playOnVerify
-            playOnRead
-            playOnWrite
-          />
-        </Grid>
-        <Grid
-          size={1}
-          sx={{ flexGrow: 1 }}
-        >
-          <Visualizer
-            mem={frame.auxiMem}
-            playOnWrite
-          />
-        </Grid>
-        <Grid
-          size={1}
-          sx={{ flexGrow: 1 }}
-        >
-          <Visualizer mem={frame.sortMem} />
-        </Grid>
+        <Visualizer mem={frame.mainMem} playOnVerify playOnRead playOnWrite />
       </Grid>
-    );
-  }
-);
+      <Grid size={1} sx={{ flexGrow: 1 }}>
+        <Visualizer mem={frame.auxiMem} playOnWrite />
+      </Grid>
+      <Grid size={1} sx={{ flexGrow: 1 }}>
+        <Visualizer mem={frame.sortMem} />
+      </Grid>
+    </Grid>
+  );
+});

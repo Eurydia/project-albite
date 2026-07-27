@@ -2,9 +2,7 @@ import type { MergeSortFrameData } from "@/types/sorting-animators/merge-sort";
 import { generateDataset } from "../generate-dataset";
 import { SortAnimatorBase } from "./base";
 
-function* mergeSortAnimator(
-  dataset: number[]
-): Generator<MergeSortFrameData> {
+function* mergeSortAnimator(dataset: number[]): Generator<MergeSortFrameData> {
   const size = dataset.length;
 
   let writeCount = 0;
@@ -37,15 +35,13 @@ function* mergeSortAnimator(
 
   function* __top_down_merge_sort(
     startIndex: number,
-    endIndex: number
+    endIndex: number,
   ): Generator<MergeSortFrameData> {
     if (endIndex - startIndex <= 0) {
       return;
     }
 
-    const middleIndex = Math.floor(
-      (startIndex + endIndex) / 2
-    );
+    const middleIndex = Math.floor((startIndex + endIndex) / 2);
 
     yield* __top_down_merge_sort(startIndex, middleIndex);
 

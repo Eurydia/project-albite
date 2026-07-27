@@ -1,5 +1,3 @@
-import { useAnimtionLoop } from "@/hooks/useAnimationLoop";
-import { usePlayNote } from "@/hooks/usePlayNote";
 import {
   AutorenewRounded,
   ChevronLeftRounded,
@@ -8,7 +6,9 @@ import {
   PlayArrowRounded,
 } from "@mui/icons-material";
 import { Button, Toolbar } from "@mui/material";
-import { memo, useCallback, type FC } from "react";
+import { type FC, memo, useCallback } from "react";
+import { useAnimtionLoop } from "@/hooks/useAnimationLoop";
+import { usePlayNote } from "@/hooks/usePlayNote";
 
 type Props = {
   onNextFrame: () => boolean;
@@ -17,11 +17,10 @@ type Props = {
 };
 export const SorterAnimationToolbar: FC<Props> = memo(
   ({ onNextFrame, onPrevFrame, onShuffle }) => {
-    const {
-      animationActive,
-      playAnimation,
-      stopAnimation,
-    } = useAnimtionLoop(onNextFrame, 12);
+    const { animationActive, playAnimation, stopAnimation } = useAnimtionLoop(
+      onNextFrame,
+      12,
+    );
     const playNote = usePlayNote({
       waveform: "sine",
     });
@@ -54,49 +53,24 @@ export const SorterAnimationToolbar: FC<Props> = memo(
       }
       onShuffle();
       playNote(300);
-    }, [
-      animationActive,
-      onShuffle,
-      playNote,
-      stopAnimation,
-    ]);
+    }, [animationActive, onShuffle, playNote, stopAnimation]);
 
     return (
-      <Toolbar
-        variant="dense"
-        disableGutters
-        sx={{ gap: 1, flexWrap: "wrap" }}
-      >
-        <Button
-          variant="contained"
-          onClick={handleShuffle}
-        >
+      <Toolbar variant="dense" disableGutters sx={{ gap: 1, flexWrap: "wrap" }}>
+        <Button variant="contained" onClick={handleShuffle}>
           <AutorenewRounded />
         </Button>
-        <Button
-          variant="contained"
-          onClick={handlePrevFrame}
-        >
+        <Button variant="contained" onClick={handlePrevFrame}>
           <ChevronLeftRounded />
         </Button>
 
-        <Button
-          variant="contained"
-          onClick={handleNextFrame}
-        >
+        <Button variant="contained" onClick={handleNextFrame}>
           <ChevronRightRounded />
         </Button>
-        <Button
-          variant="contained"
-          onClick={handlePausePlay}
-        >
-          {animationActive ? (
-            <PauseRounded />
-          ) : (
-            <PlayArrowRounded />
-          )}
+        <Button variant="contained" onClick={handlePausePlay}>
+          {animationActive ? <PauseRounded /> : <PlayArrowRounded />}
         </Button>
       </Toolbar>
     );
-  }
+  },
 );

@@ -1,15 +1,19 @@
 import { KeyboardArrowLeftRounded } from "@mui/icons-material";
-import { Button, Toolbar } from "@mui/material";
-import { Fragment, memo, type FC } from "react";
+import { Box, Button, Toolbar } from "@mui/material";
+import { type FC, memo } from "react";
 import { NavLink, Outlet } from "react-router";
 
 export const SorterRouteLayout: FC = memo(() => {
   return (
-    <Fragment>
-      <Toolbar
-        variant="dense"
-        disableGutters
-      >
+    <Box
+      component="main"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        flexGrow: 1,
+      }}
+    >
+      <Toolbar component="nav" variant="dense" disableGutters>
         <Button
           variant="text"
           component={NavLink}
@@ -22,6 +26,6 @@ export const SorterRouteLayout: FC = memo(() => {
         </Button>
       </Toolbar>
       <Outlet />
-    </Fragment>
+    </Box>
   );
 });

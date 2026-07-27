@@ -1,14 +1,9 @@
+import type { RouteObject } from "react-router";
 import type { SorterRouteData } from "@/types/routes";
-import { type RouteObject } from "react-router";
-import { sorterRouterLoader as sorterRouteLoader } from "./sorter-route-loader";
 
-const SORTER_VIEW__REGISTRY: Map<string, SorterRouteData> =
-  new Map();
+const SORTER_VIEW__REGISTRY: Map<string, SorterRouteData> = new Map();
 
-export const registerSorterView = (
-  path: string,
-  view: SorterRouteData
-) => {
+export const registerSorterView = (path: string, view: SorterRouteData) => {
   if (SORTER_VIEW__REGISTRY.has(path)) {
     return false;
   }
@@ -21,13 +16,19 @@ export const getRegisteredSorterView = () => {
 };
 
 export const getSorterRoutes = () => {
-  return getRegisteredSorterView().map(
-    ([path, { view }]) => {
-      return {
-        path,
-        element: view,
-        loader: sorterRouteLoader,
-      } as RouteObject;
-    }
-  );
+  return getRegisteredSorterView().map(([path, { view }]) => {
+    return {
+      path,
+      element: view,
+      loader: async ({ request }) => {
+        const url = new URL(request.url);
+        const searchParams = url.searchParams;
+        const paramSize = searchParams.get("size") ?? "21";
+
+        const size = Number(paramSize);
+
+        return Number.isFinite(size) && Number.isInteger(size) ? size : 21;
+      },
+    } as RouteObject;
+  });
 };

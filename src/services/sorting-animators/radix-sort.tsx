@@ -2,9 +2,7 @@ import type { RadixSortFrameState } from "@/types/sorting-animators/radix-sort";
 import { generateDataset } from "../generate-dataset";
 import { SortAnimatorBase } from "./base";
 
-function* radixSortAnimator(
-  dataset: number[]
-): Generator<RadixSortFrameState> {
+function* radixSortAnimator(dataset: number[]): Generator<RadixSortFrameState> {
   const size = dataset.length;
   const maxValue = Math.max(...dataset);
 
@@ -41,9 +39,7 @@ function* radixSortAnimator(
     };
   }
 
-  function* __countSort(
-    digit: number
-  ): Generator<RadixSortFrameState> {
+  function* __countSort(digit: number): Generator<RadixSortFrameState> {
     for (let i = 0; i < size; i++) {
       const tIndex = Math.floor(dataset[i] / digit) % 10;
       auxiMemory[tIndex]++;
@@ -124,11 +120,7 @@ function* radixSortAnimator(
   }
 
   yield* generateFrame();
-  for (
-    let digit = 1;
-    Math.floor(maxValue / digit) > 0;
-    digit *= 10
-  ) {
+  for (let digit = 1; Math.floor(maxValue / digit) > 0; digit *= 10) {
     auxiMemory.fill(0);
     sortMemory.fill(0);
     yield* __countSort(digit);

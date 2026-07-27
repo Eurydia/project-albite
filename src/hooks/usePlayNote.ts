@@ -30,19 +30,13 @@ export const usePlayNote = ({
 
       // configure oscillator
       osc.type = waveform;
-      osc.frequency.setValueAtTime(
-        frequency,
-        audioCtx.currentTime
-      );
+      osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
 
       // configure gain envelope
-      gainNode.gain.setValueAtTime(
-        gain,
-        audioCtx.currentTime
-      );
+      gainNode.gain.setValueAtTime(gain, audioCtx.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(
         0.001,
-        audioCtx.currentTime + duration - fadeDuration
+        audioCtx.currentTime + duration - fadeDuration,
       );
 
       // connect and play
@@ -51,13 +45,7 @@ export const usePlayNote = ({
       osc.start(audioCtx.currentTime);
       osc.stop(audioCtx.currentTime + duration);
     },
-    [
-      getAudioContext,
-      waveform,
-      gain,
-      duration,
-      fadeDuration,
-    ]
+    [getAudioContext, waveform, gain, duration, fadeDuration],
   );
 
   return playNote;

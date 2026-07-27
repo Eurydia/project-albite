@@ -1,8 +1,5 @@
 import { useCallback } from "react";
-import {
-  usePlayNote,
-  type UsePlayNoteOptions,
-} from "./usePlayNote";
+import { type UsePlayNoteOptions, usePlayNote } from "./usePlayNote";
 
 export const MusicalScales = {
   Major: [0, 2, 4, 5, 7, 9, 11],
@@ -43,25 +40,21 @@ export const useMusicalScale = ({
 
       const degree = (v - 1) % scalePattern.length;
 
-      const rawOctave = Math.floor(
-        (v - 1) / scalePattern.length
-      );
+      const rawOctave = Math.floor((v - 1) / scalePattern.length);
 
       const octave = wrapOctave
         ? rawOctave % (maxOctave + 1)
         : Math.min(rawOctave, maxOctave);
 
-      const midi =
-        baseMidi + scalePattern[degree] + octave * 12;
-      return 440 * Math.pow(2, (midi - 69) / 12);
+      const midi = baseMidi + scalePattern[degree] + octave * 12;
+      return 440 * 2 ** ((midi - 69) / 12);
     },
-    [scalePattern, baseMidi, maxOctave, wrapOctave]
+    [scalePattern, baseMidi, maxOctave, wrapOctave],
   );
 
   const playNote = useCallback(
-    (value: number) =>
-      _playNote(mapValueToFrequency(value)),
-    [_playNote, mapValueToFrequency]
+    (value: number) => _playNote(mapValueToFrequency(value)),
+    [_playNote, mapValueToFrequency],
   );
 
   return { playNote };

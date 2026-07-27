@@ -1,26 +1,22 @@
+import { Box, Stack, Typography, useTheme } from "@mui/material";
+import { type FC, memo } from "react";
+import { useLoaderData } from "react-router";
 import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { InsertionSortVisualizer } from "@/components/visualizers/InsertionSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { InsertionSortAnimator } from "@/services/sorting-animators/insertion-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import {
-  Box,
-  Stack,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import { memo, type FC } from "react";
-import { useLoaderData } from "react-router";
 
 const InsertionSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const { frame, nextFrame, prevFrame, shuffleDataset } =
-    useSortAnimator(new InsertionSortAnimator(size));
+  const { frame, nextFrame, prevFrame, shuffleDataset } = useSortAnimator(
+    new InsertionSortAnimator(size),
+  );
   const { palette } = useTheme();
   return (
     <Box
-      component="div"
+      component="section"
       tabIndex={0}
       sx={{
         display: "flex",
@@ -29,8 +25,8 @@ const InsertionSortView_: FC = () => {
         flexGrow: 1,
       }}
     >
-      <Stack spacing={1}>
-        <Typography fontWeight={900}>
+      <Stack component="header" spacing={1}>
+        <Typography component="h1" variant="h5" fontWeight={900}>
           {`Insertion sort`}
         </Typography>
         <Stack
@@ -61,16 +57,10 @@ const InsertionSortView_: FC = () => {
           onShuffle={shuffleDataset}
         />
       </Stack>
-      {frame === undefined && (
-        <ShuffleRequestRegion onClick={shuffleDataset} />
-      )}
-      {frame !== undefined && (
-        <InsertionSortVisualizer frame={frame} />
-      )}
+      {frame === undefined && <ShuffleRequestRegion onClick={shuffleDataset} />}
+      {frame !== undefined && <InsertionSortVisualizer frame={frame} />}
     </Box>
   );
 };
 
-export const InsertionSortView: FC = memo(
-  InsertionSortView_
-);
+export const InsertionSortView: FC = memo(InsertionSortView_);

@@ -2,15 +2,13 @@ import type { HeapSortFrameState } from "@/types/sorting-animators/heap-sort";
 import { generateDataset } from "../generate-dataset";
 import { SortAnimatorBase } from "./base";
 
-function* heapSortAnimator(
-  dataset: number[]
-): Generator<HeapSortFrameState> {
+function* heapSortAnimator(dataset: number[]): Generator<HeapSortFrameState> {
   const size = dataset.length;
   let swapCount = 0;
   let compareCount = 0;
 
   function* generateFrame(
-    data: Partial<HeapSortFrameState> = {}
+    data: Partial<HeapSortFrameState> = {},
   ): Generator<HeapSortFrameState> {
     yield {
       ...data,
@@ -22,7 +20,7 @@ function* heapSortAnimator(
 
   function* __heapsort_rebuild(
     heapSize: number,
-    parentIndex: number
+    parentIndex: number,
   ): Generator<HeapSortFrameState> {
     while (parentIndex * 2 + 1 < heapSize) {
       const leftChildIndex = parentIndex * 2 + 1;
@@ -32,8 +30,7 @@ function* heapSortAnimator(
 
       if (leftChildIndex + 1 < heapSize) {
         const shouldIncTargetChild =
-          dataset[leftChildIndex] <
-          dataset[leftChildIndex + 1];
+          dataset[leftChildIndex] < dataset[leftChildIndex + 1];
         compareCount++;
         yield* generateFrame({
           compared: [leftChildIndex, leftChildIndex + 1],
@@ -47,17 +44,14 @@ function* heapSortAnimator(
         }
       }
 
-      const shouldSkip =
-        dataset[parentIndex] >= dataset[targetChildIndex];
+      const shouldSkip = dataset[parentIndex] >= dataset[targetChildIndex];
       compareCount++;
       yield* generateFrame({
         compared: [parentIndex, targetChildIndex],
         parent: parentIndex,
         children: [
           leftChildIndex,
-          rightChildIndex < heapSize
-            ? rightChildIndex
-            : undefined,
+          rightChildIndex < heapSize ? rightChildIndex : undefined,
         ].filter((v) => v !== undefined),
         rightBound: heapSize - 1,
       });
@@ -77,9 +71,7 @@ function* heapSortAnimator(
         parent: parentIndex,
         children: [
           leftChildIndex,
-          rightChildIndex < heapSize
-            ? rightChildIndex
-            : undefined,
+          rightChildIndex < heapSize ? rightChildIndex : undefined,
         ].filter((v) => v !== undefined),
         rightBound: heapSize - 1,
       });

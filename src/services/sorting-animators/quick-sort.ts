@@ -2,15 +2,13 @@ import type { QuicksortFrameState } from "@/types/sorting-animators/quick-sort";
 import { generateDataset } from "../generate-dataset";
 import { SortAnimatorBase } from "./base";
 
-function* quickSortAnimator(
-  dataset: number[]
-): Generator<QuicksortFrameState> {
+function* quickSortAnimator(dataset: number[]): Generator<QuicksortFrameState> {
   const size = dataset.length;
   let swapCount = 0;
   let compareCount = 0;
 
   function* generateFrame(
-    data: Partial<QuicksortFrameState> = {}
+    data: Partial<QuicksortFrameState> = {},
   ): Generator<QuicksortFrameState> {
     yield {
       ...data,
@@ -20,10 +18,7 @@ function* quickSortAnimator(
     };
   }
 
-  function* __partition(
-    lowIndex: number,
-    highIndex: number
-  ) {
+  function* __partition(lowIndex: number, highIndex: number) {
     yield* generateFrame({
       terminals: [lowIndex, highIndex],
     });
@@ -82,7 +77,7 @@ function* quickSortAnimator(
 
   function* __quickSort(
     lowIndex: number,
-    highIndex: number
+    highIndex: number,
   ): Generator<QuicksortFrameState> {
     if (lowIndex >= highIndex || lowIndex < 0) {
       return;

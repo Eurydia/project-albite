@@ -1,20 +1,15 @@
-import { useMusicalScale } from "@/hooks/useMusicalNotes";
-import type { SelectionSortFrameState } from "@/types/sorting-animators/selection-sort";
 import { ChangeHistoryRounded } from "@mui/icons-material";
 import { Grid, useTheme } from "@mui/material";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  type FC,
-} from "react";
+import { type FC, memo, useCallback, useEffect } from "react";
+import { useMusicalScale } from "@/hooks/useMusicalNotes";
+import type { SelectionSortFrameState } from "@/types/sorting-animators/selection-sort";
 import { VisualizerItem } from "./VisualizerItem";
 
 type SelectionSortVisualizerProps = {
   frame: SelectionSortFrameState;
 };
-export const SelectionSortVisualizer: FC<SelectionSortVisualizerProps> =
-  memo(({ frame }) => {
+export const SelectionSortVisualizer: FC<SelectionSortVisualizerProps> = memo(
+  ({ frame }) => {
     const { playNote } = useMusicalScale();
     const { palette } = useTheme();
 
@@ -43,20 +38,11 @@ export const SelectionSortVisualizer: FC<SelectionSortVisualizerProps> =
         let backgroundColor = palette.rangeBounded.light;
         if (frame.verifyAt === index) {
           backgroundColor = palette.opVerify.main;
-        } else if (
-          frame.leftBound !== undefined &&
-          index < frame.leftBound
-        ) {
+        } else if (frame.leftBound !== undefined && index < frame.leftBound) {
           backgroundColor = palette.rangeBounded.dark;
-        } else if (
-          frame.compared !== undefined &&
-          frame.compared.includes(index)
-        ) {
+        } else if (frame.compared?.includes(index)) {
           backgroundColor = palette.opCompare.main;
-        } else if (
-          frame.swapped !== undefined &&
-          frame.swapped.includes(index)
-        ) {
+        } else if (frame.swapped?.includes(index)) {
           backgroundColor = palette.opSwap.main;
         }
         return backgroundColor;
@@ -71,12 +57,12 @@ export const SelectionSortVisualizer: FC<SelectionSortVisualizerProps> =
         palette.opVerify.main,
         palette.rangeBounded.dark,
         palette.rangeBounded.light,
-      ]
+      ],
     );
 
     const onMouseEnterProvider = useCallback(
       (value: number) => () => playNote(value),
-      [playNote]
+      [playNote],
     );
 
     return (
@@ -88,8 +74,7 @@ export const SelectionSortVisualizer: FC<SelectionSortVisualizerProps> =
         sx={{ flexBasis: 0, flexGrow: 1 }}
       >
         {frame.items.map((value, index) => {
-          const backgroundColor =
-            backgroundColorProvider(index);
+          const backgroundColor = backgroundColorProvider(index);
 
           return (
             <VisualizerItem
@@ -101,10 +86,7 @@ export const SelectionSortVisualizer: FC<SelectionSortVisualizerProps> =
               {frame.key === index && (
                 <ChangeHistoryRounded
                   sx={{
-                    color:
-                      palette.getContrastText(
-                        backgroundColor
-                      ),
+                    color: palette.getContrastText(backgroundColor),
                   }}
                 />
               )}
@@ -113,4 +95,5 @@ export const SelectionSortVisualizer: FC<SelectionSortVisualizerProps> =
         })}
       </Grid>
     );
-  });
+  },
+);

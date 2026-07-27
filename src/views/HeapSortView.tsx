@@ -1,27 +1,23 @@
+import { Box, Stack, Typography, useTheme } from "@mui/material";
+import { type FC, memo } from "react";
+import { useLoaderData } from "react-router";
 import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { HeapSortVisualizer } from "@/components/visualizers/HeapSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { HeapSortAnimator } from "@/services/sorting-animators/heap-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import {
-  Box,
-  Stack,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import { memo, type FC } from "react";
-import { useLoaderData } from "react-router";
 
 const HeapSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { palette } = useTheme();
-  const { frame, nextFrame, prevFrame, shuffleDataset } =
-    useSortAnimator(new HeapSortAnimator(size));
+  const { frame, nextFrame, prevFrame, shuffleDataset } = useSortAnimator(
+    new HeapSortAnimator(size),
+  );
 
   return (
     <Box
-      component="div"
+      component="section"
       tabIndex={0}
       sx={{
         flexBasis: 0,
@@ -30,8 +26,8 @@ const HeapSortView_: FC = () => {
         flexDirection: "column",
       }}
     >
-      <Stack spacing={1}>
-        <Typography fontWeight={900}>
+      <Stack component="header" spacing={1}>
+        <Typography component="h1" variant="h5" fontWeight={900}>
           {`Heap sort`}
         </Typography>
         <Stack
@@ -62,15 +58,8 @@ const HeapSortView_: FC = () => {
           onShuffle={shuffleDataset}
         />
       </Stack>
-      {frame === undefined && (
-        <ShuffleRequestRegion onClick={shuffleDataset} />
-      )}
-      {frame !== undefined && (
-        <HeapSortVisualizer
-          frame={frame}
-          size={size}
-        />
-      )}
+      {frame === undefined && <ShuffleRequestRegion onClick={shuffleDataset} />}
+      {frame !== undefined && <HeapSortVisualizer frame={frame} size={size} />}
     </Box>
   );
 };

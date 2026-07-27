@@ -1,27 +1,23 @@
+import { Box, Stack, Typography, useTheme } from "@mui/material";
+import { type FC, memo } from "react";
+import { useLoaderData } from "react-router";
 import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { QuickSortVisualizer } from "@/components/visualizers/QuickSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { QuickSortAnimator } from "@/services/sorting-animators/quick-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import {
-  Box,
-  Stack,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import { memo, type FC } from "react";
-import { useLoaderData } from "react-router";
 
 const QuickSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { palette } = useTheme();
-  const { frame, nextFrame, prevFrame, shuffleDataset } =
-    useSortAnimator(new QuickSortAnimator(size));
+  const { frame, nextFrame, prevFrame, shuffleDataset } = useSortAnimator(
+    new QuickSortAnimator(size),
+  );
 
   return (
     <Box
-      component="div"
+      component="section"
       tabIndex={0}
       sx={{
         display: "flex",
@@ -30,8 +26,8 @@ const QuickSortView_: FC = () => {
         flexBasis: 0,
       }}
     >
-      <Stack spacing={1}>
-        <Typography fontWeight={900}>
+      <Stack component="header" spacing={1}>
+        <Typography component="h1" variant="h5" fontWeight={900}>
           {`Quick sort`}
         </Typography>
         <Stack
@@ -62,12 +58,8 @@ const QuickSortView_: FC = () => {
           onShuffle={shuffleDataset}
         />
       </Stack>
-      {frame === undefined && (
-        <ShuffleRequestRegion onClick={shuffleDataset} />
-      )}
-      {frame !== undefined && (
-        <QuickSortVisualizer frame={frame} />
-      )}
+      {frame === undefined && <ShuffleRequestRegion onClick={shuffleDataset} />}
+      {frame !== undefined && <QuickSortVisualizer frame={frame} />}
     </Box>
   );
 };

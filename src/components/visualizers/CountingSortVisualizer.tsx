@@ -1,15 +1,7 @@
-import {
-  MusicalScales,
-  useMusicalScale,
-} from "@/hooks/useMusicalNotes";
-import type { CountingSortFrameState } from "@/types/sorting-animators/counting-sort";
 import { Grid, useTheme } from "@mui/material";
-import {
-  type FC,
-  memo,
-  useCallback,
-  useEffect,
-} from "react";
+import { type FC, memo, useCallback, useEffect } from "react";
+import { MusicalScales, useMusicalScale } from "@/hooks/useMusicalNotes";
+import type { CountingSortFrameState } from "@/types/sorting-animators/counting-sort";
 import { VisualizerItem } from "./VisualizerItem";
 
 type VisualizerProps = {
@@ -47,13 +39,7 @@ const Visualizer: FC<VisualizerProps> = memo(
           playNote(item);
         }
       }
-    }, [
-      mem,
-      playNote,
-      playOnRead,
-      playOnWrite,
-      playOnVerify,
-    ]);
+    }, [mem, playNote, playOnRead, playOnWrite, playOnVerify]);
 
     const backgroundColorProvider = useCallback(
       (index: number) => {
@@ -67,14 +53,14 @@ const Visualizer: FC<VisualizerProps> = memo(
         }
         return backgroundColor;
       },
-      [mem, palette]
+      [mem, palette],
     );
 
     const mouseEnterHandleProvider = useCallback(
       (value: number) => () => {
         playNote(value);
       },
-      [playNote]
+      [playNote],
     );
 
     return (
@@ -95,59 +81,38 @@ const Visualizer: FC<VisualizerProps> = memo(
               key={`sort-item-${index}`}
               height={(value / mem.items.length) * 100}
               onMouseEnter={mouseEnterHandleProvider(value)}
-              backgroundColor={backgroundColorProvider(
-                index
-              )}
+              backgroundColor={backgroundColorProvider(index)}
             />
           );
         })}
       </Grid>
     );
-  }
+  },
 );
 
 type Props = {
   frame: CountingSortFrameState;
 };
-export const CountingSortVisualizer: FC<Props> = memo(
-  ({ frame }) => {
-    return (
-      <Grid
-        container
-        spacing={2}
-        columns={1}
-        sx={{
-          flexGrow: 1,
-          flexBasis: 0,
-        }}
-      >
-        <Grid
-          size={1}
-          sx={{ flexGrow: 1 }}
-        >
-          <Visualizer
-            mem={frame.mainMem}
-            playOnVerify
-            playOnRead
-            playOnWrite
-          />
-        </Grid>
-        <Grid
-          size={1}
-          sx={{ flexGrow: 1 }}
-        >
-          <Visualizer
-            mem={frame.auxiMem}
-            playOnWrite
-          />
-        </Grid>
-        <Grid
-          size={1}
-          sx={{ flexGrow: 1 }}
-        >
-          <Visualizer mem={frame.sortMem} />
-        </Grid>
+export const CountingSortVisualizer: FC<Props> = memo(({ frame }) => {
+  return (
+    <Grid
+      container
+      spacing={2}
+      columns={1}
+      sx={{
+        flexGrow: 1,
+        flexBasis: 0,
+      }}
+    >
+      <Grid size={1} sx={{ flexGrow: 1 }}>
+        <Visualizer mem={frame.mainMem} playOnVerify playOnRead playOnWrite />
       </Grid>
-    );
-  }
-);
+      <Grid size={1} sx={{ flexGrow: 1 }}>
+        <Visualizer mem={frame.auxiMem} playOnWrite />
+      </Grid>
+      <Grid size={1} sx={{ flexGrow: 1 }}>
+        <Visualizer mem={frame.sortMem} />
+      </Grid>
+    </Grid>
+  );
+});

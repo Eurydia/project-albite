@@ -3,14 +3,14 @@ import { generateDataset } from "../generate-dataset";
 import { SortAnimatorBase } from "./base";
 
 function* selectionSortAnimator(
-  dataset: number[]
+  dataset: number[],
 ): Generator<SelectionSortFrameState> {
   const size = dataset.length;
   let swapCount = 0;
   let compareCount = 0;
 
   function* generateFrame(
-    data: Partial<SelectionSortFrameState> = {}
+    data: Partial<SelectionSortFrameState> = {},
   ): Generator<SelectionSortFrameState> {
     yield {
       ...data,
@@ -71,8 +71,6 @@ function* selectionSortAnimator(
 
 export class SelectionSortAnimator extends SortAnimatorBase<SelectionSortFrameState> {
   protected getGeneratorFunction(): Generator<SelectionSortFrameState> {
-    return selectionSortAnimator(
-      generateDataset(this.size)
-    );
+    return selectionSortAnimator(generateDataset(this.size));
   }
 }

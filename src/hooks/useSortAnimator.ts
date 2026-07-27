@@ -1,12 +1,7 @@
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { SortAnimatorBase } from "@/services/sorting-animators/base";
-import {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
 export const useSortAnimator = <T extends object>(
-  animator: SortAnimatorBase<T>
+  animator: SortAnimatorBase<T>,
 ) => {
   const animatorRef = useRef(animator);
   const [frameIndex, setFrameIndex] = useState(0);
@@ -27,9 +22,7 @@ export const useSortAnimator = <T extends object>(
 
   const nextFrame = useCallback(() => {
     if (frameIndex < frames.length - 1) {
-      setFrameIndex(
-        Math.min(frameIndex + 1, frames.length - 1)
-      );
+      setFrameIndex(Math.min(frameIndex + 1, frames.length - 1));
       return false;
     }
 
@@ -39,15 +32,13 @@ export const useSortAnimator = <T extends object>(
     }
     const nextFrames = [...frames, newFrame];
     setFrames(nextFrames);
-    setFrameIndex(
-      Math.min(frameIndex + 1, nextFrames.length - 1)
-    );
+    setFrameIndex(Math.min(frameIndex + 1, nextFrames.length - 1));
     return false;
   }, [frameIndex, frames]);
 
   const prevFrame = useCallback(
     () => setFrameIndex((prev) => Math.max(0, prev - 1)),
-    []
+    [],
   );
 
   const frame = useMemo(() => {

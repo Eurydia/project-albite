@@ -3,14 +3,14 @@ import { generateDataset } from "../generate-dataset";
 import { SortAnimatorBase } from "./base";
 
 function* bubbleSortAnimator(
-  dataset: number[]
+  dataset: number[],
 ): Generator<BubbleSortFrameData> {
   const size = dataset.length;
   let swapCount = 0;
   let compareCount = 0;
 
   function* generateFrame(
-    data: Partial<BubbleSortFrameData> = {}
+    data: Partial<BubbleSortFrameData> = {},
   ): Generator<BubbleSortFrameData> {
     yield {
       ...data,

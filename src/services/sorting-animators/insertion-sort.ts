@@ -3,14 +3,14 @@ import { generateDataset } from "../generate-dataset";
 import { SortAnimatorBase } from "./base";
 
 function* insertionSortAnimator(
-  dataset: number[]
+  dataset: number[],
 ): Generator<InsertionSortFrameState> {
   const size = dataset.length;
   let swapCount = 0;
   let compareCount = 0;
 
   function* generateFrame(
-    data: Partial<InsertionSortFrameState> = {}
+    data: Partial<InsertionSortFrameState> = {},
   ): Generator<InsertionSortFrameState> {
     yield {
       ...data,
@@ -22,11 +22,7 @@ function* insertionSortAnimator(
 
   yield* generateFrame();
 
-  for (
-    let pivotIndex = 0;
-    pivotIndex < size;
-    pivotIndex++
-  ) {
+  for (let pivotIndex = 0; pivotIndex < size; pivotIndex++) {
     yield* generateFrame({
       leftBound: pivotIndex,
       key: pivotIndex,
@@ -34,8 +30,7 @@ function* insertionSortAnimator(
 
     let mover = pivotIndex;
     while (mover > 0) {
-      const shouldSwap =
-        dataset[mover] < dataset[mover - 1];
+      const shouldSwap = dataset[mover] < dataset[mover - 1];
       compareCount++;
       yield* generateFrame({
         compared: [mover, mover - 1],
@@ -70,8 +65,6 @@ function* insertionSortAnimator(
 
 export class InsertionSortAnimator extends SortAnimatorBase<InsertionSortFrameState> {
   protected getGeneratorFunction(): Generator<InsertionSortFrameState> {
-    return insertionSortAnimator(
-      generateDataset(this.size)
-    );
+    return insertionSortAnimator(generateDataset(this.size));
   }
 }

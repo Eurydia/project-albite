@@ -1,27 +1,23 @@
+import { Box, Stack, Typography, useTheme } from "@mui/material";
+import { type FC, memo } from "react";
+import { useLoaderData } from "react-router";
 import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
 import { MergeSortVisualizer } from "@/components/visualizers/MergeSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
 import { MergeSortAnimator } from "@/services/sorting-animators/merge-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
-import {
-  Box,
-  Stack,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import { type FC, memo } from "react";
-import { useLoaderData } from "react-router";
 
 const MergeSortView_: FC = () => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { palette } = useTheme();
-  const { frame, nextFrame, prevFrame, shuffleDataset } =
-    useSortAnimator(new MergeSortAnimator(size));
+  const { frame, nextFrame, prevFrame, shuffleDataset } = useSortAnimator(
+    new MergeSortAnimator(size),
+  );
 
   return (
     <Box
-      component="div"
+      component="section"
       tabIndex={0}
       sx={{
         display: "flex",
@@ -30,16 +26,11 @@ const MergeSortView_: FC = () => {
         flexGrow: 1,
       }}
     >
-      <Stack spacing={1}>
-        <Typography fontWeight={900}>
+      <Stack component="header" spacing={1}>
+        <Typography component="h1" variant="h5" fontWeight={900}>
           {`Merge sort`}
         </Typography>
-        <Stack
-          flexDirection="row"
-          flexWrap="wrap"
-          spacing={1}
-          useFlexGap
-        >
+        <Stack flexDirection="row" flexWrap="wrap" spacing={1} useFlexGap>
           <Typography
             sx={{
               color: palette.opWrite.main,
@@ -68,12 +59,8 @@ const MergeSortView_: FC = () => {
           onShuffle={shuffleDataset}
         />
       </Stack>
-      {frame === undefined && (
-        <ShuffleRequestRegion onClick={shuffleDataset} />
-      )}
-      {frame !== undefined && (
-        <MergeSortVisualizer frame={frame} />
-      )}
+      {frame === undefined && <ShuffleRequestRegion onClick={shuffleDataset} />}
+      {frame !== undefined && <MergeSortVisualizer frame={frame} />}
     </Box>
   );
 };

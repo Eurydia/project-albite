@@ -1,14 +1,8 @@
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { memo, type FC } from "react";
-import {
-  createHashRouter,
-  RouterProvider,
-} from "react-router";
+import { type FC, memo } from "react";
+import { createHashRouter, RouterProvider } from "react-router";
 import { SorterRouteLayout } from "./layouts/SorterRouteLayouts";
-import {
-  getSorterRoutes,
-  registerSorterView,
-} from "./routes";
+import { getSorterRoutes, registerSorterView } from "./routes";
 import { theme } from "./theme";
 import { BubbleSortView } from "./views/BubbleSortView";
 import { CountingSortView } from "./views/CountingSortView";
