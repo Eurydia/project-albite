@@ -1,0 +1,25 @@
+{
+  "id": "/project-albite/",
+  "name": "Project Albite",
+  "short_name": "Albite",
+  "description": "Explore sorting algorithms step by step with sound.",
+  "lang": "en",
+  "start_url": "/project-albite/",
+  "scope": "/project-albite/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "categories": ["education", "utilities"],
+  "icons": [
+    {
+      "src": "android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,14 +1,68 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
+      name="description"
+      content="Explore eight sorting algorithms step by step, including bubble, selection, insertion, quick, merge, heap, counting, and radix sort, with sound."
     />
-    <title>
-      Project Albite | A Sorting Algorithm Visualizer
-    </title>
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#121212" />
+    <meta name="application-name" content="Project Albite" />
+    <meta name="apple-mobile-web-app-title" content="Project Albite" />
+
+    <link rel="canonical" href="https://eurydia.github.io/project-albite/" />
+    <link rel="icon" href="favicon.ico" sizes="any" />
+    <link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Project Albite" />
+    <meta property="og:locale" content="en_US" />
+    <meta
+      property="og:url"
+      content="https://eurydia.github.io/project-albite/"
+    />
+    <meta
+      property="og:title"
+      content="Interactive Sorting Algorithm Visualizer | Project Albite"
+    />
+    <meta
+      property="og:description"
+      content="Explore eight sorting algorithms step by step, including bubble, selection, insertion, quick, merge, heap, counting, and radix sort, with sound."
+    />
+    <meta
+      property="og:image"
+      content="https://eurydia.github.io/project-albite/og.png"
+    />
+    <meta property="og:image:type" content="image/png" />
+    <meta
+      property="og:image:alt"
+      content="Project Albite interactive sorting algorithm visualizer"
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Interactive Sorting Algorithm Visualizer | Project Albite"
+    />
+    <meta
+      name="twitter:description"
+      content="Explore eight sorting algorithms step by step, including bubble, selection, insertion, quick, merge, heap, counting, and radix sort, with sound."
+    />
+    <meta
+      name="twitter:image"
+      content="https://eurydia.github.io/project-albite/og.png"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="Project Albite interactive sorting algorithm visualizer"
+    />
+
+    <title>Interactive Sorting Algorithm Visualizer | Project Albite</title>
     <style>
       #root {
         display: flex;
@@ -16,40 +70,10 @@
         height: 100vh;
       }
     </style>
-    <script type="module" crossorigin src="/project-albite/assets/index-1m9aghW2.js"></script>
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-cookie-CY119PWS.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-react-B_b7dxsI.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-scheduler-SPyfQU6S.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-react-dom-YX5CGG76.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-react-router-p2olTmvb.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-hoist-non-react-statics-C-Qo8PK8.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@emotion/sheet-gUyxtmJr.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-stylis-DDa9OTMq.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@emotion/cache-BGxKOicI.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@emotion/utils-BijCJQMc.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@emotion/hash-WldOFDRm.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@emotion/unitless-x5IvBceT.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@emotion/memoize-3S_6p140.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@emotion/serialize-49CNd-Ha.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@emotion/use-insertion-effect-with-fallbacks-CFy5RT4J.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@emotion/react-DWqaJ2G3.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@babel/runtime-B4YMtfbM.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@emotion/is-prop-valid-D5zzdBC6.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@emotion/styled-DNtcnkLs.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@mui/styled-engine-DCyBxYb0.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-clsx-B-dksMZM.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-react-is-BPJnJB5S.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@mui/utils-DS7mc6HK.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@mui/private-theming-BweNvHhX.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@mui/system-Cyat7jmJ.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-react-transition-group-Wyc4kIQf.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@mui/material-DFjjg4Zp.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-@mui/icons-material-eCEidbPQ.js">
-    <link rel="modulepreload" crossorigin href="/project-albite/assets/vendor-lodash-bv8dOiEF.js">
-    <link rel="stylesheet" crossorigin href="/project-albite/assets/vendor-@fontsource/roboto-z9rYA0KJ.css">
+    <script type="module" crossorigin src="/project-albite/assets/index-D0nQjwPD.js"></script>
+    <link rel="stylesheet" crossorigin href="/project-albite/assets/index-BoTyfcoc.css">
   </head>
   <body>
     <div id="root"></div>
   </body>
 </html>
-

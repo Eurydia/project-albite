@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /project-albite/
+
+Sitemap: https://eurydia.github.io/project-albite/sitemap.xml
