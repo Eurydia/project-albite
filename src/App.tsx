@@ -68,7 +68,7 @@ const router = createHashRouter([
 export const App: FC = memo(() => {
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline enableColorScheme />
+      <CssBaseline />
       <RouterProvider router={router} />
     </ThemeProvider>
   );
