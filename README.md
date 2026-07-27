@@ -1,26 +1,11 @@
-![Alexandrite(1)](https://github.com/user-attachments/assets/8730072b-8db2-45da-a83e-a72d3136e88d)
+![](assets/gifs/thumbnail.gif)
 
-A little sorting algorithm visualizer that sings.
+# ~Albite | Sorting Algorithm Visualizer ...That Sings!?
 
-## Inspiration
+_Albite_ lets you see how a sorting algorithm works by providing both visual and auditory feedback. Missed something? Don't worry, just pause the player and rewind back a few frames until to understand what is going on.
 
-"15 Sorting Algorithms in 6 Minutes" by Timo Bingmann (YouTube): https://www.youtube.com/watch?v=kPRA0W1kECg
+## ~Inspiration
 
-This little project is heavily inspired by a video called "15 Sorting Algorithms in 6 Minutes" by Timo Bingmann.
+_Albite_ is heavily inspired by a video called "15 Sorting Algorithms in 6 Minutes" by Timo Bingmann.
 
-Having seen the video multiple times, I want to implement a sorting algorithm visualizer of my own, but for some reason I never had the chance to complete it until now, that is.
-
-In my version of sorting algorithm visualizer, you can investigate exactly what the algorithm is doing to the input.
-The visualizer will describe that two elements are being compared, or being swapped, or has been swapped.
-
-## Sources
-
-- **Bubble sort** (Wikipedia): https://en.wikipedia.org/wiki/Bubble_sort
-- **Insertion sort** (Wikipedia): https://en.wikipedia.org/wiki/Insertion_sort
-- **Selection sort** (Wikipedia): https://en.wikipedia.org/wiki/Selection_sort
-- **Merge sort** (Wikipedia): https://en.wikipedia.org/wiki/Merge_sort
-- **Heapsort** (Wikipedia): https://en.wikipedia.org/wiki/Heapsort
-- **Counting sort** (Wikipedia): https://en.wikipedia.org/wiki/Counting_sort
-- **Radix sort**
-  - _Wikipedia_: https://en.wikipedia.org/wiki/Radix_sort
-  - _geeksforgeeks_: https://www.geeksforgeeks.org/radix-sort/
+<iframe width="560" height="315" src="https://www.youtube.com/embed/kPRA0W1kECg?si=y2jkDu35I1MpHBmC" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
