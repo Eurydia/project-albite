@@ -1,5 +1,4 @@
 import "@fontsource-variable/roboto";
-import { alpha, createTheme } from "@mui/material";
 import {
   amber,
   deepPurple,
@@ -8,6 +7,7 @@ import {
   indigo,
   pink,
 } from "@mui/material/colors";
+import { createTheme } from "@mui/material/styles";
 
 declare module "@mui/material/styles" {
   interface Palette {
@@ -47,7 +47,7 @@ const base = createTheme({
     },
     MuiTypography: {
       defaultProps: {
-        color: alpha("#fff", 0.8),
+        color: "#ffffffd9",
       },
       styleOverrides: {
         root: {

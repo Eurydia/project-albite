@@ -1,5 +1,7 @@
-import { KeyboardArrowLeftRounded } from "@mui/icons-material";
-import { Box, Button, Toolbar } from "@mui/material";
+import KeyboardArrowLeftRounded from "@mui/icons-material/KeyboardArrowLeftRounded";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Toolbar from "@mui/material/Toolbar";
 import { type FC, memo } from "react";
 import { NavLink, Outlet } from "react-router";
 

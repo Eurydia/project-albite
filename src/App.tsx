@@ -1,4 +1,5 @@
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider } from "@mui/material/styles";
 import { type FC, memo } from "react";
 import { createHashRouter, RouterProvider } from "react-router";
 import { SorterRouteLayout } from "./components/layouts/SorterRouteLayouts";

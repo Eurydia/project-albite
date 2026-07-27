@@ -1,5 +1,6 @@
-import { PanToolAltRounded } from "@mui/icons-material";
-import { Box, Typography } from "@mui/material";
+import PanToolAltRounded from "@mui/icons-material/PanToolAltRounded";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import { type FC, memo } from "react";
 
 type Props = {

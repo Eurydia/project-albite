@@ -1,4 +1,5 @@
-import { Grid, useTheme } from "@mui/material";
+import Grid from "@mui/material/Grid";
+import { useTheme } from "@mui/material/styles";
 import { type FC, memo, useCallback, useEffect } from "react";
 import { MusicalScales, useMusicalScale } from "@/hooks/useMusicalNotes";
 import type { BubbleSortFrameData } from "@/types/sorting-animators/bubble-sort";

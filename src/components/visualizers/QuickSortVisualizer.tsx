@@ -1,5 +1,7 @@
-import { ChangeHistoryRounded, CircleOutlined } from "@mui/icons-material";
-import { Grid, useTheme } from "@mui/material";
+import ChangeHistoryRounded from "@mui/icons-material/ChangeHistoryRounded";
+import CircleOutlined from "@mui/icons-material/CircleOutlined";
+import Grid from "@mui/material/Grid";
+import { useTheme } from "@mui/material/styles";
 import { type FC, memo, useCallback, useEffect } from "react";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
 import type { QuicksortFrameState } from "@/types/sorting-animators/quick-sort";

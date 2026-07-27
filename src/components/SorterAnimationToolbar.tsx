@@ -1,11 +1,10 @@
-import {
-  AutorenewRounded,
-  ChevronLeftRounded,
-  ChevronRightRounded,
-  PauseRounded,
-  PlayArrowRounded,
-} from "@mui/icons-material";
-import { Button, Toolbar } from "@mui/material";
+import AutorenewRounded from "@mui/icons-material/AutorenewRounded";
+import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
+import ChevronRightRounded from "@mui/icons-material/ChevronRightRounded";
+import PauseRounded from "@mui/icons-material/PauseRounded";
+import PlayArrowRounded from "@mui/icons-material/PlayArrowRounded";
+import Button from "@mui/material/Button";
+import Toolbar from "@mui/material/Toolbar";
 import { type FC, memo, useCallback } from "react";
 import { useAnimtionLoop } from "@/hooks/useAnimationLoop";
 import { usePlayNote } from "@/hooks/usePlayNote";

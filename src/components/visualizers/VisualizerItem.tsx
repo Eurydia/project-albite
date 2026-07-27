@@ -1,4 +1,4 @@
-import { darken, Grid } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import { type FC, memo, type PropsWithChildren } from "react";
 
 export const VisualizerItem: FC<
@@ -25,7 +25,7 @@ export const VisualizerItem: FC<
         flexDirection: "column",
         overflow: "clip",
         ":hover": {
-          backgroundColor: darken(backgroundColor, 0.5),
+          backgroundColor: (t) => t.darken(backgroundColor, 0.5),
         },
       }}
     >

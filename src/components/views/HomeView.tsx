@@ -1,4 +1,8 @@
-import { Box, Card, CardActionArea, CardHeader, Grid } from "@mui/material";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardActionArea from "@mui/material/CardActionArea";
+import CardHeader from "@mui/material/CardHeader";
+import Grid from "@mui/material/Grid";
 import { type FC, memo, useCallback } from "react";
 import { Link } from "react-router";
 import { useMusicalScale } from "@/hooks/useMusicalNotes";
