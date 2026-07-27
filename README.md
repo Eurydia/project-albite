@@ -1,6 +1,6 @@
 
 <p align="center"> 
-  ![](assets/gifs/thumbnail.gif)
+  <img src="assets/gifs/thumbnail.gif" width="80%" />
 </p>
 
 # ~Albite | Sorting Algorithm Visualizer ...That Sings!?
