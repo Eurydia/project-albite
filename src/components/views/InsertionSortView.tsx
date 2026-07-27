@@ -3,18 +3,17 @@ import { type FC, memo } from "react";
 import { useLoaderData } from "react-router";
 import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import { CountingSortVisualizer } from "@/components/visualizers/CountingSortVisualizer";
+import { InsertionSortVisualizer } from "@/components/visualizers/InsertionSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
-import { CountingSortAnimator } from "@/services/sorting-animators/counting-sort";
+import { InsertionSortAnimator } from "@/services/sorting-animators/insertion-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 
-const CountingSortView_: FC = () => {
+export const InsertionSortView: FC = memo(() => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const { palette } = useTheme();
   const { frame, nextFrame, prevFrame, shuffleDataset } = useSortAnimator(
-    new CountingSortAnimator(size),
+    new InsertionSortAnimator(size),
   );
-
+  const { palette } = useTheme();
   return (
     <Box
       component="section"
@@ -27,23 +26,27 @@ const CountingSortView_: FC = () => {
       }}
     >
       <Stack component="header" spacing={1}>
-        <Typography component="h1" variant="h5" fontWeight={900}>
-          {`Counting sort`}
+        <Typography component="h1" variant="h5" sx={{ fontWeight: 900 }}>
+          {`Insertion sort`}
         </Typography>
-        <Stack flexDirection="row" flexWrap="wrap" spacing={1} useFlexGap>
+        <Stack
+          spacing={1}
+          direction={"row"}
+          sx={{ flexWrap: "wrap", alignItems: "center" }}
+        >
           <Typography
             sx={{
-              color: palette.opWrite.main,
+              color: palette.opSwap.main,
             }}
           >
-            {`Writes: ${frame?.writeCount ?? 0}`}
+            {`Swaps: ${frame?.swapCount ?? 0}`}
           </Typography>
           <Typography
             sx={{
-              color: palette.opRead.main,
+              color: palette.opCompare.main,
             }}
           >
-            {`Reads: ${frame?.readCount ?? 0}`}
+            {`Comparisons: ${frame?.compareCount ?? 0}`}
           </Typography>
         </Stack>
         <SorterAnimationToolbar
@@ -53,9 +56,7 @@ const CountingSortView_: FC = () => {
         />
       </Stack>
       {frame === undefined && <ShuffleRequestRegion onClick={shuffleDataset} />}
-      {frame !== undefined && <CountingSortVisualizer frame={frame} />}
+      {frame !== undefined && <InsertionSortVisualizer frame={frame} />}
     </Box>
   );
-};
-
-export const CountingSortView = memo(CountingSortView_);
+});

@@ -72,8 +72,7 @@ export const InsertionSortVisualizer: FC<Props> = memo(({ frame }) => {
     <Grid
       container
       columns={frame.items.length}
-      alignItems="flex-end"
-      sx={{ flexBasis: 0, flexGrow: 1 }}
+      sx={{ flexBasis: 0, flexGrow: 1, alignItems: "flex-end" }}
     >
       {frame.items.map((value, index) => {
         const backgroundColor = backgroundColorProvider(index);

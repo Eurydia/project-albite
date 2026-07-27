@@ -11,7 +11,7 @@ export const HomeView: FC = memo(() => {
     [playNote],
   );
   return (
-    <Box component="main" maxWidth="lg" marginX="auto" marginY={4}>
+    <Box component="main" sx={{ marginX: "auto", marginY: 4, maxWidth: "lg" }}>
       <Grid
         component="ul"
         container

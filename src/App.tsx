@@ -1,18 +1,18 @@
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { type FC, memo } from "react";
 import { createHashRouter, RouterProvider } from "react-router";
-import { SorterRouteLayout } from "./layouts/SorterRouteLayouts";
+import { SorterRouteLayout } from "./components/layouts/SorterRouteLayouts";
+import { BubbleSortView } from "./components/views/BubbleSortView";
+import { CountingSortView } from "./components/views/CountingSortView";
+import { HeapSortView } from "./components/views/HeapSortView";
+import { HomeView } from "./components/views/HomeView";
+import { InsertionSortView } from "./components/views/InsertionSortView";
+import { MergeSortView } from "./components/views/MergeSortView";
+import { QuickSortView } from "./components/views/QuickSortView";
+import { RadixSortView } from "./components/views/RadixSortView";
+import { SelectionSortView } from "./components/views/SelectionSortView";
 import { getSorterRoutes, registerSorterView } from "./routes";
 import { theme } from "./theme";
-import { BubbleSortView } from "./views/BubbleSortView";
-import { CountingSortView } from "./views/CountingSortView";
-import { HeapSortView } from "./views/HeapSortView";
-import { HomeView } from "./views/HomeView";
-import { InsertionSortView } from "./views/InsertionSortView";
-import { MergeSortView } from "./views/MergeSortView";
-import { QuickSortView } from "./views/QuickSortView";
-import { RadixSortView } from "./views/RadixSortView";
-import { SelectionSortView } from "./views/SelectionSortView";
 
 registerSorterView("bubble-sort", {
   display: { name: "Bubble Sort" },

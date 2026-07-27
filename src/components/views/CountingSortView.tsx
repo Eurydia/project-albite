@@ -3,16 +3,16 @@ import { type FC, memo } from "react";
 import { useLoaderData } from "react-router";
 import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import { RadixSortVisualizer } from "@/components/visualizers/RadixSortVisualizer";
+import { CountingSortVisualizer } from "@/components/visualizers/CountingSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
-import { RadixSortAnimator } from "@/services/sorting-animators/radix-sort";
+import { CountingSortAnimator } from "@/services/sorting-animators/counting-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 
-const RadixSortView_: FC = () => {
+export const CountingSortView: FC = memo(() => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { palette } = useTheme();
   const { frame, nextFrame, prevFrame, shuffleDataset } = useSortAnimator(
-    new RadixSortAnimator(size),
+    new CountingSortAnimator(size),
   );
 
   return (
@@ -22,28 +22,32 @@ const RadixSortView_: FC = () => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        flexGrow: 1,
         flexBasis: 0,
+        flexGrow: 1,
       }}
     >
       <Stack component="header" spacing={1}>
-        <Typography component="h1" variant="h5" fontWeight={900}>
-          {`Radix sort`}
+        <Typography component="h1" variant="h5" sx={{ fontWeight: 900 }}>
+          {`Counting sort`}
         </Typography>
-        <Stack flexDirection="row" flexWrap="wrap" spacing={1} useFlexGap>
+        <Stack
+          spacing={1}
+          direction={"row"}
+          sx={{ flexWrap: "wrap", alignItems: "center" }}
+        >
           <Typography
             sx={{
               color: palette.opWrite.main,
             }}
           >
-            {`Writes: ${frame?.memWriteCount ?? 0}`}
+            {`Writes: ${frame?.writeCount ?? 0}`}
           </Typography>
           <Typography
             sx={{
               color: palette.opRead.main,
             }}
           >
-            {`Reads: ${frame?.memReadCount ?? 0}`}
+            {`Reads: ${frame?.readCount ?? 0}`}
           </Typography>
         </Stack>
         <SorterAnimationToolbar
@@ -53,9 +57,7 @@ const RadixSortView_: FC = () => {
         />
       </Stack>
       {frame === undefined && <ShuffleRequestRegion onClick={shuffleDataset} />}
-      {frame !== undefined && <RadixSortVisualizer frame={frame} />}
+      {frame !== undefined && <CountingSortVisualizer frame={frame} />}
     </Box>
   );
-};
-
-export const RadixSortView = memo(RadixSortView_);
+});

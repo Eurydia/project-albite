@@ -1,7 +1,4 @@
-import "@fontsource/roboto/300.css";
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/500.css";
-import "@fontsource/roboto/700.css";
+import "@fontsource-variable/roboto";
 import { alpha, createTheme } from "@mui/material";
 import {
   amber,
@@ -30,7 +27,7 @@ declare module "@mui/material/styles" {
     rangeBounded?: PaletteOptions["primary"];
   }
 }
-export let theme = createTheme({
+const base = createTheme({
   palette: {
     primary: grey,
 
@@ -58,29 +55,34 @@ export let theme = createTheme({
         },
       },
     },
+    MuiStack: {
+      defaultProps: {
+        useFlexGap: true,
+      },
+    },
   },
 });
 
-theme = createTheme(theme, {
+export const theme = createTheme(base, {
   palette: {
-    opCompare: theme.palette.augmentColor({
+    opCompare: base.palette.augmentColor({
       color: {
         main: green["400"],
       },
     }),
-    opSwap: theme.palette.augmentColor({
+    opSwap: base.palette.augmentColor({
       color: { main: indigo["A200"] },
     }),
-    opWrite: theme.palette.augmentColor({
+    opWrite: base.palette.augmentColor({
       color: { main: deepPurple["A200"] },
     }),
-    opRead: theme.palette.augmentColor({
+    opRead: base.palette.augmentColor({
       color: { main: amber["A200"] },
     }),
-    opVerify: theme.palette.augmentColor({
+    opVerify: base.palette.augmentColor({
       color: { main: pink["600"] },
     }),
-    rangeBounded: theme.palette.augmentColor({
+    rangeBounded: base.palette.augmentColor({
       color: { main: grey["500"] },
     }),
   },

@@ -3,16 +3,16 @@ import { type FC, memo } from "react";
 import { useLoaderData } from "react-router";
 import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import { MergeSortVisualizer } from "@/components/visualizers/MergeSortVisualizer";
+import { QuickSortVisualizer } from "@/components/visualizers/QuickSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
-import { MergeSortAnimator } from "@/services/sorting-animators/merge-sort";
+import { QuickSortAnimator } from "@/services/sorting-animators/quick-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 
-const MergeSortView_: FC = () => {
+export const QuickSortView: FC = memo(() => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { palette } = useTheme();
   const { frame, nextFrame, prevFrame, shuffleDataset } = useSortAnimator(
-    new MergeSortAnimator(size),
+    new QuickSortAnimator(size),
   );
 
   return (
@@ -22,35 +22,38 @@ const MergeSortView_: FC = () => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        flexBasis: 0,
         flexGrow: 1,
+        flexBasis: 0,
       }}
     >
       <Stack component="header" spacing={1}>
-        <Typography component="h1" variant="h5" fontWeight={900}>
-          {`Merge sort`}
+        <Typography
+          component="h1"
+          variant="h5"
+          sx={{
+            fontWeight: 900,
+          }}
+        >
+          {`Quick sort`}
         </Typography>
-        <Stack flexDirection="row" flexWrap="wrap" spacing={1} useFlexGap>
+        <Stack
+          direction={"row"}
+          spacing={1}
+          sx={{ flexWrap: "wrap", alignItems: "center" }}
+        >
           <Typography
             sx={{
-              color: palette.opWrite.main,
+              color: palette.opSwap.main,
             }}
           >
-            {`Writes: ${frame?.writeCount ?? 0}`}
-          </Typography>
-          <Typography
-            sx={{
-              color: palette.opRead.main,
-            }}
-          >
-            {`Reads: ${frame?.readCount ?? 0}`}
+            {`Swaps: ${frame?.swapCount ?? 0}`}
           </Typography>
           <Typography
             sx={{
               color: palette.opCompare.main,
             }}
           >
-            {`Compares: ${frame?.compareCount ?? 0}`}
+            {`Comparisons: ${frame?.compareCount ?? 0}`}
           </Typography>
         </Stack>
         <SorterAnimationToolbar
@@ -60,9 +63,7 @@ const MergeSortView_: FC = () => {
         />
       </Stack>
       {frame === undefined && <ShuffleRequestRegion onClick={shuffleDataset} />}
-      {frame !== undefined && <MergeSortVisualizer frame={frame} />}
+      {frame !== undefined && <QuickSortVisualizer frame={frame} />}
     </Box>
   );
-};
-
-export const MergeSortView = memo(MergeSortView_);
+});

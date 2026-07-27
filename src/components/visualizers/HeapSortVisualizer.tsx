@@ -64,8 +64,7 @@ export const HeapSortVisualizer: FC<Props> = memo(({ size, frame }) => {
       container
       columns={size}
       spacing={0}
-      alignItems="flex-end"
-      sx={{ flexBasis: 0, flexGrow: 1 }}
+      sx={{ flexBasis: 0, flexGrow: 1, alignItems: "flex-end" }}
     >
       {frame.items.map((value, index) => {
         const backgroundColor = backgroundColorProvider(index);

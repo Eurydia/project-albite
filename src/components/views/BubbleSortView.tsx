@@ -3,17 +3,17 @@ import { type FC, memo } from "react";
 import { useLoaderData } from "react-router";
 import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import { QuickSortVisualizer } from "@/components/visualizers/QuickSortVisualizer";
+import { BubbleSortVisualizer } from "@/components/visualizers/BubbleSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
-import { QuickSortAnimator } from "@/services/sorting-animators/quick-sort";
+import { BubbleSortAnimator } from "@/services/sorting-animators/bubble-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 
-const QuickSortView_: FC = () => {
+export const BubbleSortView: FC = memo(() => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
-  const { palette } = useTheme();
   const { frame, nextFrame, prevFrame, shuffleDataset } = useSortAnimator(
-    new QuickSortAnimator(size),
+    new BubbleSortAnimator(size),
   );
+  const { palette } = useTheme();
 
   return (
     <Box
@@ -22,20 +22,18 @@ const QuickSortView_: FC = () => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        flexGrow: 1,
         flexBasis: 0,
+        flexGrow: 1,
       }}
     >
       <Stack component="header" spacing={1}>
-        <Typography component="h1" variant="h5" fontWeight={900}>
-          {`Quick sort`}
+        <Typography component="h1" variant="h5" sx={{ fontWeight: 900 }}>
+          {`Bubble sort`}
         </Typography>
         <Stack
           spacing={1}
-          flexDirection="row"
-          alignItems="center"
-          flexWrap="wrap"
-          useFlexGap
+          direction={"row"}
+          sx={{ alignItems: "center", flexWrap: "wrap" }}
         >
           <Typography
             sx={{
@@ -59,9 +57,7 @@ const QuickSortView_: FC = () => {
         />
       </Stack>
       {frame === undefined && <ShuffleRequestRegion onClick={shuffleDataset} />}
-      {frame !== undefined && <QuickSortVisualizer frame={frame} />}
+      {frame !== undefined && <BubbleSortVisualizer frame={frame} />}
     </Box>
   );
-};
-
-export const QuickSortView = memo(QuickSortView_);
+});

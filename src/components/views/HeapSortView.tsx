@@ -3,16 +3,16 @@ import { type FC, memo } from "react";
 import { useLoaderData } from "react-router";
 import { ShuffleRequestRegion } from "@/components/ShuffleRequestRegion";
 import { SorterAnimationToolbar } from "@/components/SorterAnimationToolbar";
-import { SelectionSortVisualizer } from "@/components/visualizers/SelectionSortVisualizer";
+import { HeapSortVisualizer } from "@/components/visualizers/HeapSortVisualizer";
 import { useSortAnimator } from "@/hooks/useSortAnimator";
-import { SelectionSortAnimator } from "@/services/sorting-animators/selection-sort";
+import { HeapSortAnimator } from "@/services/sorting-animators/heap-sort";
 import type { SorterRouterLoaderData } from "@/types/loader-data";
 
-const SelectionSortView_: FC = () => {
+export const HeapSortView: FC = memo(() => {
   const { size } = useLoaderData<SorterRouterLoaderData>();
   const { palette } = useTheme();
   const { frame, nextFrame, prevFrame, shuffleDataset } = useSortAnimator(
-    new SelectionSortAnimator(size),
+    new HeapSortAnimator(size),
   );
 
   return (
@@ -27,15 +27,13 @@ const SelectionSortView_: FC = () => {
       }}
     >
       <Stack component="header" spacing={1}>
-        <Typography component="h1" variant="h5" fontWeight={900}>
-          {`Selection sort`}
+        <Typography component="h1" variant="h5" sx={{ fontWeight: 900 }}>
+          {`Heap sort`}
         </Typography>
         <Stack
           spacing={1}
-          flexDirection="row"
-          alignItems="center"
-          flexWrap="wrap"
-          useFlexGap
+          direction={"row"}
+          sx={{ flexWrap: "wrap", alignItems: "center" }}
         >
           <Typography
             sx={{
@@ -59,9 +57,7 @@ const SelectionSortView_: FC = () => {
         />
       </Stack>
       {frame === undefined && <ShuffleRequestRegion onClick={shuffleDataset} />}
-      {frame !== undefined && <SelectionSortVisualizer frame={frame} />}
+      {frame !== undefined && <HeapSortVisualizer frame={frame} size={size} />}
     </Box>
   );
-};
-
-export const SelectionSortView: FC = memo(SelectionSortView_);
+});
